@@ -47,7 +47,7 @@ final class InterviewControllerTest extends TestCase
 
     public function test_existing_brief_can_be_imported_for_orchestration(): void
     {
-        $this->withToken('test-token')->postJson('/api/v1/interviews/import', [
+        $payload = [
             'contract_version' => '1.0',
             'site_id' => 'site-one',
             'locale' => 'ja',
@@ -59,9 +59,19 @@ final class InterviewControllerTest extends TestCase
                 'requirements' => '5ページ',
                 'materials' => [],
             ],
-        ])->assertCreated()
+        ];
+        $first = $this->withToken('test-token')->withHeader('Idempotency-Key', 'site:job:interview')
+            ->postJson('/api/v1/interviews/import', $payload)->assertCreated()
             ->assertJsonPath('status', 'completed')
             ->assertJsonPath('structured_data.goals', '問い合わせ増加');
+        $this->withToken('test-token')->withHeader('Idempotency-Key', 'site:job:interview')
+            ->postJson('/api/v1/interviews/import', $payload)->assertOk()
+            ->assertJsonPath('id', $first->json('id'));
+        $payload['interview']['goals'] = 'different';
+        $this->withToken('test-token')->withHeader('Idempotency-Key', 'site:job:interview')
+            ->postJson('/api/v1/interviews/import', $payload)->assertConflict()
+            ->assertJsonPath('type', 'idempotency_conflict');
+        $this->assertDatabaseCount('interview_sessions', 1);
     }
 
     public function test_authentication_and_session_deletion_are_enforced(): void

@@ -9,6 +9,7 @@ use App\Http\Requests\ImportInterviewRequest;
 use App\Http\Requests\StartInterviewRequest;
 use App\Http\Resources\InterviewSessionResource;
 use App\Models\InterviewSession;
+use App\Support\CanonicalJson;
 use App\Support\Problem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,6 +32,24 @@ final class InterviewController extends Controller
 
     public function import(ImportInterviewRequest $request): JsonResponse
     {
+        $key = $request->header('Idempotency-Key');
+        $keyHash = is_string($key) && $key !== '' ? hash('sha256', $key) : null;
+        $requestHash = hash('sha256', CanonicalJson::encode([
+            'site_id' => $request->validated('site_id'),
+            'locale' => $request->validated('locale'),
+            'interview' => $request->validated('interview'),
+        ]));
+        if ($keyHash !== null) {
+            $existing = InterviewSession::query()->where('idempotency_key_hash', $keyHash)->first();
+            if ($existing !== null) {
+                if (! hash_equals((string) $existing->request_hash, $requestHash)) {
+                    return Problem::response($request, 409, 'idempotency_conflict', 'The Idempotency-Key was already used for a different interview.');
+                }
+
+                return (new InterviewSessionResource($existing))->response()->setStatusCode(200);
+            }
+        }
+
         $session = InterviewSession::query()->create([
             'site_id' => $request->validated('site_id'),
             'locale' => $request->validated('locale'),
@@ -38,6 +57,8 @@ final class InterviewController extends Controller
             'current_step' => 6,
             'messages' => [],
             'structured_data' => $request->validated('interview'),
+            'idempotency_key_hash' => $keyHash,
+            'request_hash' => $requestHash,
         ]);
 
         return (new InterviewSessionResource($session))->response()->setStatusCode(201);

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
+
 final class ImportInterviewRequest extends ContractRequest
 {
     /** @return array<string,array<mixed>|string> */
@@ -19,6 +21,20 @@ final class ImportInterviewRequest extends ContractRequest
             'interview.requirements' => ['sometimes', 'string', 'max:8000'],
             'interview.materials' => ['sometimes', 'array', 'max:30'],
             'interview.materials.*' => ['string', 'max:8000'],
+        ];
+    }
+
+    /** @return array<int,callable(Validator):void> */
+    public function after(): array
+    {
+        return [
+            ...parent::after(),
+            function (Validator $validator): void {
+                $key = $this->header('Idempotency-Key');
+                if ($key !== null && (! is_string($key) || mb_strlen($key) < 8 || mb_strlen($key) > 200)) {
+                    $validator->errors()->add('Idempotency-Key', 'The Idempotency-Key header must be between 8 and 200 characters.');
+                }
+            },
         ];
     }
 

@@ -26,6 +26,8 @@ final class InterviewSession extends Model
         'current_step',
         'messages',
         'structured_data',
+        'idempotency_key_hash',
+        'request_hash',
     ];
 
     /** @return array<string,string> */
