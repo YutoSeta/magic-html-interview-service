@@ -11,19 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cms_resources', function (Blueprint $table) {
+        Schema::create('interview_sessions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('site_id', 100)->index();
-            $table->string('type', 32);
-            $table->string('resource_key', 100);
-            $table->string('name');
-            $table->json('schema');
-            $table->json('value');
-            $table->json('media_refs');
+            $table->string('locale', 20)->default('ja');
+            $table->string('status', 20)->index();
+            $table->unsignedTinyInteger('current_step')->default(0);
+            $table->json('messages');
+            $table->json('structured_data')->nullable();
             $table->timestamps();
-
-            $table->unique(['site_id', 'type', 'resource_key']);
-            $table->index(['site_id', 'type']);
         });
     }
 
@@ -32,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cms_resources');
+        Schema::dropIfExists('interview_sessions');
     }
 };

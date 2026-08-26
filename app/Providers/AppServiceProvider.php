@@ -24,9 +24,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         JsonResource::withoutWrapping();
-        RateLimiter::for('content-writes', fn (Request $request): Limit => Limit::perMinute((int) config('content.writes_per_minute'))
+        RateLimiter::for('interview-writes', fn (Request $request): Limit => Limit::perMinute((int) config('interview.writes_per_minute'))
             ->by((string) $request->bearerToken()));
-        RateLimiter::for('content-public-reads', fn (Request $request): Limit => Limit::perMinute((int) config('content.public_reads_per_minute'))
-            ->by(implode('|', [(string) $request->route('site'), (string) $request->ip()])));
+        RateLimiter::for('interview-reads', fn (Request $request): Limit => Limit::perMinute((int) config('interview.reads_per_minute'))
+            ->by((string) $request->bearerToken()));
     }
 }

@@ -15,16 +15,17 @@ final class CapabilityResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name' => 'magic-html-content-service',
+            'name' => 'magic-html-interview-service',
             'tier' => 1,
             'contract_version' => '1.0',
             'documentation' => url('/api/__verify'),
             'health' => url('/up'),
             'operations' => [
-                'PUT /api/v1/sites/{site}/contents/{resource}',
-                'POST /api/v1/sites/{site}/snapshots',
-                'GET /api/v1/sites/{site}/snapshots/{version}',
-                'GET /api/v1/sites/{site}/published/contents/{resource}',
+                'POST /api/v1/interviews',
+                'POST /api/v1/interviews/import',
+                'GET /api/v1/interviews/{interview}',
+                'POST /api/v1/interviews/{interview}/messages',
+                'DELETE /api/v1/interviews/{interview}',
             ],
         ];
     }
