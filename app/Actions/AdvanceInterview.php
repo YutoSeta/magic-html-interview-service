@@ -4,11 +4,14 @@ namespace App\Actions;
 
 use App\Models\InterviewSession;
 use Illuminate\Support\Facades\DB;
+use Yutoseta\InterviewEngine\Services\StructuredInterviewStateEngine;
 
 final class AdvanceInterview
 {
     /** @var list<string> */
     private const array FIELDS = ['organization', 'goals', 'audience', 'tone', 'requirements', 'materials'];
+
+    public function __construct(private readonly StructuredInterviewStateEngine $stateEngine) {}
 
     /** @return list<array{role:string,content:string,field:string}> */
     public function initialMessages(string $locale): array
@@ -28,28 +31,80 @@ final class AdvanceInterview
             $field = self::FIELDS[$step];
             $messages = $locked->messages;
             $messages[] = ['role' => 'user', 'content' => $answer, 'field' => $field];
-            $structured = $locked->structured_data ?? [];
-            $structured[$field] = $field === 'materials'
-                ? array_values(array_filter(array_map('trim', preg_split('/\R/u', $answer) ?: [])))
-                : trim($answer);
+
+            $definitions = $this->fieldDefinitions($locked->locale);
+            $state = $this->stateFromValues($locked->structured_data ?? [], $definitions);
+            $result = $this->stateEngine->applyUpdates($state, $definitions, [[
+                'path' => $field,
+                'value' => $this->normalizeAnswer($field, $answer),
+                'status' => 'confirmed',
+            ]]);
             $step++;
 
-            $attributes = [
-                'current_step' => $step,
-                'messages' => $messages,
-                'structured_data' => $structured,
-            ];
-            if ($step >= count(self::FIELDS)) {
-                $attributes['status'] = InterviewSession::STATUS_COMPLETED;
-            } else {
-                $messages[] = $this->question($step, $locked->locale);
-                $attributes['messages'] = $messages;
+            // The v1 HTTP contract is a scripted six-answer flow and has no
+            // separate confirmation endpoint. Keep that contract while making
+            // the package engine the sole authority for completeness.
+            if (($result['decision']['next_action'] ?? null) === 'confirm_summary') {
+                $result = $this->stateEngine->confirm($result['state'], $definitions);
             }
 
-            $locked->update($attributes);
+            $completed = ($result['decision']['next_action'] ?? null) === 'complete';
+            if (! $completed && $step < count(self::FIELDS)) {
+                $messages[] = $this->question($step, $locked->locale);
+            }
+
+            $locked->update([
+                'current_step' => $step,
+                'messages' => $messages,
+                'structured_data' => $this->stateEngine->values($result['state']),
+                'status' => $completed
+                    ? InterviewSession::STATUS_COMPLETED
+                    : InterviewSession::STATUS_ACTIVE,
+            ]);
 
             return $locked->refresh();
         });
+    }
+
+    /**
+     * @param  array<string,mixed>  $values
+     * @param  list<array<string,mixed>>  $definitions
+     * @return array<string,mixed>
+     */
+    private function stateFromValues(array $values, array $definitions): array
+    {
+        if ($values === []) {
+            return $this->stateEngine->freshState();
+        }
+
+        $updates = [];
+        foreach (self::FIELDS as $path) {
+            if (array_key_exists($path, $values)) {
+                $updates[] = ['path' => $path, 'value' => $values[$path], 'status' => 'confirmed'];
+            }
+        }
+
+        return $this->stateEngine
+            ->applyUpdates($this->stateEngine->freshState(), $definitions, $updates)['state'];
+    }
+
+    private function normalizeAnswer(string $field, string $answer): string|array
+    {
+        return $field === 'materials'
+            ? array_values(array_filter(array_map('trim', preg_split('/\R/u', $answer) ?: [])))
+            : trim($answer);
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function fieldDefinitions(string $locale): array
+    {
+        return array_map(fn (string $path, int $step): array => [
+            'path' => $path,
+            'label' => $path,
+            'question' => $this->question($step, $locale)['content'],
+            'type' => $path === 'materials' ? 'array' : 'string',
+            'required' => true,
+        ], self::FIELDS, array_keys(self::FIELDS));
     }
 
     /** @return array{role:string,content:string,field:string} */

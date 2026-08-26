@@ -88,4 +88,13 @@ final class InterviewControllerTest extends TestCase
         $this->withToken('test-token')->deleteJson('/api/v1/interviews/'.$start->json('id'))->assertNoContent();
         $this->assertDatabaseEmpty('interview_sessions');
     }
+
+    public function test_capability_verification_includes_the_shared_interview_engine(): void
+    {
+        $this->getJson('/api/__verify')
+            ->assertOk()
+            ->assertJsonPath('checks.interview_engine', true);
+
+        $this->get('/interviews')->assertNotFound();
+    }
 }
