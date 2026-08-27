@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cbf33b9b29c2961971331287b2032ef2",
+    "content-hash": "ee5f0bedf2cd6fa93d60999d34f97ddd",
     "packages": [
         {
             "name": "brick/math",
@@ -6090,6 +6090,66 @@
                 "issues": "https://github.com/YutoSeta/interview-engine/issues"
             },
             "time": "2026-08-26T06:54:55+00:00"
+        },
+        {
+            "name": "yutoseta/laravel-admin",
+            "version": "v0.1.2",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:YutoSeta/magic-html-laravel-admin.git",
+                "reference": "fd71314924b110846f096f003c4bb787a96cbd43"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/YutoSeta/magic-html-laravel-admin/zipball/fd71314924b110846f096f003c4bb787a96cbd43",
+                "reference": "fd71314924b110846f096f003c4bb787a96cbd43",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^13.0",
+                "illuminate/database": "^13.0",
+                "illuminate/encryption": "^13.0",
+                "illuminate/http": "^13.0",
+                "illuminate/routing": "^13.0",
+                "illuminate/support": "^13.0",
+                "php": "^8.3"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^11.2",
+                "phpunit/phpunit": "^12.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Yutoseta\\LaravelAdmin\\LaravelAdminServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Yutoseta\\LaravelAdmin\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Yutoseta\\LaravelAdmin\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Composable Laravel administration primitives and orchestration contracts for tenant access, typed settings, encrypted secrets, and revision publishing.",
+            "support": {
+                "source": "https://github.com/YutoSeta/magic-html-laravel-admin/tree/v0.1.2",
+                "issues": "https://github.com/YutoSeta/magic-html-laravel-admin/issues"
+            },
+            "time": "2026-08-27T08:53:10+00:00"
         },
         {
             "name": "yutoseta/laravel-llm-adapter",
