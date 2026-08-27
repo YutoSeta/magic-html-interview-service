@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/template/bind-result.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "template_key", "version", "html", "values"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "template_key": {"type": "string"},
+    "version": {"type": "string", "pattern": "^v1-[a-f0-9]{20}$"},
+    "html": {"$ref": "../document/html.json"},
+    "values": {"type": "object"}
+  }
+}

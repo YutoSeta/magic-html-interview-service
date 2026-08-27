@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/slack-webhook-accepted-response.json",
+  "title": "Accepted Slack webhook response",
+  "oneOf": [
+    {"type": "object", "additionalProperties": false, "required": ["accepted", "ignored"], "properties": {"accepted": {"const": true}, "ignored": {"const": true}}},
+    {"type": "object", "additionalProperties": false, "required": ["accepted", "duplicate", "ignored"], "properties": {"accepted": {"const": true}, "duplicate": {"const": false}, "ignored": {"const": true}}},
+    {"type": "object", "additionalProperties": false, "required": ["accepted", "duplicate", "ignored", "message_id", "conversation_id"], "properties": {"accepted": {"const": true}, "duplicate": {"const": false}, "ignored": {"const": false}, "message_id": {"type": "string", "format": "uuid"}, "conversation_id": {"type": "string", "format": "uuid"}}},
+    {"type": "object", "additionalProperties": false, "required": ["accepted", "duplicate", "conflict", "message_id"], "properties": {"accepted": {"const": true}, "duplicate": {"const": true}, "conflict": {"const": false}, "message_id": {"type": ["string", "null"], "format": "uuid"}}}
+  ]
+}

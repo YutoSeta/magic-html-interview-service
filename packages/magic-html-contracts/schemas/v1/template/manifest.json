@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/template/manifest.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fields", "schema"],
+  "properties": {
+    "fields": {"type": "array", "items": {"$ref": "field.json"}, "maxItems": 200},
+    "schema": {"type": "object"}
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/message.json",
+  "title": "Messaging message",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "tenant_id", "conversation_id", "direction", "sender_external_id", "text", "provider_message_id", "thread_external_id", "delivery_status", "metadata", "created_at", "updated_at"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "format": "uuid"},
+    "conversation_id": {"type": "string", "format": "uuid"},
+    "direction": {"enum": ["inbound", "outbound"]},
+    "sender_external_id": {"type": ["string", "null"], "maxLength": 191},
+    "text": {"type": "string", "minLength": 1, "maxLength": 10000},
+    "provider_message_id": {"type": ["string", "null"], "maxLength": 191},
+    "thread_external_id": {"type": ["string", "null"], "maxLength": 191},
+    "delivery_status": {"enum": ["sent", "failed", "unknown", "received"], "description": "sent is confirmed success, failed is a definite provider rejection, unknown is an ambiguous outcome that must not be auto-retried, and received is normalized inbound delivery."},
+    "metadata": {"$ref": "metadata.json"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

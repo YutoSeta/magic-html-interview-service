@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/provider-identity.json",
+  "title": "Verified Channel provider identity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["account_ref", "display_name"],
+  "properties": {
+    "account_ref": {"type": ["string", "null"], "maxLength": 255},
+    "display_name": {"type": ["string", "null"], "maxLength": 255}
+  }
+}

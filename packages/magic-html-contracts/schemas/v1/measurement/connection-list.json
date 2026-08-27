@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/connection-list.json",
+  "title": "Measurement connection list",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["data", "links", "meta"],
+  "properties": {
+    "data": {"type": "array", "maxItems": 100, "items": {"$ref": "connection.json"}},
+    "links": {"$ref": "pagination-links.json"},
+    "meta": {"$ref": "pagination-meta.json"}
+  }
+}

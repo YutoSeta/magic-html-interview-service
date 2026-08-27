@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/channel-response.json",
+  "title": "Messaging channel response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["data"],
+  "properties": {"data": {"$ref": "channel.json"}}
+}

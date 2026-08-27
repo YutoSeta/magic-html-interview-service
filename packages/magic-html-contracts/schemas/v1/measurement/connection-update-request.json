@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/connection-update-request.json",
+  "title": "Update Measurement connection request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120},
+    "configuration": {"$ref": "provider-configuration.json"},
+    "credentials": {"oneOf": [{"$ref": "oauth-credentials.json"}, {"$ref": "service-account-credentials.json"}]}
+  },
+  "description": "provider and auth_mode are immutable. Configuration and credential variants are checked against the existing scoped connection by the service."
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/connection-verification-response.json",
+  "title": "Channel connection verification response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["data", "provider_identity"],
+  "properties": {
+    "data": {"$ref": "connection.json"},
+    "provider_identity": {"$ref": "provider-identity.json"}
+  }
+}

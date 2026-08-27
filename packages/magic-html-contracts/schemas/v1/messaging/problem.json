@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/problem.json",
+  "title": "Messaging API Problem",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "title", "status", "detail", "instance"],
+  "properties": {
+    "type": {"const": "about:blank"},
+    "title": {"enum": ["unauthenticated", "validation_failed", "resource_not_found", "idempotency_conflict", "idempotency_in_progress", "resource_conflict", "delivery_provider_unavailable", "payload_too_large", "invalid_signature", "invalid_event", "event_id_conflict", "rate_limited"]},
+    "status": {"enum": [401, 404, 409, 413, 422, 429, 503]},
+    "detail": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "instance": {"type": "string", "pattern": "^/api(?:/|$)", "maxLength": 2048},
+    "errors": {"type": "object", "maxProperties": 100, "additionalProperties": {"type": "array", "maxItems": 20, "items": {"type": "string", "minLength": 1, "maxLength": 1000}}}
+  },
+  "allOf": [
+    {"if": {"properties": {"title": {"const": "validation_failed"}}, "required": ["title"]}, "then": {"required": ["errors"]}, "else": {"not": {"required": ["errors"]}}}
+  ]
+}

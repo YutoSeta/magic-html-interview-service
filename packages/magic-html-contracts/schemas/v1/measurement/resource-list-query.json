@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/resource-list-query.json",
+  "title": "Measurement provider resource list query",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["kind"],
+  "properties": {
+    "kind": {"enum": ["accounts", "containers", "workspaces", "tags", "triggers", "variables", "locations", "reviews"]},
+    "parent": {"type": "string", "maxLength": 400, "pattern": "^[A-Za-z0-9_/-]+$"},
+    "page_size": {"type": "integer", "minimum": 1, "maximum": 100},
+    "page_token": {"type": "string", "maxLength": 2048, "pattern": "^[^\\u0000-\\u001F\\u007F]*$"}
+  }
+}

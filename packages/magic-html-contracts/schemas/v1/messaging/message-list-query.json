@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/message-list-query.json",
+  "title": "Messaging message list query",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "direction": {"enum": ["inbound", "outbound"]},
+    "page": {"type": "integer", "minimum": 1, "maximum": 10000, "default": 1},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 50, "default": 20}
+  }
+}

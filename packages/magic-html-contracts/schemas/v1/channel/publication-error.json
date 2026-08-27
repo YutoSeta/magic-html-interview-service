@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/publication-error.json",
+  "title": "Normalized Channel publication error",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "detail"],
+  "properties": {
+    "type": {"enum": ["connection_not_verified", "invalid_credentials", "invalid_connection", "invalid_content", "provider_rejected", "provider_unavailable", "provider_rate_limited", "unsupported_provider", "delivery_unknown", "invalid_provider_response", "worker_failed"]},
+    "detail": {"type": "string", "minLength": 1, "maxLength": 500},
+    "provider_status": {"type": ["integer", "null"], "minimum": 100, "maximum": 599}
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/slack-webhook-request.json",
+  "title": "Slack webhook envelope",
+  "description": "A bounded provider envelope authenticated from its exact raw bytes. Callback-looking URL fields are inert data and are never executed or persisted.",
+  "oneOf": [
+    {"$ref": "#/$defs/url_verification"},
+    {"$ref": "#/$defs/event_callback"},
+    {"$ref": "#/$defs/ignored_callback"},
+    {"type": "object", "additionalProperties": false, "maxProperties": 0}
+  ],
+  "$defs": {
+    "url_verification": {
+      "type": "object", "additionalProperties": false,
+      "required": ["type", "challenge"],
+      "properties": {
+        "type": {"const": "url_verification"},
+        "challenge": {"type": "string", "minLength": 1, "maxLength": 256},
+        "token": {"type": "string", "maxLength": 500},
+        "api_app_id": {"type": "string", "maxLength": 191}
+      }
+    },
+    "event_callback": {
+      "type": "object", "additionalProperties": false,
+      "required": ["type", "event_id", "event"],
+      "properties": {
+        "type": {"const": "event_callback"},
+        "event_id": {"type": "string", "pattern": "^[A-Za-z0-9._:-]{1,191}$"},
+        "event": {"$ref": "#/$defs/event"},
+        "token": {"type": "string", "maxLength": 500},
+        "team_id": {"type": "string", "maxLength": 191},
+        "api_app_id": {"type": "string", "maxLength": 191},
+        "event_context": {"type": "string", "maxLength": 500},
+        "event_time": {"type": "integer", "minimum": 0},
+        "context_team_id": {"type": ["string", "null"], "maxLength": 191},
+        "context_enterprise_id": {"type": ["string", "null"], "maxLength": 191},
+        "is_ext_shared_channel": {"type": "boolean"},
+        "authorizations": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/authorization"}}
+      }
+    },
+    "event": {
+      "type": "object", "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {"type": "string", "minLength": 1, "maxLength": 100},
+        "subtype": {"type": ["string", "null"], "maxLength": 100},
+        "channel": {"type": "string", "maxLength": 191},
+        "user": {"type": "string", "maxLength": 191},
+        "text": {"type": "string", "maxLength": 10000},
+        "ts": {"type": "string", "maxLength": 191},
+        "thread_ts": {"type": ["string", "null"], "maxLength": 191},
+        "bot_id": {"type": "string", "maxLength": 191},
+        "files": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/file_reference"}},
+        "callback_url": {"type": "string", "format": "uri", "maxLength": 2048, "x-magic-html-runnable": false},
+        "response_url": {"type": "string", "format": "uri", "maxLength": 2048, "x-magic-html-runnable": false},
+        "trigger_id": {"type": "string", "maxLength": 500}
+      }
+    },
+    "ignored_callback": {
+      "type": "object", "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {"type": "string", "minLength": 1, "maxLength": 100, "not": {"enum": ["url_verification", "event_callback"]}},
+        "callback_url": {"type": "string", "format": "uri", "maxLength": 2048, "x-magic-html-runnable": false},
+        "response_url": {"type": "string", "format": "uri", "maxLength": 2048, "x-magic-html-runnable": false},
+        "trigger_id": {"type": "string", "maxLength": 500}
+      }
+    },
+    "authorization": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "enterprise_id": {"type": ["string", "null"], "maxLength": 191},
+        "team_id": {"type": ["string", "null"], "maxLength": 191},
+        "user_id": {"type": ["string", "null"], "maxLength": 191},
+        "is_bot": {"type": "boolean"},
+        "is_enterprise_install": {"type": "boolean"}
+      }
+    },
+    "file_reference": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "maxLength": 191},
+        "name": {"type": "string", "maxLength": 500},
+        "mimetype": {"type": "string", "maxLength": 255},
+        "filetype": {"type": "string", "maxLength": 100},
+        "size": {"type": "integer", "minimum": 0},
+        "url_private": {"type": "string", "format": "uri", "maxLength": 2048, "x-magic-html-runnable": false},
+        "permalink": {"type": "string", "format": "uri", "maxLength": 2048, "x-magic-html-runnable": false}
+      }
+    }
+  }
+}

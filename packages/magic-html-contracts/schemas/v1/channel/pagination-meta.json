@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/pagination-meta.json",
+  "title": "Channel pagination metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["current_page", "last_page", "per_page", "total"],
+  "properties": {
+    "current_page": {"type": "integer", "minimum": 1},
+    "last_page": {"type": "integer", "minimum": 1},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 100},
+    "total": {"type": "integer", "minimum": 0}
+  }
+}

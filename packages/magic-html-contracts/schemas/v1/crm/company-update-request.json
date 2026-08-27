@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/crm/company-update-request.json",
+  "title": "Update CRM company request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["expected_version"],
+  "properties": {
+    "expected_version": {"type": "integer", "minimum": 1},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "name_kana": {"type": ["string", "null"], "maxLength": 200},
+    "corporate_number": {"type": ["string", "null"], "pattern": "^[0-9]{13}$", "description": "Must be unique within the tenant, including soft-deleted records."},
+    "industry": {"type": ["string", "null"], "maxLength": 120},
+    "postal_code": {"type": ["string", "null"], "maxLength": 16},
+    "address": {"type": ["string", "null"], "maxLength": 500},
+    "phone": {"type": ["string", "null"], "maxLength": 50},
+    "email": {"type": ["string", "null"], "format": "email", "maxLength": 254},
+    "website": {"type": ["string", "null"], "format": "uri", "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://", "maxLength": 2048},
+    "notes": {"type": ["string", "null"], "maxLength": 10000},
+    "custom_fields": {"$ref": "custom-fields.json"}
+  },
+  "anyOf": [
+    {"required": ["name"]}, {"required": ["name_kana"]}, {"required": ["corporate_number"]},
+    {"required": ["industry"]}, {"required": ["postal_code"]}, {"required": ["address"]},
+    {"required": ["phone"]}, {"required": ["email"]}, {"required": ["website"]},
+    {"required": ["notes"]}, {"required": ["custom_fields"]}
+  ]
+}

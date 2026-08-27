@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/ga4-report-request.json",
+  "title": "GA4 report request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "start_date", "end_date", "dimensions", "metrics"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "start_date": {"type": "string", "format": "date"},
+    "end_date": {"type": "string", "format": "date"},
+    "dimensions": {"type": "array", "maxItems": 9, "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,79}$"}},
+    "metrics": {"type": "array", "minItems": 1, "maxItems": 10, "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,79}$"}},
+    "limit": {"type": "integer", "minimum": 1, "maximum": 5000},
+    "offset": {"type": "integer", "minimum": 0, "maximum": 100000}
+  },
+  "description": "end_date must be on or after start_date and the date difference must not exceed 366 days."
+}

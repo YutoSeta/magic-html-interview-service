@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/channel-list-query.json",
+  "title": "Messaging channel list query",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "provider": {"enum": ["local", "slack"]},
+    "active": {"anyOf": [{"type": "boolean"}, {"type": "integer", "enum": [0, 1]}]},
+    "q": {"type": "string", "minLength": 1, "maxLength": 100, "description": "Substring search across name and external_channel_id."},
+    "page": {"type": "integer", "minimum": 1, "maximum": 10000, "default": 1},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 50, "default": 20}
+  }
+}

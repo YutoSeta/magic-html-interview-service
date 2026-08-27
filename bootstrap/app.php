@@ -2,6 +2,9 @@
 
 use App\Http\Middleware\AllowPublicOrigin;
 use App\Http\Middleware\AuthenticateService;
+use App\Http\Middleware\GrantIntakeAccess;
+use App\Http\Middleware\NormalizeIntakeAnswers;
+use App\Http\Middleware\RequireIntakeAccess;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'public.origin' => AllowPublicOrigin::class,
             'service' => AuthenticateService::class,
+            'intake.grant' => GrantIntakeAccess::class,
+            'intake.access' => RequireIntakeAccess::class,
+            'intake.answers' => NormalizeIntakeAnswers::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

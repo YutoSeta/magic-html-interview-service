@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/connection-update-request.json",
+  "title": "Update Channel connection request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["expected_version"],
+  "properties": {
+    "expected_version": {"type": "integer", "minimum": 1},
+    "name": {"type": "string", "minLength": 1, "maxLength": 100},
+    "account_ref": {"type": ["string", "null"], "maxLength": 255},
+    "configuration": {"type": "object", "maxProperties": 0, "additionalProperties": false},
+    "credentials": {"$ref": "credentials.json"}
+  },
+  "anyOf": [
+    {"required": ["name"]},
+    {"required": ["account_ref"]},
+    {"required": ["configuration"]},
+    {"required": ["credentials"]}
+  ]
+}

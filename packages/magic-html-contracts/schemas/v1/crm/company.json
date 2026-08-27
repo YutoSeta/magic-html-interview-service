@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/crm/company.json",
+  "title": "CRM company",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "tenant_id", "name", "name_kana", "corporate_number", "industry", "postal_code", "address", "phone", "email", "website", "notes", "custom_fields", "version", "created_at", "updated_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "name_kana": {"type": ["string", "null"], "maxLength": 200},
+    "corporate_number": {"type": ["string", "null"], "pattern": "^[0-9]{13}$", "description": "Unique among active and soft-deleted company records within one tenant."},
+    "industry": {"type": ["string", "null"], "maxLength": 120},
+    "postal_code": {"type": ["string", "null"], "maxLength": 16},
+    "address": {"type": ["string", "null"], "maxLength": 500},
+    "phone": {"type": ["string", "null"], "maxLength": 50},
+    "email": {"type": ["string", "null"], "format": "email", "maxLength": 254},
+    "website": {"type": ["string", "null"], "format": "uri", "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://", "maxLength": 2048},
+    "notes": {"type": ["string", "null"], "maxLength": 10000},
+    "custom_fields": {"$ref": "custom-fields.json"},
+    "version": {"type": "integer", "minimum": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

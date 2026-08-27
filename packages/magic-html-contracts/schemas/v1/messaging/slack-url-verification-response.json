@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/slack-url-verification-response.json",
+  "title": "Slack URL verification response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["challenge"],
+  "properties": {"challenge": {"type": "string", "minLength": 1, "maxLength": 256}}
+}

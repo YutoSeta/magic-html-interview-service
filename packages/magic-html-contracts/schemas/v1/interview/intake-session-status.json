@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/interview/intake-session-status.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "uuid", "status", "values"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "uuid": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["in_progress", "ready_for_confirmation", "confirmed", "closing", "ended", "abandoned", "failed"]},
+    "values": {"type": "object"},
+    "confirmed_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

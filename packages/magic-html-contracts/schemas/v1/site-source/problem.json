@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-source/problem.json",
+  "title": "Site Source Problem",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "type", "title", "status", "detail", "request_id"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"enum": ["unauthorized", "rate_limited", "validation_failed", "connection_not_found", "fetch_job_not_found", "snapshot_not_found", "idempotency_conflict", "idempotency_in_progress", "connection_name_conflict", "connection_changed", "driver_mismatch", "provider_failed", "unsafe_source", "source_limit_exceeded", "fetch_not_ready", "queue_unavailable"]},
+    "title": {"type": "string"},
+    "status": {"enum": [401, 404, 409, 413, 422, 429, 503]},
+    "detail": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "errors": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string"}}}
+  }
+}

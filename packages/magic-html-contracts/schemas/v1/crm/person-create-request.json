@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/crm/person-create-request.json",
+  "title": "Create CRM person request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name"],
+  "properties": {
+    "company_id": {"type": ["string", "null"], "format": "uuid", "description": "Must identify an active company in the same tenant."},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "name_kana": {"type": ["string", "null"], "maxLength": 200},
+    "department": {"type": ["string", "null"], "maxLength": 120},
+    "title": {"type": ["string", "null"], "maxLength": 120},
+    "email": {"type": ["string", "null"], "format": "email", "maxLength": 254},
+    "phone": {"type": ["string", "null"], "maxLength": 50},
+    "mobile": {"type": ["string", "null"], "maxLength": 50},
+    "notes": {"type": ["string", "null"], "maxLength": 10000},
+    "custom_fields": {"$ref": "custom-fields.json"}
+  }
+}

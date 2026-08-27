@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/template/markdown-result.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "html"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "html": {"$ref": "../document/html.json"}
+  }
+}

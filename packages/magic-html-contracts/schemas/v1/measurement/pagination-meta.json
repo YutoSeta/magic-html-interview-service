@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/pagination-meta.json",
+  "title": "Measurement pagination metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["current_page", "from", "last_page", "links", "path", "per_page", "to", "total"],
+  "properties": {
+    "current_page": {"type": "integer", "minimum": 1},
+    "from": {"type": ["integer", "null"], "minimum": 1},
+    "last_page": {"type": "integer", "minimum": 1},
+    "links": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "label", "active"],
+        "properties": {
+          "url": {"type": ["string", "null"], "format": "uri"},
+          "label": {"type": "string"},
+          "active": {"type": "boolean"}
+        }
+      }
+    },
+    "path": {"type": "string", "format": "uri"},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 100},
+    "to": {"type": ["integer", "null"], "minimum": 1},
+    "total": {"type": "integer", "minimum": 0}
+  }
+}

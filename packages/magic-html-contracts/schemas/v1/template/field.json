@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/template/field.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["path", "label", "question", "type", "required"],
+  "properties": {
+    "path": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]*(\\.[A-Za-z][A-Za-z0-9_-]*)*$", "maxLength": 128},
+    "label": {"type": "string", "minLength": 1, "maxLength": 200},
+    "question": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "section": {"type": "string", "maxLength": 200},
+    "description": {"type": "string", "maxLength": 2000},
+    "type": {"enum": ["string", "text", "number", "integer", "boolean", "array", "email", "url"]},
+    "format": {"enum": ["date", "money"]},
+    "required": {"type": "boolean"},
+    "example": {},
+    "default": {},
+    "options": {"type": "array", "items": {"type": ["string", "number", "boolean"]}, "maxItems": 100},
+    "separator": {"type": "string", "maxLength": 20}
+  },
+  "oneOf": [
+    {"properties": {"type": {"const": "string"}, "format": {"const": "date"}}, "required": ["format"]},
+    {"properties": {"type": {"const": "number"}, "format": {"const": "money"}}, "required": ["format"]},
+    {"not": {"required": ["format"]}}
+  ]
+}

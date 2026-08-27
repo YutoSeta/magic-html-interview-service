@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/crm/custom-fields.json",
+  "title": "CRM custom fields",
+  "description": "At most 25 caller-defined scalar values. The UTF-8 JSON encoding of the complete object must not exceed 20,000 characters.",
+  "anyOf": [
+    {
+      "type": "object",
+      "maxProperties": 25,
+      "propertyNames": {"pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"},
+      "additionalProperties": {
+        "anyOf": [
+          {"type": "string", "maxLength": 1000},
+          {"type": "number"},
+          {"type": "boolean"},
+          {"type": "null"}
+        ]
+      }
+    },
+    {"type": "array", "maxItems": 0}
+  ],
+  "x-magic-html-max-encoded-characters": 20000
+}

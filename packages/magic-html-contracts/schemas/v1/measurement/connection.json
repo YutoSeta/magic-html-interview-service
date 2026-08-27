@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/connection.json",
+  "title": "Measurement connection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "tenant_id", "name", "provider", "auth_mode", "configuration", "credentials_configured", "verification_status", "verified_at", "created_at", "updated_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120},
+    "provider": {"enum": ["ga4", "gsc", "gtm", "gbp"]},
+    "auth_mode": {"enum": ["oauth_refresh_token", "service_account"]},
+    "configuration": {"$ref": "provider-configuration.json"},
+    "credentials_configured": {"type": "boolean"},
+    "verification_status": {"enum": ["unverified", "verified", "failed"]},
+    "verified_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": ["string", "null"], "format": "date-time"},
+    "updated_at": {"type": ["string", "null"], "format": "date-time"}
+  },
+  "allOf": [
+    {"if": {"properties": {"provider": {"const": "ga4"}}, "required": ["provider"]}, "then": {"properties": {"configuration": {"type": "object", "additionalProperties": false, "required": ["property_id"], "properties": {"property_id": {"type": "string", "pattern": "^[0-9]{1,32}$"}}}}}},
+    {"if": {"properties": {"provider": {"const": "gsc"}}, "required": ["provider"]}, "then": {"properties": {"configuration": {"type": "object", "additionalProperties": false, "required": ["site_url"], "properties": {"site_url": {"type": "string", "pattern": "^(?:sc-domain:[A-Za-z0-9.-]{1,253}|https://[A-Za-z0-9.-]{1,253}(?::[0-9]{1,5})?/.*)$"}}}}}},
+    {"if": {"properties": {"provider": {"const": "gtm"}}, "required": ["provider"]}, "then": {"properties": {"configuration": {"type": "object", "additionalProperties": false, "required": ["account_id"], "properties": {"account_id": {"type": "string", "pattern": "^[0-9]{1,32}$"}}}}}},
+    {"if": {"properties": {"provider": {"const": "gbp"}}, "required": ["provider"]}, "then": {"properties": {"auth_mode": {"const": "oauth_refresh_token"}, "configuration": {"type": "object", "additionalProperties": false, "required": ["account_id"], "properties": {"account_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,100}$"}}}}}}
+  ],
+  "description": "Credential values, connection_revision, token cache keys, and provider error details are never exposed."
+}

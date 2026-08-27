@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/connection-create-request.json",
+  "title": "Create Measurement connection request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "name", "provider", "auth_mode", "configuration", "credentials"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120},
+    "provider": {"enum": ["ga4", "gsc", "gtm", "gbp"]},
+    "auth_mode": {"enum": ["oauth_refresh_token", "service_account"]},
+    "configuration": {"$ref": "provider-configuration.json"},
+    "credentials": {"oneOf": [{"$ref": "oauth-credentials.json"}, {"$ref": "service-account-credentials.json"}]}
+  },
+  "allOf": [
+    {"if": {"properties": {"provider": {"const": "ga4"}}, "required": ["provider"]}, "then": {"properties": {"configuration": {"type": "object", "additionalProperties": false, "required": ["property_id"], "properties": {"property_id": {"type": "string", "pattern": "^[0-9]{1,32}$"}}}}}},
+    {"if": {"properties": {"provider": {"const": "gsc"}}, "required": ["provider"]}, "then": {"properties": {"configuration": {"type": "object", "additionalProperties": false, "required": ["site_url"], "properties": {"site_url": {"type": "string", "pattern": "^(?:sc-domain:[A-Za-z0-9.-]{1,253}|https://[A-Za-z0-9.-]{1,253}(?::[0-9]{1,5})?/.*)$"}}}}}},
+    {"if": {"properties": {"provider": {"const": "gtm"}}, "required": ["provider"]}, "then": {"properties": {"configuration": {"type": "object", "additionalProperties": false, "required": ["account_id"], "properties": {"account_id": {"type": "string", "pattern": "^[0-9]{1,32}$"}}}}}},
+    {"if": {"properties": {"provider": {"const": "gbp"}}, "required": ["provider"]}, "then": {"properties": {"auth_mode": {"const": "oauth_refresh_token"}, "configuration": {"type": "object", "additionalProperties": false, "required": ["account_id"], "properties": {"account_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,100}$"}}}}}},
+    {"if": {"properties": {"auth_mode": {"const": "oauth_refresh_token"}}, "required": ["auth_mode"]}, "then": {"properties": {"credentials": {"$ref": "oauth-credentials.json"}}}},
+    {"if": {"properties": {"auth_mode": {"const": "service_account"}}, "required": ["auth_mode"]}, "then": {"properties": {"credentials": {"$ref": "service-account-credentials.json"}}}}
+  ]
+}

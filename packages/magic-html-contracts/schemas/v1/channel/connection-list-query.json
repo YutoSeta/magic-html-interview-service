@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/connection-list-query.json",
+  "title": "Channel connection list query",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "provider": {"enum": ["x", "threads", "instagram", "line", "youtube"]},
+    "page": {"type": "integer", "minimum": 1, "default": 1},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25}
+  }
+}

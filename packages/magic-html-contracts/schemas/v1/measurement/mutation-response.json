@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/mutation-response.json",
+  "title": "Measurement mutation response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "mutation_id", "provider", "operation", "resource", "provider_version", "data"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "mutation_id": {"type": "string", "format": "uuid"},
+    "provider": {"enum": ["gtm", "gbp"]},
+    "operation": {"enum": ["gtm.update_tag", "gtm.publish_version", "gbp.update_location", "gbp.reply_review"]},
+    "resource": {"type": "string", "maxLength": 500, "pattern": "^[A-Za-z0-9_/-]+$"},
+    "provider_version": {"type": "string", "minLength": 1},
+    "data": {"type": ["object", "array"]}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/connection-list-query.json",
+  "title": "Measurement connection list query",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "page": {"type": "integer", "minimum": 1, "default": 1},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20}
+  }
+}

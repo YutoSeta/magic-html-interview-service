@@ -46,6 +46,8 @@ Tier 3 has two ordered substages represented in one contract inventory: `build` 
 20. A Static Builder manifest digest is canonical across Builder, Approval, and Deploy. Sort `files` by `path` in bytewise ascending order, concatenate `path + NUL + lowercase sha256 + NUL` for each file, and encode the SHA-256 of those concatenated bytes as lowercase hexadecimal. File size, content, and JSON serialization are excluded from the digest input.
 21. Site Edit target inspection is a synchronous, side-effect-free Tier 1 transform over caller-supplied HTML. It performs no external communication or persistence, returns at most 200 finite text, image, and contact-link targets, and binds the response to the exact input bytes with a lowercase SHA-256 `base_digest`.
 22. Site Edit candidate IDs are request-local. Consumers must use the canonical XPath and `base_digest` from the same inspection when proposing a later edit, and must treat `truncated` as notice that candidates were omitted or display fields were shortened to their contract bounds.
+23. Measurement owns tenant-scoped Google connection credentials and always chooses provider endpoints from server configuration. Credentials are encrypted and write-only; token cache material, connection revisions, and raw provider errors never cross its public interface.
+24. Measurement reports and provider-resource reads are bounded and do not require idempotency. Only GTM/GBP provider mutations require canonical confirmation, the reviewed live version, and a tenant-and-connection-scoped `Idempotency-Key`; ambiguous outcomes are never retried automatically and remain blocked until reconciliation.
 
 ## Tier calculation
 

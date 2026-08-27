@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/verification-response.json",
+  "title": "Measurement connection verification response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "connection_id", "status", "provider", "details"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "connection_id": {"type": "string", "format": "uuid"},
+    "status": {"const": "verified"},
+    "provider": {"enum": ["ga4", "gsc", "gtm", "gbp"]},
+    "details": {"type": "object", "additionalProperties": true}
+  }
+}

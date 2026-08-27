@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/pagination-meta.json",
+  "title": "Messaging pagination metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["current_page", "from", "last_page", "links", "path", "per_page", "to", "total"],
+  "properties": {
+    "current_page": {"type": "integer", "minimum": 1, "maximum": 10000},
+    "from": {"type": ["integer", "null"], "minimum": 1},
+    "last_page": {"type": "integer", "minimum": 1},
+    "links": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "label", "active"],
+        "properties": {
+          "url": {"type": ["string", "null"], "format": "uri"},
+          "label": {"type": "string", "minLength": 1},
+          "page": {"type": ["integer", "null"], "minimum": 1},
+          "active": {"type": "boolean"}
+        }
+      }
+    },
+    "path": {"type": "string", "format": "uri"},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 50},
+    "to": {"type": ["integer", "null"], "minimum": 1},
+    "total": {"type": "integer", "minimum": 0}
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/problem.json",
+  "title": "Measurement API problem",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "title", "status", "detail"],
+  "properties": {
+    "type": {"type": "string", "pattern": "^https://magic-html\\.dev/problems/(?:unauthorized|tenant-invalid|query-invalid|validation-failed|not-found|provider-mismatch|connection-unverified|connection-revision-conflict|resource-kind-invalid|resource-path-invalid|idempotency-key-invalid|idempotency-conflict|idempotency-in-progress|confirmation-mismatch|optimistic-version-conflict|operation-unsupported|mutation-payload-invalid|mutation-payload-too-large|provider-unavailable|provider-authentication-failed|provider-response-too-large|provider-rate-limited|provider-rejected-request|provider-invalid-response|provider-unsupported|concurrency-timeout)$"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 100},
+    "status": {"enum": [401, 404, 409, 422, 429, 502, 503]},
+    "detail": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "retryable": {"type": "boolean"},
+    "errors": {"type": "object", "additionalProperties": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1, "maxLength": 1000}}}
+  }
+}

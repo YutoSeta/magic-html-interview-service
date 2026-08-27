@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/channel-create-request.json",
+  "title": "Create Messaging channel request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["provider", "name", "credential_reference"],
+  "properties": {
+    "provider": {"enum": ["local", "slack"]},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120, "pattern": "\\S"},
+    "external_channel_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 191},
+    "credential_reference": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[A-Za-z0-9._:/-]+$", "writeOnly": true, "description": "Runtime secret-store lookup key. The reference and resolved credential are never returned."},
+    "active": {"anyOf": [{"type": "boolean"}, {"type": "integer", "enum": [0, 1]}], "default": true},
+    "metadata": {"$ref": "metadata.json"}
+  },
+  "allOf": [
+    {"if": {"properties": {"provider": {"const": "slack"}}, "required": ["provider"]}, "then": {"required": ["external_channel_id"], "properties": {"external_channel_id": {"type": "string", "minLength": 1, "maxLength": 191}}}}
+  ]
+}

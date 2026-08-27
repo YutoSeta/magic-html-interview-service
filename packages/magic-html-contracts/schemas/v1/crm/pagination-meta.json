@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/crm/pagination-meta.json",
+  "title": "CRM pagination metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["current_page", "per_page", "total", "last_page"],
+  "properties": {
+    "current_page": {"type": "integer", "minimum": 1},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 100},
+    "total": {"type": "integer", "minimum": 0},
+    "last_page": {"type": "integer", "minimum": 1}
+  }
+}

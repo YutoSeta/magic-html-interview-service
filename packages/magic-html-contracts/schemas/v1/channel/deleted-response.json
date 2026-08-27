@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/deleted-response.json",
+  "title": "Deleted Channel connection response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["data"],
+  "properties": {
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deleted", "id"],
+      "properties": {"deleted": {"const": true}, "id": {"type": "string", "format": "uuid"}}
+    }
+  }
+}
