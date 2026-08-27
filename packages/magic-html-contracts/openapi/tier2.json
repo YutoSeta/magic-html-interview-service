@@ -1,0 +1,58 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Magic HTML Tier 2 APIs",
+    "version": "1.3.0",
+    "description": "Immutable publication assembly, multi-page site composition, and deterministic presentation builders."
+  },
+  "servers": [{"url": "/api"}],
+  "paths": {
+    "/v1/sites/{site}/publication-snapshots": {
+      "post": {
+        "operationId": "createPublicationSnapshot",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/publication/request.json"}}}},
+        "responses": {
+          "201": {"description": "Self-contained immutable publication", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/publication/snapshot.json"}}}}
+        }
+      }
+    },
+    "/v1/sites/{site}/publication-snapshots/{version}": {
+      "get": {
+        "operationId": "getPublicationSnapshot",
+        "responses": {"200": {"description": "Self-contained immutable publication", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/publication/snapshot.json"}}}}}
+      }
+    },
+    "/v1/sites/{site}/publication-snapshots/{version}/assets/{media}": {
+      "get": {"operationId": "downloadPublicationAsset", "responses": {"200": {"description": "Snapshot-owned immutable media bytes"}}}
+    },
+    "/v1/site-jobs": {
+      "post": {
+        "operationId": "composeMultiPageSite",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-composer/request.json"}}}},
+        "responses": {"202": {"description": "Composition accepted", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-composer/job.json"}}}}}
+      }
+    },
+    "/v1/site-jobs/{job}": {"get": {"operationId": "getSiteCompositionJob", "responses": {"200": {"description": "Composition state"}}}},
+    "/v1/sites/{site}/snapshots/{version}": {
+      "get": {"operationId": "getComposedSiteSnapshot", "responses": {"200": {"description": "Immutable composed site", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-composer/snapshot.json"}}}}}}
+    },
+    "/v1/slide-builds": {
+      "post": {
+        "operationId": "buildHtmlSlideDeck",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 200}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/slide-builder/request.json"}}}},
+        "responses": {"200": {"description": "Deterministically composed Presentation AST and HTML", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/slide-builder/result.json"}}}}}
+      }
+    },
+    "/v1/email-builds": {
+      "post": {
+        "operationId": "buildHtmlEmail",
+        "description": "Build a deterministic, synchronous, side-effect-free email artifact. Repeating the same closed payload returns the same digest and does not require an Idempotency-Key.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/email-builder/request.json"}}}},
+        "responses": {"200": {"description": "Deterministically composed email-safe HTML", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/email-builder/result.json"}}}}}
+      }
+    }
+  }
+}

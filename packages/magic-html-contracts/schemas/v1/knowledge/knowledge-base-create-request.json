@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/knowledge-base-create-request.json",
+  "title": "Create knowledge base request",
+  "description": "Create one private tenant-scoped knowledge base. Provider, embedding, storage, and messaging configuration are intentionally not caller controlled.",
+  "type": "object",
+  "required": ["contract_version", "name"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "description": {"type": ["string", "null"], "maxLength": 2000},
+    "locale": {"type": "string", "minLength": 2, "maxLength": 20, "default": "ja"}
+  }
+}

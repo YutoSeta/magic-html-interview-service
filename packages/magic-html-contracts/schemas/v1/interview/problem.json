@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/interview/problem.json",
+  "title": "Interview API problem",
+  "type": "object",
+  "required": ["contract_version", "type", "title", "status", "detail", "request_id"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"enum": ["unauthorized", "validation_failed", "idempotency_conflict", "idempotency_in_progress", "interview_not_found", "interview_step_conflict", "interview_completed"]},
+    "title": {"type": "string", "minLength": 1},
+    "status": {"enum": [401, 404, 409, 422]},
+    "detail": {"type": "string", "minLength": 1},
+    "request_id": {"type": "string", "minLength": 1},
+    "errors": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    }
+  }
+}

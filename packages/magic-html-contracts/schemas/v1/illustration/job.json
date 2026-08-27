@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/illustration/job.json",
+  "title": "Illustration generation job",
+  "allOf": [
+    {"$ref": "../common/job.json"},
+    {
+      "type": "object",
+      "properties": {
+        "stage": {"enum": ["queued", "prompt_compilation", "image_generation", "cataloging", "complete"]},
+        "item": {"anyOf": [{"type": "null"}, {"$ref": "item.json"}]}
+      }
+    }
+  ]
+}

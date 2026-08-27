@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/knowledge-base.json",
+  "title": "Knowledge base resource",
+  "type": "object",
+  "required": ["contract_version", "id", "tenant_id", "name", "description", "locale", "retrieval_strategy", "document_count", "index_revision", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "description": {"type": ["string", "null"], "maxLength": 2000},
+    "locale": {"type": "string", "minLength": 2, "maxLength": 20},
+    "retrieval_strategy": {"const": "weighted_rrf_v1"},
+    "document_count": {"type": "integer", "minimum": 0},
+    "index_revision": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

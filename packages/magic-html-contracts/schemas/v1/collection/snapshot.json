@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/collection/snapshot.json",
+  "title": "Immutable collection snapshot",
+  "type": "object",
+  "required": ["contract_version", "site_id", "version", "published_at", "digest", "collections"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "site_id": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "minLength": 1},
+    "published_at": {"type": "string", "format": "date-time"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "collections": {"type": "object"}
+  }
+}

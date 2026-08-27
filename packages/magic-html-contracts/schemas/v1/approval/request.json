@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/request.json",
+  "title": "Approval request resource",
+  "type": "object",
+  "required": ["contract_version", "id", "tenant_id", "site_id", "artifact", "title", "status", "requested_by", "request_message", "metadata", "decision", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "artifact": {"$ref": "artifact.json"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 255},
+    "status": {"enum": ["pending", "approved", "rejected"]},
+    "requested_by": {"$ref": "actor.json"},
+    "request_message": {"type": ["string", "null"], "maxLength": 10000},
+    "metadata": {"type": ["object", "array"]},
+    "decision": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["value", "actor", "message", "decided_at"],
+          "additionalProperties": false,
+          "properties": {
+            "value": {"enum": ["approved", "rejected"]},
+            "actor": {"$ref": "actor.json"},
+            "message": {"type": ["string", "null"], "maxLength": 10000},
+            "decided_at": {"type": "string", "format": "date-time"}
+          }
+        }
+      ]
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

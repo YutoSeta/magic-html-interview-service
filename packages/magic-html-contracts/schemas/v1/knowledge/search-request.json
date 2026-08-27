@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/search-request.json",
+  "title": "Knowledge hybrid search request",
+  "type": "object",
+  "required": ["contract_version", "query"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "query": {"type": "string", "minLength": 1, "maxLength": 4000},
+    "retrieval": {"$ref": "retrieval-options.json"}
+  }
+}

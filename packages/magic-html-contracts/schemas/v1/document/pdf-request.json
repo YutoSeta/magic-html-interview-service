@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/document/pdf-request.json",
+  "title": "PDF document job request",
+  "description": "HTML owns page geometry by default. When format, landscape, and margins are all omitted, the renderer must honor the HTML CSS @page size, orientation, and margins. Supplying any of those three fields explicitly selects renderer page-geometry overrides; print_background and page_ranges do not change the page-geometry source.",
+  "type": "object",
+  "required": ["contract_version", "html"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "html": {"$ref": "html.json"},
+    "filename": {"type": "string", "minLength": 5, "maxLength": 124, "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N}._ -]{0,119}\\.pdf$", "default": "document.pdf"},
+    "options": {
+      "type": "object",
+      "description": "Rendering controls. Omit format, landscape, and margins to keep HTML CSS @page authoritative. Existing callers may continue to supply any of those fields to request renderer-owned page geometry.",
+      "additionalProperties": false,
+      "properties": {
+        "format": {"enum": ["A4", "A3", "Letter", "Legal"], "description": "Explicit renderer page-format override. Its presence selects renderer-owned page geometry."},
+        "landscape": {"type": "boolean", "description": "Explicit renderer orientation override. Its presence selects renderer-owned page geometry."},
+        "print_background": {"type": "boolean", "default": true},
+        "margins": {
+          "type": "object",
+          "description": "Explicit renderer margin override in millimetres. Its presence selects renderer-owned page geometry; omitted sides retain the renderer's legacy 10 mm fallback.",
+          "additionalProperties": false,
+          "properties": {
+            "top": {"type": "number", "minimum": 0, "maximum": 50, "default": 10},
+            "right": {"type": "number", "minimum": 0, "maximum": 50, "default": 10},
+            "bottom": {"type": "number", "minimum": 0, "maximum": 50, "default": 10},
+            "left": {"type": "number", "minimum": 0, "maximum": 50, "default": 10}
+          }
+        },
+        "page_ranges": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[0-9, -]+$"}
+      }
+    }
+  }
+}

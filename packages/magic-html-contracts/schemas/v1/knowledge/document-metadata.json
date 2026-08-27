@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/document-metadata.json",
+  "title": "Knowledge document ingestion metadata",
+  "description": "Bounded metadata supplied with document bytes. Source adapters resolve remote systems before this request; this contract accepts no remote URL, credentials, or messaging surface.",
+  "type": "object",
+  "required": ["contract_version", "original_filename", "media_type", "source_kind"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "original_filename": {"type": "string", "minLength": 1, "maxLength": 255, "pattern": "^[^/\\\\\\u0000-\\u001F\\u007F]+$"},
+    "media_type": {
+      "enum": [
+        "text/plain",
+        "text/markdown",
+        "text/html",
+        "text/csv",
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.sqlite3",
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+      ]
+    },
+    "source_kind": {"enum": ["direct_upload", "source_adapter"]},
+    "source_adapter": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "external_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 255},
+    "title": {"type": ["string", "null"], "maxLength": 500},
+    "locale": {"type": ["string", "null"], "minLength": 2, "maxLength": 20},
+    "captured_at": {"type": ["string", "null"], "format": "date-time"},
+    "tags": {
+      "type": "array",
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 100}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"source_kind": {"const": "source_adapter"}}, "required": ["source_kind"]},
+      "then": {"required": ["source_adapter"], "properties": {"source_adapter": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}}}
+    },
+    {
+      "if": {"properties": {"source_kind": {"const": "direct_upload"}}, "required": ["source_kind"]},
+      "then": {"properties": {"source_adapter": {"type": "null"}}}
+    }
+  ]
+}

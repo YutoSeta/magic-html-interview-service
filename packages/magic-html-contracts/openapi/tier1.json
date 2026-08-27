@@ -1,0 +1,515 @@
+{
+  "openapi": "3.1.0",
+  "info": {"title": "Magic HTML Tier 1 APIs", "version": "1.10.0", "description": "Independent styling, forms, content, collection, media, illustration, replay-safe interview, knowledge retrieval, approval, static-site import, safe static-page target inspection and editing, and isolated preview services."},
+  "servers": [{"url": "/api"}],
+  "paths": {
+    "/v1/style-jobs": {
+      "post": {
+        "operationId": "createStyleJob",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/style/job-request.json"}}}},
+        "responses": {"202": {"description": "Accepted", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/style/job.json"}}}}}
+      }
+    },
+    "/v1/style-jobs/{job}": {"get": {"operationId": "getStyleJob", "responses": {"200": {"description": "Current style job"}}}},
+    "/v1/sites/{site}/forms/{form}": {"put": {"operationId": "upsertFormDefinition", "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/forms/definition.json"}}}}, "responses": {"200": {"description": "Form definition"}}}},
+    "/v1/sites/{site}/forms/{form}/submissions": {
+      "post": {
+        "operationId": "submitForm",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/forms/submission-request.json"}}}},
+        "responses": {"202": {"description": "Accepted", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/forms/submission.json"}}}}}
+      }
+    },
+    "/v1/submissions/{submission}": {"get": {"operationId": "getSubmission", "responses": {"200": {"description": "Submission delivery state"}}}},
+    "/v1/sites/{site}/contents/{resource}": {"put": {"operationId": "upsertContentResource", "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/domain/resource.json"}}}}, "responses": {"200": {"description": "Content resource"}}}},
+    "/v1/sites/{site}/collections/{resource}": {"put": {"operationId": "upsertCollectionResource", "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/domain/resource.json"}}}}, "responses": {"200": {"description": "Collection resource"}}}},
+    "/v1/sites/{site}/snapshots": {"post": {"operationId": "publishDomainSnapshot", "description": "The independently deployed Content and Collection services expose the same route on their own origins.", "responses": {"201": {"description": "Immutable domain snapshot", "content": {"application/json": {"schema": {"oneOf": [{"$ref": "../schemas/v1/content/snapshot.json"}, {"$ref": "../schemas/v1/collection/snapshot.json"}]}}}}}}},
+    "/v1/sites/{site}/snapshots/{version}": {"get": {"operationId": "getDomainSnapshot", "description": "Read from the Content or Collection service origin that owns the version.", "responses": {"200": {"description": "Immutable domain snapshot", "content": {"application/json": {"schema": {"oneOf": [{"$ref": "../schemas/v1/content/snapshot.json"}, {"$ref": "../schemas/v1/collection/snapshot.json"}]}}}}}}},
+    "/v1/sites/{site}/media": {
+      "post": {
+        "operationId": "uploadMedia",
+        "requestBody": {"required": true, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "additionalProperties": false, "properties": {"file": {"type": "string", "format": "binary"}, "name": {"type": "string", "minLength": 1, "maxLength": 255}}}}}},
+        "responses": {"201": {"description": "Stored draft media asset", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/media/asset.json"}}}}}
+      }
+    },
+    "/v1/sites/{site}/media/{media}": {"get": {"operationId": "getMediaMetadata", "responses": {"200": {"description": "Media metadata", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/media/asset.json"}}}}}}},
+    "/v1/sites/{site}/media/{media}/file": {"get": {"operationId": "previewMedia", "responses": {"200": {"description": "Authenticated draft or published media bytes"}}}},
+    "/media/{site}/{media}": {"get": {"operationId": "getPublishedMedia", "security": [], "responses": {"200": {"description": "Public immutable media bytes"}, "404": {"description": "Media is absent or not published"}}}},
+    "/v1/illustration-jobs": {
+      "post": {
+        "operationId": "createIllustrationJob",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 200}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/illustration/generation-request.json"}}}},
+        "responses": {"202": {"description": "Accepted", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/illustration/job.json"}}}}}
+      }
+    },
+    "/v1/illustration-jobs/{job}": {"get": {"operationId": "getIllustrationJob", "responses": {"200": {"description": "Illustration generation state", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/illustration/job.json"}}}}}}},
+    "/v1/illustrations": {"get": {"operationId": "searchIllustrations", "security": [], "responses": {"200": {"description": "Searchable illustration catalog"}}}},
+    "/v1/illustrations/{illustration}": {"get": {"operationId": "getIllustration", "security": [], "responses": {"200": {"description": "Illustration metadata", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/illustration/item.json"}}}}}}},
+    "/illustrations/{illustration}/asset": {"get": {"operationId": "downloadIllustrationAsset", "security": [], "responses": {"200": {"description": "Public immutable illustration bytes"}}}},
+    "/v1/site-edit-targets": {
+      "post": {
+        "operationId": "inspectStaticPageEditTargets",
+        "description": "Deterministically inspect caller-supplied HTML for finite text, image, and contact-link edit targets. This synchronous operation performs no external communication, persistence, or mutation.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-edit/inspect-request.json"}}}},
+        "responses": {
+          "200": {"description": "Bounded editable targets and the digest to bind a later edit", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-edit/inspect-result.json"}}}},
+          "401": {"description": "Missing or invalid service Bearer credential"},
+          "422": {"description": "The supplied HTML or request fields are invalid"}
+        }
+      }
+    },
+    "/v1/site-edits": {
+      "post": {
+        "operationId": "applyStaticPageEdit",
+        "description": "Apply a finite, structure-preserving operation list to caller-supplied HTML. The service owns no site source or deployment credentials.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-edit/request.json"}}}},
+        "responses": {
+          "200": {"description": "Edited HTML and deterministic digests", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-edit/result.json"}}}},
+          "409": {"description": "The supplied base digest does not match the HTML or an operation violates the structural editing boundary"}
+        }
+      }
+    },
+    "/v1/site-imports": {
+      "post": {
+        "operationId": "importStaticSiteFiles",
+        "description": "Classify and normalize caller-resolved source bytes. GitHub, SFTP, FTPS, and FTP credentials remain in separate source adapters; this service receives no credentials and performs no outbound connection.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-import/request.json"}}}},
+        "responses": {
+          "200": {"description": "Normalized self-contained import snapshot", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-import/result.json"}}}},
+          "422": {"description": "The file set is invalid, unsafe, too large, or contains no importable static files"}
+        }
+      }
+    },
+    "/v1/previews": {
+      "post": {
+        "operationId": "createStaticSitePreview",
+        "description": "Store a short-lived, self-contained StaticSite snapshot on an isolated preview origin.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/request.json"}}}},
+        "responses": {
+          "201": {"description": "Ready preview", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/resource.json"}}}},
+          "422": {"description": "The file set or entry path is invalid or unsafe"}
+        }
+      }
+    },
+    "/v1/previews/{preview}": {
+      "get": {"operationId": "getStaticSitePreview", "responses": {"200": {"description": "Preview metadata", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/resource.json"}}}}}},
+      "delete": {"operationId": "deleteStaticSitePreview", "responses": {"204": {"description": "Preview deleted"}}}
+    },
+    "/v1/previews/{preview}/screenshots": {
+      "post": {
+        "operationId": "captureStaticSitePreview",
+        "description": "Render the isolated preview in a real headless browser and return image bytes.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/screenshot-request.json"}}}},
+        "responses": {
+          "200": {"description": "Rendered screenshot", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/screenshot-result.json"}}}},
+          "503": {"description": "The configured browser renderer is temporarily unavailable"}
+        }
+      }
+    },
+    "/previews/{preview}/{path}": {
+      "get": {"operationId": "serveStaticSitePreviewFile", "security": [], "responses": {"200": {"description": "Short-lived preview file with an operation-specific content type"}, "404": {"description": "Preview expired or file absent"}}}
+    },
+    "/v1/interviews": {
+      "post": {
+        "tags": ["Interview"],
+        "operationId": "startInterview",
+        "description": "Start a private scripted interview that accumulates a structured website brief. The key is scoped by site; an exact retry replays the original 201 response and changed input returns 409.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/InterviewWriteIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/start-request.json"}}}},
+        "responses": {
+          "201": {"description": "Active interview session, or the exact idempotent response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/session.json"}}}},
+          "401": {"$ref": "#/components/responses/InterviewProblem"},
+          "409": {"$ref": "#/components/responses/InterviewProblem"},
+          "422": {"$ref": "#/components/responses/InterviewProblem"},
+          "429": {"description": "Interview write rate limit exceeded"}
+        }
+      }
+    },
+    "/v1/interviews/import": {
+      "post": {
+        "tags": ["Interview"],
+        "operationId": "importInterview",
+        "description": "Register an already collected structured website brief as a completed interview session. Idempotency-Key is optional; when supplied, an exact retry returns the existing session and changed input returns 409.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/InterviewIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/import-request.json"}}}},
+        "responses": {
+          "200": {"description": "Existing completed session replayed for the supplied Idempotency-Key", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/session.json"}}}},
+          "201": {"description": "Completed interview session created", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/session.json"}}}},
+          "401": {"$ref": "#/components/responses/InterviewProblem"},
+          "409": {"$ref": "#/components/responses/InterviewProblem"},
+          "422": {"$ref": "#/components/responses/InterviewProblem"},
+          "429": {"description": "Interview write rate limit exceeded"}
+        }
+      }
+    },
+    "/v1/interviews/{interview}": {
+      "parameters": [{"$ref": "#/components/parameters/Interview"}],
+      "get": {
+        "tags": ["Interview"],
+        "operationId": "getInterview",
+        "description": "Read the messages, current question, and structured data for one private interview session.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Interview session", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/session.json"}}}},
+          "401": {"$ref": "#/components/responses/InterviewProblem"},
+          "404": {"$ref": "#/components/responses/InterviewProblem"},
+          "429": {"description": "Interview read rate limit exceeded"}
+        }
+      },
+      "delete": {
+        "tags": ["Interview"],
+        "operationId": "deleteInterview",
+        "description": "Delete one private interview authoring session.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "204": {"description": "Interview session deleted"},
+          "401": {"$ref": "#/components/responses/InterviewProblem"},
+          "404": {"$ref": "#/components/responses/InterviewProblem"},
+          "429": {"description": "Interview write rate limit exceeded"}
+        }
+      }
+    },
+    "/v1/interviews/{interview}/messages": {
+      "parameters": [{"$ref": "#/components/parameters/Interview"}],
+      "post": {
+        "tags": ["Interview"],
+        "operationId": "answerInterview",
+        "description": "Answer the active session's expected current scripted step and advance its structured brief. The key is scoped by site and session; exact retries replay the original response, while changed input, concurrent work, stale steps, and completed sessions return 409 without advancing twice.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/InterviewWriteIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/answer-request.json"}}}},
+        "responses": {
+          "200": {"description": "Advanced interview session, or the exact idempotent response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/session.json"}}}},
+          "401": {"$ref": "#/components/responses/InterviewProblem"},
+          "404": {"$ref": "#/components/responses/InterviewProblem"},
+          "409": {"$ref": "#/components/responses/InterviewProblem"},
+          "422": {"$ref": "#/components/responses/InterviewProblem"},
+          "429": {"description": "Interview write rate limit exceeded"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}],
+      "post": {
+        "tags": ["Knowledge"],
+        "operationId": "createKnowledgeBase",
+        "description": "Create one private knowledge base in the authenticated tenant scope.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/KnowledgeIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/knowledge-base-create-request.json"}}}},
+        "responses": {
+          "201": {
+            "description": "Knowledge base created, or the exact idempotent response replayed",
+            "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}},
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/knowledge-base.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "409": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "422": {"$ref": "#/components/responses/KnowledgeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/KnowledgeBase"}
+      ],
+      "get": {
+        "tags": ["Knowledge"],
+        "operationId": "getKnowledgeBase",
+        "description": "Read one knowledge base only within its authenticated tenant scope.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant-scoped knowledge base", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/knowledge-base.json"}}}},
+          "401": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "404": {"$ref": "#/components/responses/KnowledgeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/ingestion-jobs": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/KnowledgeBase"}
+      ],
+      "post": {
+        "tags": ["Knowledge"],
+        "operationId": "createKnowledgeIngestionJob",
+        "description": "Accept resolved document bytes and bounded metadata, then extract, chunk, and index them asynchronously. The service performs no caller-directed remote fetch.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/KnowledgeIdempotencyKey"}],
+        "x-magic-html-source-boundary": {
+          "accepted_input": "multipart_file_bytes_and_bounded_metadata",
+          "remote_url_fetch": false,
+          "source_credentials": false,
+          "messaging_surfaces": false
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file", "metadata"],
+                "additionalProperties": false,
+                "properties": {
+                  "file": {"type": "string", "format": "binary", "maxLength": 52428800, "description": "Resolved document bytes, limited to 50 MiB before extraction."},
+                  "metadata": {"$ref": "../schemas/v1/knowledge/document-metadata.json"}
+                }
+              },
+              "encoding": {"metadata": {"contentType": "application/json"}}
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Ingestion accepted, or the exact idempotent job replayed",
+            "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}},
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/ingestion-job.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "404": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "409": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "413": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "415": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "422": {"$ref": "#/components/responses/KnowledgeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/ingestion-jobs/{ingestionJob}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/KnowledgeBase"},
+        {"$ref": "#/components/parameters/KnowledgeIngestionJob"}
+      ],
+      "get": {
+        "tags": ["Knowledge"],
+        "operationId": "getKnowledgeIngestionJob",
+        "description": "Read an ingestion job only within the tenant and knowledge-base scope that owns it.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Current ingestion state", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/ingestion-job.json"}}}},
+          "401": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "404": {"$ref": "#/components/responses/KnowledgeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/search": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/KnowledgeBase"}
+      ],
+      "post": {
+        "tags": ["Knowledge"],
+        "operationId": "searchKnowledgeBase",
+        "description": "Search one fixed knowledge-base revision using deterministic weighted reciprocal-rank fusion of semantic and keyword ranks.",
+        "security": [{"serviceBearer": []}],
+        "x-magic-html-retrieval": {
+          "strategy": "weighted_rrf_v1",
+          "semantic_rank_source": "indexed_embedding_similarity",
+          "keyword_rank_source": "normalized_bm25",
+          "rrf_k": 60,
+          "default_semantic_weight": 70,
+          "derived_keyword_weight": "100-semantic_weight",
+          "tie_breaker": "fused_score_desc_chunk_id_asc",
+          "scope": "tenant_and_knowledge_base"
+        },
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/search-request.json"}}}},
+        "responses": {
+          "200": {"description": "Deterministically ranked chunks", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/search-response.json"}}}},
+          "401": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "404": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "409": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "422": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "503": {"$ref": "#/components/responses/KnowledgeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/answers": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/KnowledgeBase"}
+      ],
+      "post": {
+        "tags": ["Knowledge"],
+        "operationId": "answerKnowledgeQuestion",
+        "description": "Return an answer supported by explicit citations from this knowledge base, or refuse when the indexed evidence is insufficient or conflicting.",
+        "security": [{"serviceBearer": []}],
+        "x-magic-html-grounding": {
+          "default_policy": "strict_grounded",
+          "allowed_policies": ["strict_grounded"],
+          "unsupported_answer_behavior": "refuse",
+          "answered_requires_citations": true,
+          "scope": "tenant_and_knowledge_base"
+        },
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/answer-request.json"}}}},
+        "responses": {
+          "200": {"description": "Cited answer or explicit refusal", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/answer-response.json"}}}},
+          "401": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "404": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "409": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "422": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "503": {"$ref": "#/components/responses/KnowledgeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/approval-requests": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"}
+      ],
+      "get": {
+        "tags": ["Approval"],
+        "operationId": "listApprovalRequests",
+        "description": "List approval requests within one tenant and site scope. The trusted caller is responsible for authorizing the principal for this scope.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"name": "status", "in": "query", "schema": {"enum": ["pending", "approved", "rejected"]}},
+          {"name": "artifact_type", "in": "query", "schema": {"enum": ["site_snapshot", "cms_snapshot", "static_build", "composer_artifact", "publication_candidate"]}},
+          {"name": "artifact_id", "in": "query", "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,254}$"}},
+          {"name": "artifact_version", "in": "query", "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
+          {"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25}}
+        ],
+        "responses": {
+          "200": {"description": "Tenant- and site-scoped approval requests", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/list.json"}}}},
+          "401": {"$ref": "#/components/responses/ApprovalProblem"},
+          "422": {"$ref": "#/components/responses/ApprovalProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Approval"],
+        "operationId": "createApprovalRequest",
+        "description": "Create one review request for an immutable artifact tuple. preview_url is descriptive and is never fetched by this service.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/IdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/create-request.json"}}}},
+        "responses": {
+          "201": {
+            "description": "Approval request created, or the exact idempotent response replayed",
+            "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}},
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/request.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/ApprovalProblem"},
+          "409": {"$ref": "#/components/responses/ApprovalProblem"},
+          "422": {"$ref": "#/components/responses/ApprovalProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/approval-requests/{approval}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/Approval"}
+      ],
+      "get": {
+        "tags": ["Approval"],
+        "operationId": "getApprovalRequest",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Approval request", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/request.json"}}}},
+          "401": {"$ref": "#/components/responses/ApprovalProblem"},
+          "404": {"$ref": "#/components/responses/ApprovalProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/approval-requests/{approval}/messages": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/Approval"}
+      ],
+      "post": {
+        "tags": ["Approval"],
+        "operationId": "addApprovalMessage",
+        "description": "Append an attributed message. Messages remain appendable after a final decision.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/IdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/message-request.json"}}}},
+        "responses": {
+          "201": {
+            "description": "Message audit event created, or the exact idempotent response replayed",
+            "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}},
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/event.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/ApprovalProblem"},
+          "404": {"$ref": "#/components/responses/ApprovalProblem"},
+          "409": {"$ref": "#/components/responses/ApprovalProblem"},
+          "422": {"$ref": "#/components/responses/ApprovalProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/approval-requests/{approval}/decisions": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/Approval"}
+      ],
+      "post": {
+        "tags": ["Approval"],
+        "operationId": "decideApprovalRequest",
+        "description": "Record the first and only final approved or rejected decision. A rejection requires a non-empty message.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/IdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/decision-request.json"}}}},
+        "responses": {
+          "200": {
+            "description": "Final decision recorded, or the exact idempotent response replayed",
+            "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}},
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/request.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/ApprovalProblem"},
+          "404": {"$ref": "#/components/responses/ApprovalProblem"},
+          "409": {"$ref": "#/components/responses/ApprovalProblem"},
+          "422": {"$ref": "#/components/responses/ApprovalProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/approval-requests/{approval}/history": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/Approval"}
+      ],
+      "get": {
+        "tags": ["Approval"],
+        "operationId": "getApprovalHistory",
+        "description": "Return ordered audit events and server-side keyed-hash verification. Hash values are opaque; consumers must reject a history whose integrity.valid is false.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Verified approval history", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/history.json"}}}},
+          "401": {"$ref": "#/components/responses/ApprovalProblem"},
+          "404": {"$ref": "#/components/responses/ApprovalProblem"}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "serviceBearer": {"type": "http", "scheme": "bearer", "description": "A trusted service credential. The caller authenticates and authorizes end users for tenant/site scope and asserts actor identity."}
+    },
+    "parameters": {
+      "Tenant": {"name": "tenant", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
+      "Site": {"name": "site", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
+      "Interview": {"name": "interview", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "InterviewIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": false, "description": "Optional import idempotency key. Exact retries return the existing completed session; reuse for changed input returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
+      "InterviewWriteIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque start or answer key scoped to the relevant site and, for answers, interview session. Exact retries replay the original status and body; changed input or work already in progress returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
+      "KnowledgeBase": {"name": "knowledgeBase", "in": "path", "required": true, "description": "Knowledge base UUID resolved together with the tenant scope; cross-tenant lookup must return 404.", "schema": {"type": "string", "format": "uuid"}},
+      "KnowledgeIngestionJob": {"name": "ingestionJob", "in": "path", "required": true, "description": "Ingestion job UUID resolved together with tenant and knowledge-base scope.", "schema": {"type": "string", "format": "uuid"}},
+      "KnowledgeIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque key scoped to the authenticated tenant and operation. Exact retries replay the original response; reuse with changed input returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
+      "Approval": {"name": "approval", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "IdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque globally unique key. Exact retries replay the original status and body; reuse for another operation or input returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}}
+    },
+    "headers": {
+      "IdempotentReplayed": {"description": "Whether this response is an exact replay of a completed operation.", "schema": {"type": "string", "enum": ["true", "false"]}}
+    },
+    "responses": {
+      "InterviewProblem": {"description": "Interview API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/problem.json"}}}},
+      "KnowledgeProblem": {"description": "Knowledge API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/problem.json"}}}},
+      "ApprovalProblem": {"description": "Approval API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/problem.json"}}}}
+    }
+  }
+}

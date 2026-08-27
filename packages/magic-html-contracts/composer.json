@@ -1,0 +1,12 @@
+{
+  "name": "yutoseta/magic-html-contracts",
+  "description": "Executable contracts for independently deployed Magic HTML services.",
+  "type": "library",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.3"
+  },
+  "scripts": {
+    "test": "php tests/validate.php"
+  }
+}

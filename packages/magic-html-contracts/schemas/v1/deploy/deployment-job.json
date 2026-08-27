@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/deploy/deployment-job.json",
+  "title": "Static build deployment job",
+  "type": "object",
+  "required": ["contract_version", "id", "tenant_id", "site_id", "environment_id", "driver", "status", "build_id", "artifact_digest", "approval_request_id", "result", "error", "created_at", "updated_at", "started_at", "completed_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "environment_id": {"type": "string", "format": "uuid"},
+    "driver": {"enum": ["github", "cloudflare_pages", "sftp", "ftps"]},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "build_id": {"type": "string", "format": "uuid"},
+    "artifact_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "approval_request_id": {"type": "string", "format": "uuid"},
+    "result": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["provider_reference", "destination", "deployment_url", "files_count", "bytes_count"],
+          "additionalProperties": false,
+          "properties": {
+            "provider_reference": {"type": ["string", "null"], "maxLength": 2048},
+            "destination": {"type": "string", "minLength": 1, "maxLength": 2048},
+            "deployment_url": {"type": ["string", "null"], "format": "uri"},
+            "files_count": {"type": "integer", "minimum": 0},
+            "bytes_count": {"type": "integer", "minimum": 0}
+          }
+        }
+      ]
+    },
+    "error": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["code", "message"],
+          "additionalProperties": false,
+          "properties": {
+            "code": {"enum": ["build_unavailable", "build_not_found", "build_not_ready", "artifact_digest_mismatch", "approval_unavailable", "approval_not_found", "approval_not_approved", "approval_artifact_mismatch", "approval_integrity_invalid", "environment_unverified", "provider_failed"]},
+            "message": {"type": "string", "minLength": 1, "maxLength": 2000}
+          }
+        }
+      ]
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
+    "completed_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

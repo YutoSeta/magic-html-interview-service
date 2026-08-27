@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\InterviewSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -14,21 +15,27 @@ final class InterviewSessionResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $messages = is_array($this->messages) ? $this->messages : [];
+        return self::present($this->resource);
+    }
+
+    /** @return array<string,mixed> */
+    public static function present(InterviewSession $session): array
+    {
+        $messages = is_array($session->messages) ? $session->messages : [];
         $last = $messages === [] ? null : $messages[array_key_last($messages)];
 
         return [
             'contract_version' => '1.0',
-            'id' => $this->id,
-            'site_id' => $this->site_id,
-            'locale' => $this->locale,
-            'status' => $this->status,
-            'current_step' => $this->current_step,
+            'id' => $session->id,
+            'site_id' => $session->site_id,
+            'locale' => $session->locale,
+            'status' => $session->status,
+            'current_step' => $session->current_step,
             'messages' => $messages,
-            'next_question' => $this->status === 'active' && ($last['role'] ?? null) === 'assistant' ? $last : null,
-            'structured_data' => $this->structured_data,
-            'created_at' => $this->created_at?->toIso8601String(),
-            'updated_at' => $this->updated_at?->toIso8601String(),
+            'next_question' => $session->status === InterviewSession::STATUS_ACTIVE && ($last['role'] ?? null) === 'assistant' ? $last : null,
+            'structured_data' => $session->structured_data,
+            'created_at' => $session->created_at?->toIso8601String(),
+            'updated_at' => $session->updated_at?->toIso8601String(),
         ];
     }
 }

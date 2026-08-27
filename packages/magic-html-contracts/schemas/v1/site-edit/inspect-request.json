@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-edit/inspect-request.json",
+  "title": "Static page editable-target inspection request",
+  "type": "object",
+  "required": ["contract_version", "site_id", "page_path", "html"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "page_path": {"type": "string", "pattern": "^/", "maxLength": 1000},
+    "html": {"type": "string", "minLength": 1, "maxLength": 2000000},
+    "marker_locked": {"type": "boolean", "default": false}
+  }
+}

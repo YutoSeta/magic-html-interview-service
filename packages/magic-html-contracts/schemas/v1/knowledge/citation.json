@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/citation.json",
+  "title": "Grounded answer citation",
+  "type": "object",
+  "required": ["chunk_id", "document_id", "original_filename", "chunk_ordinal", "quote", "title", "page", "section"],
+  "additionalProperties": false,
+  "properties": {
+    "chunk_id": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "document_id": {"type": "string", "format": "uuid"},
+    "original_filename": {"type": "string", "minLength": 1, "maxLength": 255},
+    "chunk_ordinal": {"type": "integer", "minimum": 0, "maximum": 9999},
+    "quote": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "title": {"type": ["string", "null"], "maxLength": 500},
+    "page": {"type": ["integer", "null"], "minimum": 1, "maximum": 100000},
+    "section": {"type": ["string", "null"], "maxLength": 500}
+  }
+}

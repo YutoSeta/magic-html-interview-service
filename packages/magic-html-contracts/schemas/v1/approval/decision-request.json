@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/decision-request.json",
+  "title": "Final approval decision request",
+  "type": "object",
+  "required": ["contract_version", "decision", "actor"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "decision": {"enum": ["approved", "rejected"]},
+    "actor": {"$ref": "actor.json"},
+    "message": {"type": ["string", "null"], "maxLength": 10000},
+    "metadata": {"type": ["object", "array"], "maxProperties": 100, "maxItems": 100}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"decision": {"const": "rejected"}}, "required": ["decision"]},
+      "then": {"required": ["message"], "properties": {"message": {"type": "string", "minLength": 1, "maxLength": 10000}}}
+    }
+  ]
+}

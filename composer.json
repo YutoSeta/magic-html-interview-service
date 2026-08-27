@@ -10,7 +10,7 @@
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "yutoseta/interview-engine": "^0.3",
-        "yutoseta/magic-html-contracts": "^1.2"
+        "yutoseta/magic-html-contracts": "^1.15"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -98,9 +98,14 @@
             "url": "https://github.com/YutoSeta/laravel-llm-adapter.git"
         },
         {
-            "name": "magic-html-contracts",
-            "type": "vcs",
-            "url": "git@github.com:YutoSeta/magic-html-contracts.git"
+            "type": "path",
+            "url": "packages/magic-html-contracts",
+            "options": {
+                "symlink": false,
+                "versions": {
+                    "yutoseta/magic-html-contracts": "1.15.0"
+                }
+            }
         }
     ]
 }

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/image/generation-request.json",
+  "title": "Image generation request",
+  "type": "object",
+  "required": ["contract_version", "prompt"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "prompt": {"type": "string", "minLength": 1, "maxLength": 16000},
+    "size": {"enum": ["1024x1024", "1536x1024", "1024x1536"]},
+    "quality": {"enum": ["low", "medium", "high", "auto"]},
+    "provider": {"enum": ["openai", "gemini"]},
+    "reference_images": {"type": "array", "maxItems": 8, "items": {"type": "string", "format": "uri"}},
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": false
+}

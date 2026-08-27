@@ -8,6 +8,7 @@ use App\Support\Problem;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Str;
 
 abstract class ContractRequest extends FormRequest
 {
@@ -27,7 +28,24 @@ abstract class ContractRequest extends FormRequest
             foreach (array_diff(array_keys($this->all()), $topLevel) as $field) {
                 $validator->errors()->add((string) $field, 'This field is not part of contract 1.0.');
             }
+
+            if ($this->requiresIdempotency()) {
+                $idempotencyKey = (string) $this->header('Idempotency-Key', '');
+                if (Str::length($idempotencyKey) < 8 || Str::length($idempotencyKey) > 200) {
+                    $validator->errors()->add('Idempotency-Key', 'The Idempotency-Key header must be between 8 and 200 characters.');
+                }
+            }
         }];
+    }
+
+    public function idempotencyKey(): string
+    {
+        return (string) $this->header('Idempotency-Key');
+    }
+
+    protected function requiresIdempotency(): bool
+    {
+        return false;
     }
 
     protected function failedValidation(Validator $validator): never

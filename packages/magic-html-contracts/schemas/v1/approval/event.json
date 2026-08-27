@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/event.json",
+  "title": "Approval audit event",
+  "type": "object",
+  "required": ["contract_version", "id", "approval_request_id", "sequence", "type", "actor", "message", "payload", "previous_hash", "event_hash", "occurred_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"},
+    "approval_request_id": {"type": "string", "format": "uuid"},
+    "sequence": {"type": "integer", "minimum": 1},
+    "type": {"enum": ["requested", "message_added", "approved", "rejected"]},
+    "actor": {"anyOf": [{"type": "null"}, {"$ref": "actor.json"}]},
+    "message": {"type": ["string", "null"], "maxLength": 10000},
+    "payload": {"type": "object"},
+    "previous_hash": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "event_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "occurred_at": {"type": "string", "format": "date-time"}
+  }
+}

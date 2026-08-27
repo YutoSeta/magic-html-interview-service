@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-composer/job.json",
+  "title": "Multi-page site composition job",
+  "type": "object",
+  "required": ["contract_version", "id", "site_id", "status", "stage", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "site_id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "stage": {"enum": ["queued", "site_structure", "wireframes", "content", "images", "styling", "publishing", "complete", "failed"]},
+    "progress": {"type": "number", "minimum": 0, "maximum": 1},
+    "snapshot": {"$ref": "snapshot.json"},
+    "error": {"type": ["object", "null"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

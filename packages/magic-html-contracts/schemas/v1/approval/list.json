@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/list.json",
+  "title": "Paginated approval request list",
+  "type": "object",
+  "required": ["contract_version", "data", "links", "meta"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "data": {"type": "array", "items": {"$ref": "request.json"}},
+    "links": {
+      "type": "object",
+      "required": ["first", "last", "prev", "next"],
+      "additionalProperties": false,
+      "properties": {
+        "first": {"type": "string", "format": "uri"},
+        "last": {"type": "string", "format": "uri"},
+        "prev": {"type": ["string", "null"], "format": "uri"},
+        "next": {"type": ["string", "null"], "format": "uri"}
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["current_page", "from", "last_page", "links", "path", "per_page", "to", "total"],
+      "additionalProperties": false,
+      "properties": {
+        "current_page": {"type": "integer", "minimum": 1},
+        "from": {"type": ["integer", "null"], "minimum": 1},
+        "last_page": {"type": "integer", "minimum": 1},
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "label", "active"],
+            "additionalProperties": false,
+            "properties": {
+              "url": {"type": ["string", "null"], "format": "uri"},
+              "label": {"type": "string"},
+              "page": {"type": ["integer", "null"], "minimum": 1},
+              "active": {"type": "boolean"}
+            }
+          }
+        },
+        "path": {"type": "string", "format": "uri"},
+        "per_page": {"type": "integer", "minimum": 1, "maximum": 100},
+        "to": {"type": ["integer", "null"], "minimum": 1},
+        "total": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

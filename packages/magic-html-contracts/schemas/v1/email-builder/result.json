@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/email-builder/result.json",
+  "title": "HTML email build result",
+  "type": "object",
+  "required": ["contract_version", "email_id", "valid", "errors", "ast", "html", "text", "digest"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "email_id": {"type": "string"},
+    "valid": {"const": true},
+    "errors": {"type": "array", "maxItems": 0},
+    "ast": {"type": "object"},
+    "html": {"type": "string"},
+    "text": {"type": "string"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

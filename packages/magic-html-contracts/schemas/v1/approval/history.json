@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/history.json",
+  "title": "Approval audit history",
+  "type": "object",
+  "required": ["contract_version", "approval_request_id", "integrity", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "approval_request_id": {"type": "string", "format": "uuid"},
+    "integrity": {
+      "type": "object",
+      "required": ["valid", "checked_events", "broken_sequence", "head_hash"],
+      "additionalProperties": false,
+      "properties": {
+        "valid": {"type": "boolean"},
+        "checked_events": {"type": "integer", "minimum": 0},
+        "broken_sequence": {"type": ["integer", "null"], "minimum": 1},
+        "head_hash": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "events": {"type": "array", "items": {"$ref": "event.json"}}
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/forms/submission.json",
+  "type": "object",
+  "required": ["contract_version", "id", "site_id", "form_id", "status", "accepted_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string"},
+    "site_id": {"type": "string"},
+    "form_id": {"type": "string"},
+    "status": {"enum": ["accepted", "delivered", "delivery_failed", "spam_discarded"]},
+    "accepted_at": {"type": "string", "format": "date-time"},
+    "delivered_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

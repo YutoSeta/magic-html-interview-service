@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/preview/resource.json",
+  "title": "Static site preview",
+  "type": "object",
+  "required": ["contract_version", "id", "site_id", "snapshot_id", "status", "entry_path", "preview_url", "file_count", "bytes", "expires_at", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "site_id": {"type": "string"},
+    "snapshot_id": {"type": "string"},
+    "status": {"const": "ready"},
+    "entry_path": {"type": "string"},
+    "preview_url": {"type": "string", "format": "uri"},
+    "file_count": {"type": "integer", "minimum": 1},
+    "bytes": {"type": "integer", "minimum": 1},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

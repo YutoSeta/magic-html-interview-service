@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/ingestion-job.json",
+  "title": "Knowledge document ingestion job",
+  "type": "object",
+  "required": ["contract_version", "id", "tenant_id", "knowledge_base_id", "status", "stage", "progress", "document", "error", "created_at", "updated_at", "completed_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "knowledge_base_id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "stage": {"enum": ["queued", "extracting", "chunking", "indexing", "complete"]},
+    "progress": {"type": "integer", "minimum": 0, "maximum": 100},
+    "document": {"anyOf": [{"type": "null"}, {"$ref": "document.json"}]},
+    "error": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["code", "message"],
+          "additionalProperties": false,
+          "properties": {
+            "code": {"enum": ["unsupported_document", "document_too_large", "extraction_failed", "chunk_limit_exceeded", "indexing_failed"]},
+            "message": {"type": "string", "minLength": 1, "maxLength": 2000}
+          }
+        }
+      ]
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": ["string", "null"], "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "succeeded"}}, "required": ["status"]},
+      "then": {"properties": {"stage": {"const": "complete"}, "progress": {"const": 100}, "document": {"$ref": "document.json"}, "error": {"type": "null"}, "completed_at": {"type": "string", "format": "date-time"}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}, "required": ["status"]},
+      "then": {"properties": {"document": {"type": "null"}, "error": {"type": "object"}, "completed_at": {"type": "string", "format": "date-time"}}}
+    }
+  ]
+}

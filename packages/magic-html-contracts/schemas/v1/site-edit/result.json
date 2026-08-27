@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-edit/result.json",
+  "title": "Static page edit result",
+  "type": "object",
+  "required": ["contract_version", "site_id", "page_path", "base_digest", "result_digest", "structure_digest", "html", "changed_paths"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "site_id": {"type": "string"},
+    "page_path": {"type": "string"},
+    "base_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "result_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "structure_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "html": {"type": "string"},
+    "changed_paths": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+  }
+}

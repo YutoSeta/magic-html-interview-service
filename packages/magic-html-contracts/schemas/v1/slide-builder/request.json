@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/slide-builder/request.json",
+  "title": "HTML slide deck build request",
+  "type": "object",
+  "required": ["contract_version", "deck_id", "title", "outline"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "deck_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 300},
+    "locale": {"type": "string", "minLength": 2, "maxLength": 20, "default": "ja-JP"},
+    "outline": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 30,
+      "items": {
+        "type": "object",
+        "required": ["key", "kind", "title"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+          "kind": {"enum": ["title", "statement", "bullets", "split", "closing"]},
+          "title": {"type": "string", "minLength": 1, "maxLength": 300},
+          "subtitle": {"type": "string", "maxLength": 500},
+          "body": {"type": "string", "maxLength": 4000},
+          "bullets": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {"type": "string", "minLength": 1, "maxLength": 500}
+          },
+          "media": {
+            "type": "object",
+            "required": ["type", "url"],
+            "additionalProperties": false,
+            "properties": {
+              "type": {"enum": ["image", "video"]},
+              "url": {"type": "string", "format": "uri", "maxLength": 2048},
+              "alt": {"type": "string", "maxLength": 500}
+            }
+          }
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "surface": {"enum": ["light", "dark", "brand"]},
+        "accent": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$"},
+        "font_family": {"enum": ["sans", "serif", "mono"]}
+      }
+    },
+    "options": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": {"type": "integer", "minimum": 320, "maximum": 7680},
+        "height": {"type": "integer", "minimum": 240, "maximum": 4320}
+      }
+    }
+  }
+}

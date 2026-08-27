@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/illustration/specification.json",
+  "title": "Illustration specification",
+  "description": "Finite semantic vocabulary shared by illustration generation and catalog search.",
+  "type": "object",
+  "required": ["subject", "pose", "expression", "camera", "composition", "style"],
+  "additionalProperties": false,
+  "properties": {
+    "subject": {
+      "type": "object",
+      "required": ["kind", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["person", "group", "animal", "object", "scene"]},
+        "description": {"type": "string", "minLength": 1, "maxLength": 1000},
+        "gender": {"enum": ["female", "male", "nonbinary", "unspecified"]},
+        "age_group": {"enum": ["child", "teen", "young_adult", "adult", "senior", "unspecified"]},
+        "occupation": {"type": "string", "minLength": 1, "maxLength": 120}
+      }
+    },
+    "pose": {"enum": ["standing", "sitting", "walking", "running", "pointing", "presenting", "waving", "thinking", "working", "celebrating", "bowing", "custom"]},
+    "pose_notes": {"type": "string", "minLength": 1, "maxLength": 500},
+    "expression": {"enum": ["neutral", "smile", "laughing", "confident", "surprised", "concerned", "thinking", "angry", "sad"]},
+    "camera": {
+      "type": "object",
+      "required": ["shot", "angle", "direction"],
+      "additionalProperties": false,
+      "properties": {
+        "shot": {"enum": ["extreme_close_up", "close_up", "medium", "three_quarter", "full_body", "wide"]},
+        "angle": {"enum": ["eye_level", "high", "low", "birds_eye"]},
+        "direction": {"enum": ["front", "three_quarter", "side", "back"]}
+      }
+    },
+    "composition": {
+      "type": "object",
+      "required": ["people", "background", "placement"],
+      "additionalProperties": false,
+      "properties": {
+        "people": {"type": "integer", "minimum": 0, "maximum": 8},
+        "background": {"enum": ["transparent", "plain", "simple", "scene"]},
+        "placement": {"enum": ["center", "left", "right", "balanced", "rule_of_thirds"]},
+        "aspect_intent": {"enum": ["square", "landscape", "portrait"]}
+      }
+    },
+    "style": {"enum": ["anime_business", "anime_casual", "chibi", "flat_anime", "editorial_anime"]},
+    "palette": {"enum": ["brand", "warm", "cool", "pastel", "vivid", "monochrome", "natural"]},
+    "negative_constraints": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {"type": "string", "minLength": 1, "maxLength": 200},
+      "uniqueItems": true
+    }
+  }
+}

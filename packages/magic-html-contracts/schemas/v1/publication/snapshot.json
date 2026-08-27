@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/publication/snapshot.json",
+  "title": "Self-contained immutable publication snapshot",
+  "type": "object",
+  "required": ["contract_version", "site_id", "version", "published_at", "digest", "sources", "contents", "collections", "media"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "version": {"type": "string", "pattern": "^p1-[0-9a-f-]{36}$"},
+    "published_at": {"type": "string", "format": "date-time"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "sources": {
+      "type": "object",
+      "required": ["content", "collection"],
+      "additionalProperties": false,
+      "properties": {
+        "content": {"$ref": "#/$defs/source"},
+        "collection": {"$ref": "#/$defs/source"}
+      }
+    },
+    "contents": {"type": "object"},
+    "collections": {"type": "object"},
+    "media": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/media"}
+    }
+  },
+  "$defs": {
+    "source": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["version", "digest"],
+          "additionalProperties": false,
+          "properties": {
+            "version": {"type": "string", "minLength": 1, "maxLength": 100},
+            "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+          }
+        }
+      ]
+    },
+    "media": {
+      "type": "object",
+      "required": ["media_key", "mime", "bytes", "sha256", "path", "url", "asset_path"],
+      "additionalProperties": true,
+      "properties": {
+        "media_key": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+        "mime": {"type": "string", "minLength": 1},
+        "bytes": {"type": "integer", "minimum": 0},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "path": {"type": "string", "pattern": "^media/"},
+        "url": {"type": "string", "pattern": "^/media/"},
+        "asset_path": {"type": "string", "pattern": "^/api/v1/sites/"}
+      }
+    }
+  }
+}

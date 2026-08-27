@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/domain/resource.json",
+  "title": "Content or collection resource request",
+  "type": "object",
+  "required": ["contract_version", "name", "schema", "value"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 255},
+    "schema": {"type": "object"},
+    "value": {},
+    "media_refs": {"type": "array", "maxItems": 1000, "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/preview/screenshot-result.json",
+  "title": "Preview screenshot result",
+  "type": "object",
+  "required": ["contract_version", "preview_id", "mime_type", "width", "height", "full_page", "content_base64", "sha256"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "preview_id": {"type": "string", "format": "uuid"},
+    "mime_type": {"enum": ["image/png", "image/jpeg"]},
+    "width": {"type": "integer", "minimum": 320, "maximum": 3840},
+    "height": {"type": "integer", "minimum": 240},
+    "full_page": {"type": "boolean"},
+    "content_base64": {"type": "string", "minLength": 1},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

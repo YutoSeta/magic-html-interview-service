@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/deploy/deployment-request.json",
+  "title": "Create approved static build deployment",
+  "description": "Identifies a Static Builder artifact and its Approval request. The Deploy service resolves both from fixed, service-configured APIs; caller-supplied URLs are forbidden.",
+  "type": "object",
+  "required": ["contract_version", "build_id", "artifact_digest", "approval_request_id"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "build_id": {"type": "string", "format": "uuid"},
+    "artifact_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "approval_request_id": {"type": "string", "format": "uuid"}
+  }
+}

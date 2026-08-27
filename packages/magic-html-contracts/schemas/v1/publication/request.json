@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/publication/request.json",
+  "title": "Publication snapshot request",
+  "type": "object",
+  "required": ["contract_version", "sources"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "sources": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "content": {"$ref": "#/$defs/source"},
+        "collection": {"$ref": "#/$defs/source"}
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": ["version"],
+      "additionalProperties": false,
+      "properties": {
+        "version": {"type": "string", "minLength": 1, "maxLength": 100}
+      }
+    }
+  }
+}

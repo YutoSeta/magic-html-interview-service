@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/design/design-ast.json",
+  "title": "Magic HTML Design AST",
+  "type": "object",
+  "required": ["version", "tokens", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "tokens": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color": { "$ref": "#/$defs/tokenMap" },
+        "font": { "$ref": "#/$defs/tokenMap" },
+        "size": { "$ref": "#/$defs/tokenMap" },
+        "space": { "$ref": "#/$defs/tokenMap" },
+        "radius": { "$ref": "#/$defs/tokenMap" },
+        "shadow": { "$ref": "#/$defs/tokenMap" },
+        "border": { "$ref": "#/$defs/tokenMap" },
+        "container": { "$ref": "#/$defs/tokenMap" }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "maxItems": 400,
+      "items": { "$ref": "#/$defs/rule" }
+    }
+  },
+  "$defs": {
+    "tokenMap": {
+      "type": "object",
+      "propertyNames": { "pattern": "^(?:[a-z]|[0-9]+[a-z])[a-z0-9-]*$" },
+      "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 200 }
+    },
+    "target": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "role": { "type": "string" },
+        "qualifier": { "type": "string" },
+        "composition": { "type": "string" },
+        "designKey": { "type": "string", "pattern": "^d_[a-f0-9]{12}$" },
+        "page": { "type": "string" },
+        "state": { "enum": ["hover", "focus", "active", "open", "disabled", "expanded"] }
+      }
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "layout": { "$ref": "#/$defs/layout" },
+        "typography": { "$ref": "#/$defs/typography" },
+        "surface": { "$ref": "#/$defs/surface" },
+        "spacing": { "$ref": "#/$defs/spacing" },
+        "decoration": { "$ref": "#/$defs/decoration" },
+        "media": { "$ref": "#/$defs/media" },
+        "primitive": { "$ref": "#/$defs/primitive" },
+        "advancedCss": { "type": "string", "maxLength": 4000 }
+      }
+    },
+    "tokenNameOrValue": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "flow": { "enum": ["stack", "row", "grid", "split", "overlay"] },
+        "columns": { "enum": ["one", "two", "three", "auto-fit"] },
+        "gap": { "$ref": "#/$defs/tokenNameOrValue" },
+        "align": { "enum": ["start", "center", "end", "stretch", "baseline"] },
+        "distribute": { "enum": ["start", "center", "end", "between", "evenly"] },
+        "width": { "enum": ["full", "container", "content", "narrow", "fit"] },
+        "minHeight": { "$ref": "#/$defs/tokenNameOrValue" },
+        "position": { "enum": ["static", "relative", "absolute", "sticky", "fixed"] }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "family": { "$ref": "#/$defs/tokenNameOrValue" },
+        "scale": { "$ref": "#/$defs/tokenNameOrValue" },
+        "weight": { "$ref": "#/$defs/tokenNameOrValue" },
+        "lineHeight": { "$ref": "#/$defs/tokenNameOrValue" },
+        "tracking": { "$ref": "#/$defs/tokenNameOrValue" },
+        "align": { "enum": ["start", "center", "end", "left", "right"] },
+        "transform": { "enum": ["none", "uppercase", "lowercase", "capitalize"] }
+      }
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "background": { "$ref": "#/$defs/tokenNameOrValue" },
+        "foreground": { "$ref": "#/$defs/tokenNameOrValue" },
+        "tone": { "$ref": "#/$defs/tokenNameOrValue" }
+      }
+    },
+    "spacing": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "paddingBlock": { "$ref": "#/$defs/tokenNameOrValue" },
+        "paddingInline": { "$ref": "#/$defs/tokenNameOrValue" },
+        "marginBlock": { "$ref": "#/$defs/tokenNameOrValue" },
+        "marginInline": { "$ref": "#/$defs/tokenNameOrValue" }
+      }
+    },
+    "decoration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "radius": { "$ref": "#/$defs/tokenNameOrValue" },
+        "shadow": { "$ref": "#/$defs/tokenNameOrValue" },
+        "border": { "$ref": "#/$defs/tokenNameOrValue" },
+        "opacity": { "$ref": "#/$defs/tokenNameOrValue" }
+      }
+    },
+    "media": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fit": { "enum": ["cover", "contain", "fill", "none", "scale-down"] },
+        "aspect": { "$ref": "#/$defs/tokenNameOrValue" },
+        "position": { "$ref": "#/$defs/tokenNameOrValue" }
+      }
+    },
+    "primitive": {
+      "type": "object",
+      "maxProperties": 3,
+      "additionalProperties": false,
+      "properties": {
+        "align-self": { "$ref": "#/$defs/tokenNameOrValue" },
+        "backdrop-filter": { "$ref": "#/$defs/tokenNameOrValue" },
+        "background-blend-mode": { "$ref": "#/$defs/tokenNameOrValue" },
+        "clip-path": { "$ref": "#/$defs/tokenNameOrValue" },
+        "filter": { "$ref": "#/$defs/tokenNameOrValue" },
+        "flex-basis": { "$ref": "#/$defs/tokenNameOrValue" },
+        "grid-auto-flow": { "$ref": "#/$defs/tokenNameOrValue" },
+        "grid-template-areas": { "$ref": "#/$defs/tokenNameOrValue" },
+        "grid-template-columns": { "$ref": "#/$defs/tokenNameOrValue" },
+        "grid-template-rows": { "$ref": "#/$defs/tokenNameOrValue" },
+        "inset": { "$ref": "#/$defs/tokenNameOrValue" },
+        "isolation": { "$ref": "#/$defs/tokenNameOrValue" },
+        "justify-self": { "$ref": "#/$defs/tokenNameOrValue" },
+        "mix-blend-mode": { "$ref": "#/$defs/tokenNameOrValue" },
+        "object-position": { "$ref": "#/$defs/tokenNameOrValue" },
+        "order": { "$ref": "#/$defs/tokenNameOrValue" },
+        "outline": { "$ref": "#/$defs/tokenNameOrValue" },
+        "overflow": { "$ref": "#/$defs/tokenNameOrValue" },
+        "perspective": { "$ref": "#/$defs/tokenNameOrValue" },
+        "place-content": { "$ref": "#/$defs/tokenNameOrValue" },
+        "place-items": { "$ref": "#/$defs/tokenNameOrValue" },
+        "text-wrap": { "$ref": "#/$defs/tokenNameOrValue" },
+        "transform": { "$ref": "#/$defs/tokenNameOrValue" },
+        "transform-origin": { "$ref": "#/$defs/tokenNameOrValue" },
+        "transition": { "$ref": "#/$defs/tokenNameOrValue" },
+        "z-index": { "$ref": "#/$defs/tokenNameOrValue" }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "required": ["id", "layer", "target", "style"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9._-]*$" },
+        "layer": { "enum": ["global", "vocabulary", "composition", "instance"] },
+        "target": { "$ref": "#/$defs/target" },
+        "style": { "$ref": "#/$defs/style" },
+        "responsive": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "compact": { "$ref": "#/$defs/style" },
+            "medium": { "$ref": "#/$defs/style" },
+            "wide": { "$ref": "#/$defs/style" }
+          }
+        }
+      }
+    }
+  }
+}

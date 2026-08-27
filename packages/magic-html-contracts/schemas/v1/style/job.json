@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/style/job.json",
+  "title": "Single-page styling job",
+  "type": "object",
+  "required": ["contract_version", "id", "status", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "minLength": 1},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "result": {
+      "type": "object", "required": ["annotated_html", "design_ast", "css", "diagnostics", "refinement"], "additionalProperties": false,
+      "properties": {
+        "annotated_html": {"type": "string"},
+        "design_ast": {"$ref": "../design/design-ast.json"},
+        "css": {"type": "string"},
+        "diagnostics": {"type": "object"},
+        "refinement": {
+          "type": "object", "required": ["used", "limit"], "additionalProperties": false,
+          "properties": {
+            "used": {"type": "integer", "minimum": 0, "maximum": 5},
+            "limit": {"type": "integer", "minimum": 0, "maximum": 5}
+          }
+        }
+      }
+    },
+    "error": {"type": "object"}
+  }
+}

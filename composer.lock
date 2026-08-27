@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "96562af639528a7b89251b8a947bdfa6",
+    "content-hash": "cbf33b9b29c2961971331287b2032ef2",
     "packages": [
         {
             "name": "brick/math",
@@ -6157,17 +6157,11 @@
         },
         {
             "name": "yutoseta/magic-html-contracts",
-            "version": "v1.3.0",
-            "source": {
-                "type": "git",
-                "url": "git@github.com:YutoSeta/magic-html-contracts.git",
-                "reference": "94c221acdb94e895137ed4e1ba8e63ee5a10c0d6"
-            },
+            "version": "1.15.0",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/YutoSeta/magic-html-contracts/zipball/94c221acdb94e895137ed4e1ba8e63ee5a10c0d6",
-                "reference": "94c221acdb94e895137ed4e1ba8e63ee5a10c0d6",
-                "shasum": ""
+                "type": "path",
+                "url": "packages/magic-html-contracts",
+                "reference": "0f38c4d7016a522595a1130b25c7e5ccfc1814ce"
             },
             "require": {
                 "php": "^8.3"
@@ -6182,11 +6176,10 @@
                 "proprietary"
             ],
             "description": "Executable contracts for independently deployed Magic HTML services.",
-            "support": {
-                "source": "https://github.com/YutoSeta/magic-html-contracts/tree/v1.3.0",
-                "issues": "https://github.com/YutoSeta/magic-html-contracts/issues"
-            },
-            "time": "2026-08-25T18:00:10+00:00"
+            "transport-options": {
+                "symlink": false,
+                "relative": true
+            }
         }
     ],
     "packages-dev": [

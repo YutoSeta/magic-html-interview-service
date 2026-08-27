@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/document/job.json",
+  "title": "PDF document job",
+  "type": "object",
+  "required": ["contract_version", "id", "status", "progress", "filename", "format", "result", "error", "created_at", "updated_at", "expires_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "progress": {"type": "number", "minimum": 0, "maximum": 1},
+    "filename": {"type": "string", "minLength": 5, "maxLength": 124, "pattern": "^[\\p{L}\\p{N}][\\p{L}\\p{N}._ -]{0,119}\\.pdf$"},
+    "format": {
+      "enum": ["A4", "A3", "Letter", "Legal"],
+      "description": "Legacy renderer format retained as a required v1 compatibility field. When page_source is css, this is only the renderer fallback and must not be interpreted as the PDF's authoritative page size."
+    },
+    "page_source": {
+      "enum": ["css", "renderer"],
+      "description": "Authoritative source of page size, orientation, and margins. css means the input HTML CSS @page rules; renderer means one or more explicit format, landscape, or margins request overrides. This additive field is optional for v1 compatibility; when absent, consumers must treat the legacy response as renderer."
+    },
+    "result": {"anyOf": [{"type": "null"}, {"$ref": "artifact.json"}]},
+    "error": {"anyOf": [{"type": "null"}, {"$ref": "problem.json"}]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "succeeded"}}, "required": ["status"]},
+      "then": {"properties": {"result": {"$ref": "artifact.json"}, "error": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}, "required": ["status"]},
+      "then": {"properties": {"result": {"type": "null"}, "error": {"$ref": "problem.json"}}}
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["queued", "running"]}}, "required": ["status"]},
+      "then": {"properties": {"result": {"type": "null"}, "error": {"type": "null"}}}
+    }
+  ]
+}

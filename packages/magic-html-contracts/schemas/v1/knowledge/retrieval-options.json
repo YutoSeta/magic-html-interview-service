@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/retrieval-options.json",
+  "title": "Deterministic hybrid retrieval options",
+  "description": "Provider-neutral weighted reciprocal-rank fusion. keyword_weight is deterministically derived as 100 - semantic_weight; equal fused scores are ordered by chunk_id ascending.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "strategy": {"const": "weighted_rrf_v1", "default": "weighted_rrf_v1"},
+    "semantic_weight": {"type": "integer", "minimum": 0, "maximum": 100, "default": 70},
+    "rrf_k": {"const": 60, "default": 60},
+    "candidate_limit": {"type": "integer", "minimum": 1, "maximum": 200, "default": 100},
+    "top_k": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
+    "filters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "document_ids": {"type": "array", "maxItems": 50, "uniqueItems": true, "items": {"type": "string", "format": "uuid"}},
+        "media_types": {"type": "array", "maxItems": 20, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 255}},
+        "tags_any": {"type": "array", "maxItems": 20, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 100}}
+      }
+    }
+  }
+}

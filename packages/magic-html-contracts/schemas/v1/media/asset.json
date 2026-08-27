@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/media/asset.json",
+  "title": "Media asset metadata",
+  "type": "object",
+  "required": ["contract_version", "id", "site_id", "media_key", "name", "original_name", "mime", "bytes", "sha256", "preview_url", "public_url", "published_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "site_id": {"type": "string", "minLength": 1, "maxLength": 100},
+    "media_key": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 255},
+    "original_name": {"type": "string", "minLength": 1, "maxLength": 255},
+    "mime": {"enum": ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif", "application/pdf", "video/mp4", "video/webm", "audio/mpeg", "audio/wav", "audio/ogg"]},
+    "bytes": {"type": "integer", "minimum": 1, "maximum": 52428800},
+    "width": {"type": ["integer", "null"], "minimum": 1},
+    "height": {"type": ["integer", "null"], "minimum": 1},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "preview_url": {"type": "string", "format": "uri"},
+    "public_url": {"type": ["string", "null"], "format": "uri"},
+    "published_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

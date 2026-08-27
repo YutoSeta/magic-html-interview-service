@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/slide-builder/result.json",
+  "title": "HTML slide deck build result",
+  "type": "object",
+  "required": ["contract_version", "deck_id", "valid", "errors", "ast", "design", "html", "digest"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "deck_id": {"type": "string"},
+    "valid": {"const": true},
+    "errors": {"type": "array", "maxItems": 0},
+    "ast": {"type": "object"},
+    "design": {"type": "object"},
+    "html": {"type": "string"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

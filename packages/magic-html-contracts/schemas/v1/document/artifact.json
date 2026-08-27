@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/document/artifact.json",
+  "title": "PDF document artifact",
+  "description": "Metadata for a private PDF artifact owned by the Document Service. content_path requires the same service Bearer credential and may expire with the job TTL.",
+  "type": "object",
+  "required": ["mime_type", "bytes", "sha256", "page_count", "content_path"],
+  "additionalProperties": false,
+  "properties": {
+    "mime_type": {"const": "application/pdf"},
+    "bytes": {"type": "integer", "minimum": 1},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "page_count": {"type": "integer", "minimum": 1},
+    "content_path": {"type": "string", "pattern": "^/api/v1/document-jobs/[0-9a-fA-F-]{36}/content$"}
+  }
+}

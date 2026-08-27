@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/deploy/problem.json",
+  "title": "Deploy API problem",
+  "type": "object",
+  "required": ["contract_version", "type", "title", "status", "detail", "request_id"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"enum": ["validation_failed", "unauthenticated", "rate_limited", "environment_not_found", "deployment_not_found", "environment_name_conflict", "environment_verification_failed", "environment_unverified", "build_unavailable", "build_not_found", "build_not_ready", "artifact_digest_mismatch", "approval_unavailable", "approval_not_found", "approval_not_approved", "approval_artifact_mismatch", "approval_integrity_invalid", "idempotency_conflict", "idempotency_in_progress", "provider_failed"]},
+    "title": {"type": "string", "minLength": 1},
+    "status": {"enum": [401, 404, 409, 422, 429, 502, 503]},
+    "detail": {"type": "string", "minLength": 1},
+    "request_id": {"type": "string", "minLength": 1},
+    "errors": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string"}}},
+    "environment_id": {"type": "string", "format": "uuid"},
+    "deployment_id": {"type": "string", "format": "uuid"},
+    "build_id": {"type": "string", "format": "uuid"},
+    "approval_request_id": {"type": "string", "format": "uuid"}
+  }
+}

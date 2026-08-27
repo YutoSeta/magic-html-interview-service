@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/problem.json",
+  "title": "Approval API problem",
+  "type": "object",
+  "required": ["contract_version", "type", "title", "status", "detail", "request_id"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"enum": ["validation_failed", "unauthenticated", "approval_request_not_found", "artifact_already_requested", "approval_already_decided", "idempotency_conflict", "idempotency_in_progress"]},
+    "title": {"type": "string", "minLength": 1},
+    "status": {"enum": [401, 404, 409, 422]},
+    "detail": {"type": "string", "minLength": 1},
+    "request_id": {"type": "string", "minLength": 1},
+    "errors": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string"}}},
+    "approval_request_id": {"type": "string", "format": "uuid"},
+    "current_status": {"enum": ["pending", "approved", "rejected"]},
+    "decision": {"type": ["string", "null"], "enum": ["approved", "rejected", null]}
+  }
+}

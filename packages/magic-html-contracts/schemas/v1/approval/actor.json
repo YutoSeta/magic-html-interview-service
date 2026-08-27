@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/actor.json",
+  "title": "Approval actor",
+  "description": "An actor identity asserted by the authenticated trusted calling service.",
+  "type": "object",
+  "required": ["type", "id"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {"enum": ["user", "service", "agent"]},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@/-]{0,254}$"},
+    "name": {"type": ["string", "null"], "maxLength": 255},
+    "role": {"type": ["string", "null"], "maxLength": 100}
+  }
+}

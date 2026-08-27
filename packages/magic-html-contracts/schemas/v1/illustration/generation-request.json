@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/illustration/generation-request.json",
+  "title": "Illustration generation request",
+  "type": "object",
+  "required": ["contract_version", "title", "specification"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 255},
+    "category": {"type": "string", "minLength": 1, "maxLength": 100},
+    "tags": {"type": "array", "maxItems": 30, "items": {"type": "string", "minLength": 1, "maxLength": 100}, "uniqueItems": true},
+    "prompt_notes": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "specification": {"$ref": "specification.json"},
+    "size": {"enum": ["1024x1024", "1536x1024", "1024x1536"]},
+    "quality": {"enum": ["low", "medium", "high", "auto"]}
+  }
+}

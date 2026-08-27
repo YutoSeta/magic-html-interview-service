@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/static-build/manifest.json",
+  "title": "Static artifact manifest",
+  "type": "object",
+  "required": ["contract_version", "snapshot_id", "digest", "files"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$", "description": "SHA-256 lowercase hex of the bytes formed by sorting files by path in bytewise ascending order and concatenating, for each file, path + NUL + lowercase sha256 + NUL."},
+    "files": {
+      "type": "array",
+      "description": "Entries are ordered by path in bytewise ascending order.",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "size"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "size": {"type": "integer", "minimum": 0},
+          "content_base64": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

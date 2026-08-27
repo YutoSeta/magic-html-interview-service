@@ -23,47 +23,53 @@ final class AdvanceInterview
     {
         return DB::transaction(function () use ($session, $answer): InterviewSession {
             $locked = InterviewSession::query()->lockForUpdate()->findOrFail($session->id);
-            if ($locked->status !== InterviewSession::STATUS_ACTIVE) {
-                return $locked;
-            }
 
-            $step = $locked->current_step;
-            $field = self::FIELDS[$step];
-            $messages = $locked->messages;
-            $messages[] = ['role' => 'user', 'content' => $answer, 'field' => $field];
-
-            $definitions = $this->fieldDefinitions($locked->locale);
-            $state = $this->stateFromValues($locked->structured_data ?? [], $definitions);
-            $result = $this->stateEngine->applyUpdates($state, $definitions, [[
-                'path' => $field,
-                'value' => $this->normalizeAnswer($field, $answer),
-                'status' => 'confirmed',
-            ]]);
-            $step++;
-
-            // The v1 HTTP contract is a scripted six-answer flow and has no
-            // separate confirmation endpoint. Keep that contract while making
-            // the package engine the sole authority for completeness.
-            if (($result['decision']['next_action'] ?? null) === 'confirm_summary') {
-                $result = $this->stateEngine->confirm($result['state'], $definitions);
-            }
-
-            $completed = ($result['decision']['next_action'] ?? null) === 'complete';
-            if (! $completed && $step < count(self::FIELDS)) {
-                $messages[] = $this->question($step, $locked->locale);
-            }
-
-            $locked->update([
-                'current_step' => $step,
-                'messages' => $messages,
-                'structured_data' => $this->stateEngine->values($result['state']),
-                'status' => $completed
-                    ? InterviewSession::STATUS_COMPLETED
-                    : InterviewSession::STATUS_ACTIVE,
-            ]);
-
-            return $locked->refresh();
+            return $this->executeLocked($locked, $answer);
         });
+    }
+
+    public function executeLocked(InterviewSession $session, string $answer): InterviewSession
+    {
+        if ($session->status !== InterviewSession::STATUS_ACTIVE) {
+            return $session;
+        }
+
+        $step = $session->current_step;
+        $field = self::FIELDS[$step];
+        $messages = $session->messages;
+        $messages[] = ['role' => 'user', 'content' => $answer, 'field' => $field];
+
+        $definitions = $this->fieldDefinitions($session->locale);
+        $state = $this->stateFromValues($session->structured_data ?? [], $definitions);
+        $result = $this->stateEngine->applyUpdates($state, $definitions, [[
+            'path' => $field,
+            'value' => $this->normalizeAnswer($field, $answer),
+            'status' => 'confirmed',
+        ]]);
+        $step++;
+
+        // The v1 HTTP contract is a scripted six-answer flow and has no
+        // separate confirmation endpoint. Keep that contract while making
+        // the package engine the sole authority for completeness.
+        if (($result['decision']['next_action'] ?? null) === 'confirm_summary') {
+            $result = $this->stateEngine->confirm($result['state'], $definitions);
+        }
+
+        $completed = ($result['decision']['next_action'] ?? null) === 'complete';
+        if (! $completed && $step < count(self::FIELDS)) {
+            $messages[] = $this->question($step, $session->locale);
+        }
+
+        $session->update([
+            'current_step' => $step,
+            'messages' => $messages,
+            'structured_data' => $this->stateEngine->values($result['state']),
+            'status' => $completed
+                ? InterviewSession::STATUS_COMPLETED
+                : InterviewSession::STATUS_ACTIVE,
+        ]);
+
+        return $session->refresh();
     }
 
     /**

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/video/job.json",
+  "title": "Video generation job",
+  "allOf": [
+    {"$ref": "../common/job.json"},
+    {
+      "type": "object",
+      "properties": {
+        "provider_job_id": {"type": "string"},
+        "provider": {"type": "string"},
+        "model": {"type": "string"},
+        "temporary_video_url": {"type": ["string", "null"], "format": "uri"},
+        "content_url": {"type": ["string", "null"], "format": "uri"},
+        "expires_at": {"type": ["string", "null"], "format": "date-time"}
+      }
+    }
+  ]
+}

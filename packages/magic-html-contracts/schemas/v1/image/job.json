@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/image/job.json",
+  "title": "Image generation job",
+  "allOf": [
+    {"$ref": "../common/job.json"},
+    {
+      "type": "object",
+      "properties": {
+        "provider": {"type": "string"},
+        "model": {"type": "string"},
+        "result": {
+          "anyOf": [
+            {"type": "null"},
+            {"$ref": "generation-result.json"}
+          ]
+        }
+      }
+    }
+  ]
+}

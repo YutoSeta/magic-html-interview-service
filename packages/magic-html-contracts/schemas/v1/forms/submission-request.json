@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/forms/submission-request.json",
+  "type": "object",
+  "required": ["contract_version", "values"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "values": {"type": "object"}
+  }
+}

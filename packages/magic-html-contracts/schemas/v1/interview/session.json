@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/interview/session.json",
+  "title": "Structured interview session",
+  "type": "object",
+  "required": ["contract_version", "id", "site_id", "locale", "status", "current_step", "messages", "next_question", "structured_data", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "locale": {"type": "string", "minLength": 2, "maxLength": 20},
+    "status": {"enum": ["active", "completed"]},
+    "current_step": {"type": "integer", "minimum": 0, "maximum": 6},
+    "messages": {"type": "array", "items": {"$ref": "message.json"}},
+    "next_question": {
+      "anyOf": [
+        {"type": "null"},
+        {"$ref": "message.json"}
+      ]
+    },
+    "structured_data": {"$ref": "structured-data.json"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "completed"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "current_step": {"const": 6},
+          "next_question": {"type": "null"},
+          "structured_data": {
+            "type": "object",
+            "required": ["organization", "goals", "audience", "tone"]
+          }
+        }
+      }
+    }
+  ]
+}

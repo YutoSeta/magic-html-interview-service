@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/illustration/item.json",
+  "title": "Illustration catalog item",
+  "type": "object",
+  "required": ["contract_version", "id", "title", "category", "tags", "specification", "mime_type", "bytes", "sha256", "asset_url", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 255},
+    "category": {"type": ["string", "null"], "maxLength": 100},
+    "tags": {"type": "array", "maxItems": 30, "items": {"type": "string", "minLength": 1, "maxLength": 100}, "uniqueItems": true},
+    "specification": {"$ref": "specification.json"},
+    "mime_type": {"enum": ["image/png", "image/jpeg", "image/webp", "image/avif"]},
+    "bytes": {"type": "integer", "minimum": 1, "maximum": 52428800},
+    "width": {"type": ["integer", "null"], "minimum": 1},
+    "height": {"type": ["integer", "null"], "minimum": 1},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "asset_url": {"type": "string", "format": "uri"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

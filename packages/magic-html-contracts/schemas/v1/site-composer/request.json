@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-composer/request.json",
+  "title": "Multi-page site composition request",
+  "type": "object",
+  "required": ["contract_version", "site_id", "interview"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "interview": {
+      "type": "object",
+      "required": ["organization", "goals", "audience", "tone"],
+      "additionalProperties": false,
+      "properties": {
+        "organization": {"type": "string", "minLength": 1, "maxLength": 1000},
+        "goals": {"type": "string", "minLength": 1, "maxLength": 4000},
+        "audience": {"type": "string", "minLength": 1, "maxLength": 4000},
+        "tone": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "requirements": {"type": "string", "maxLength": 8000},
+        "materials": {"type": "array", "maxItems": 30, "items": {"type": "string", "maxLength": 8000}}
+      }
+    },
+    "locale": {"type": "string", "minLength": 2, "maxLength": 20, "default": "ja"},
+    "page_limit": {"type": "integer", "minimum": 1, "maximum": 20, "default": 5},
+    "image_limit": {"type": "integer", "minimum": 0, "maximum": 8, "default": 3},
+    "video_limit": {"type": "integer", "minimum": 0, "maximum": 2, "default": 0},
+    "refine_limit": {"type": "integer", "minimum": 0, "maximum": 5, "default": 2}
+  }
+}

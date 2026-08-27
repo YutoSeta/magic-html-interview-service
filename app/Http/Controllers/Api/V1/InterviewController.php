@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Actions\AdvanceInterview;
+use App\Actions\RecordInterviewAnswer;
+use App\Actions\StartInterviewSession;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnswerInterviewRequest;
 use App\Http\Requests\ImportInterviewRequest;
@@ -13,21 +14,17 @@ use App\Support\CanonicalJson;
 use App\Support\Problem;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 final class InterviewController extends Controller
 {
-    public function store(StartInterviewRequest $request, AdvanceInterview $advance): JsonResponse
+    public function store(StartInterviewRequest $request, StartInterviewSession $startInterview): JsonResponse
     {
-        $session = InterviewSession::query()->create([
-            'site_id' => $request->validated('site_id'),
-            'locale' => $request->validated('locale'),
-            'status' => InterviewSession::STATUS_ACTIVE,
-            'current_step' => 0,
-            'messages' => $advance->initialMessages($request->validated('locale')),
-            'structured_data' => [],
-        ]);
+        $result = $startInterview->execute($request->validated(), $request->idempotencyKey());
 
-        return (new InterviewSessionResource($session))->response()->setStatusCode(201);
+        return response()->json($result->body, $result->status, [
+            'Idempotent-Replayed' => $result->replayed ? 'true' : 'false',
+        ]);
     }
 
     public function import(ImportInterviewRequest $request): JsonResponse
@@ -76,17 +73,22 @@ final class InterviewController extends Controller
     public function answer(
         AnswerInterviewRequest $request,
         string $interview,
-        AdvanceInterview $advance,
-    ): InterviewSessionResource|JsonResponse {
+        RecordInterviewAnswer $recordAnswer,
+    ): JsonResponse {
         $session = InterviewSession::query()->find($interview);
         if ($session === null) {
             return Problem::response($request, 404, 'interview_not_found', 'The interview session was not found.');
         }
-        if ($session->status !== InterviewSession::STATUS_ACTIVE) {
-            return Problem::response($request, 409, 'interview_completed', 'The interview session is already complete.');
-        }
+        $result = $recordAnswer->execute(
+            $session,
+            $request->validated(),
+            $request->idempotencyKey(),
+            (string) ($request->header('X-Request-Id') ?: Str::uuid()),
+        );
 
-        return new InterviewSessionResource($advance->execute($session, $request->validated('answer')));
+        return response()->json($result->body, $result->status, [
+            'Idempotent-Replayed' => $result->replayed ? 'true' : 'false',
+        ]);
     }
 
     public function destroy(Request $request, string $interview): JsonResponse

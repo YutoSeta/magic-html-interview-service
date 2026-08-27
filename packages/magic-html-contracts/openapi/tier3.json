@@ -1,0 +1,199 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Magic HTML Tier 3 APIs",
+    "version": "1.1.0",
+    "description": "Deterministic StaticSite build orchestration and approved artifact deployment. Production environments support only GitHub and Cloudflare Pages; SFTP and FTPS are limited to preview and staging in v1."
+  },
+  "servers": [{"url": "/api"}],
+  "paths": {
+    "/v1/builds": {
+      "post": {
+        "operationId": "createStaticBuild",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/build/request.json"}}}},
+        "responses": {"202": {"description": "Build accepted", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/build/job.json"}}}}}
+      }
+    },
+    "/v1/builds/{build}": {"get": {"operationId": "getStaticBuild", "responses": {"200": {"description": "Build state", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/build/job.json"}}}}}}},
+    "/v1/builds/{build}/manifest": {"get": {"operationId": "getStaticBuildManifest", "responses": {"200": {"description": "Artifact manifest", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/static-build/manifest.json"}}}}}}},
+    "/v1/builds/{build}/files/{path}": {"get": {"operationId": "downloadStaticBuildFile", "responses": {"200": {"description": "Compiled artifact file"}}}},
+    "/v1/tenants/{tenant}/sites/{site}/environments": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"}
+      ],
+      "get": {
+        "tags": ["Deploy"],
+        "operationId": "listDeploymentEnvironments",
+        "description": "List deployment environments in exactly one tenant and site scope. Secret credential values are never returned.",
+        "security": [{"deployServiceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant- and site-scoped environments", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/environment-list.json"}}}},
+          "401": {"$ref": "#/components/responses/DeployProblem"},
+          "429": {"$ref": "#/components/responses/DeployRateLimitProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Deploy"],
+        "operationId": "createDeploymentEnvironment",
+        "description": "Create an environment with encrypted provider credentials. Credentials are accepted only on write and are never returned. Production is supported only for GitHub and Cloudflare Pages; SFTP and FTPS are limited to preview and staging in v1 because they do not provide atomic cutover and rollback.",
+        "security": [{"deployServiceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DeployIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/environment-create-request.json"}}}},
+        "responses": {
+          "201": {
+            "description": "Environment created, or the exact idempotent response replayed",
+            "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/DeployIdempotentReplayed"}},
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/environment-resource.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/DeployProblem"},
+          "409": {"$ref": "#/components/responses/DeployProblem"},
+          "422": {"$ref": "#/components/responses/DeployProblem"},
+          "429": {"$ref": "#/components/responses/DeployRateLimitProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/environments/{environment}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/Environment"}
+      ],
+      "get": {
+        "tags": ["Deploy"],
+        "operationId": "getDeploymentEnvironment",
+        "description": "Get one environment only when it belongs to the supplied tenant and site. Secret credential values are never returned.",
+        "security": [{"deployServiceBearer": []}],
+        "responses": {
+          "200": {"description": "Deployment environment", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/environment-resource.json"}}}},
+          "401": {"$ref": "#/components/responses/DeployProblem"},
+          "404": {"$ref": "#/components/responses/DeployProblem"},
+          "429": {"$ref": "#/components/responses/DeployRateLimitProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/environments/{environment}/verify": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/Environment"}
+      ],
+      "post": {
+        "tags": ["Deploy"],
+        "operationId": "verifyDeploymentEnvironment",
+        "description": "Verify stored credentials, destination reachability, and required write permissions without deploying an artifact.",
+        "security": [{"deployServiceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DeployIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/environment-verification-request.json"}}}},
+        "responses": {
+          "200": {
+            "description": "Verification completed, or the exact idempotent response replayed",
+            "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/DeployIdempotentReplayed"}},
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/environment-verification.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/DeployProblem"},
+          "404": {"$ref": "#/components/responses/DeployProblem"},
+          "409": {"$ref": "#/components/responses/DeployProblem"},
+          "422": {"$ref": "#/components/responses/DeployProblem"},
+          "429": {"$ref": "#/components/responses/DeployRateLimitProblem"},
+          "502": {"$ref": "#/components/responses/DeployProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/environments/{environment}/deployments": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/Environment"}
+      ],
+      "post": {
+        "tags": ["Deploy"],
+        "operationId": "createApprovedStaticBuildDeployment",
+        "description": "Resolve the build and approval from fixed service-configured Static Builder and Approval API origins before accepting the job. The build must have succeeded and its manifest digest must equal artifact_digest. The tenant/site-scoped approval must be final approved, identify the same static_build and digest, and have a server-verified valid audit history. Caller-supplied artifact, manifest, approval, or service URLs are forbidden.",
+        "security": [{"deployServiceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DeployIdempotencyKey"}],
+        "x-magic-html-deployment-boundary": {
+          "static_builder_api": "service_configuration",
+          "approval_api": "service_configuration",
+          "caller_supplied_urls": false,
+          "requires_succeeded_build": true,
+          "requires_matching_artifact_digest": true,
+          "approval_artifact_type": "static_build",
+          "requires_same_tenant_site_scope": true,
+          "requires_final_approved_decision": true,
+          "requires_matching_approval_artifact": true,
+          "requires_valid_approval_integrity": true
+        },
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/deployment-request.json"}}}},
+        "responses": {
+          "202": {
+            "description": "Approved deployment accepted, or the exact idempotent response replayed",
+            "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/DeployIdempotentReplayed"}},
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/deployment-job.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/DeployProblem"},
+          "404": {"$ref": "#/components/responses/DeployProblem"},
+          "409": {"$ref": "#/components/responses/DeployProblem"},
+          "422": {"$ref": "#/components/responses/DeployProblem"},
+          "429": {"$ref": "#/components/responses/DeployRateLimitProblem"},
+          "502": {"$ref": "#/components/responses/DeployProblem"},
+          "503": {"$ref": "#/components/responses/DeployProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/deployments/{deployment}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/Deployment"}
+      ],
+      "get": {
+        "tags": ["Deploy"],
+        "operationId": "getStaticBuildDeployment",
+        "description": "Get one deployment only when it belongs to the supplied tenant and site.",
+        "security": [{"deployServiceBearer": []}],
+        "responses": {
+          "200": {"description": "Deployment state", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/deployment-job.json"}}}},
+          "401": {"$ref": "#/components/responses/DeployProblem"},
+          "404": {"$ref": "#/components/responses/DeployProblem"},
+          "429": {"$ref": "#/components/responses/DeployRateLimitProblem"}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "deployServiceBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "A trusted service credential. The caller authenticates and authorizes end users for the asserted tenant/site scope."
+      }
+    },
+    "parameters": {
+      "Tenant": {"name": "tenant", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
+      "Site": {"name": "site", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
+      "Environment": {"name": "environment", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "Deployment": {"name": "deployment", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "DeployIdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "Opaque globally unique key. Exact retries replay the original status and body; reuse for another operation or input returns 409.",
+        "schema": {"type": "string", "minLength": 8, "maxLength": 200}
+      }
+    },
+    "headers": {
+      "DeployIdempotentReplayed": {"description": "Whether this response is an exact replay of a completed operation.", "schema": {"type": "string", "enum": ["true", "false"]}},
+      "DeployRetryAfter": {"description": "Seconds until the caller may retry after a rate limit response.", "schema": {"type": "integer", "minimum": 0}}
+    },
+    "responses": {
+      "DeployProblem": {"description": "Deploy API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/problem.json"}}}},
+      "DeployRateLimitProblem": {
+        "description": "Deploy API rate limit exceeded",
+        "headers": {"Retry-After": {"$ref": "#/components/headers/DeployRetryAfter"}},
+        "content": {"application/json": {"schema": {"$ref": "../schemas/v1/deploy/problem.json"}}}
+      }
+    }
+  }
+}

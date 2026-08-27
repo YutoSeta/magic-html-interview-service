@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/document/problem.json",
+  "title": "Document API problem",
+  "type": "object",
+  "required": ["contract_version", "type", "title", "status", "detail", "request_id"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"enum": ["service_not_configured", "unauthorized", "validation_failed", "invalid_idempotency_key", "idempotency_conflict", "job_not_found", "artifact_not_ready", "artifact_expired", "render_failure"]},
+    "title": {"type": "string", "minLength": 1},
+    "status": {"enum": [401, 404, 409, 410, 422, 500, 503]},
+    "detail": {"type": "string", "minLength": 1},
+    "request_id": {"type": "string", "minLength": 1},
+    "errors": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string"}}}
+  }
+}

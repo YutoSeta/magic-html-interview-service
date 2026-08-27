@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/build/job.json",
+  "title": "Static site build job",
+  "type": "object",
+  "required": ["contract_version", "id", "status", "source", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "source": {
+      "type": "object",
+      "required": ["type", "site_id", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {"enum": ["publication", "splash"]},
+        "site_id": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "manifest": {"$ref": "../static-build/manifest.json"},
+    "error": {"type": ["object", "null"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

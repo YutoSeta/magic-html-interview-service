@@ -1,0 +1,183 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Magic HTML Tier 0 APIs",
+    "version": "1.1.0",
+    "description": "Atomic image, video, slide, isolated document rendering, and deterministic static compilation capabilities."
+  },
+  "servers": [{"url": "/api"}],
+  "paths": {
+    "/__verify": {"get": {"operationId": "verifyTier0Capability", "responses": {"200": {"description": "Capability and dependency readiness"}}}},
+    "/v1/image-jobs": {
+      "post": {
+        "operationId": "createImageJob",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/image/generation-request.json"}}}},
+        "responses": {"202": {"description": "Accepted", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/image/job.json"}}}}}
+      }
+    },
+    "/v1/image-jobs/{job}": {
+      "get": {
+        "operationId": "getImageJob",
+        "parameters": [{"name": "job", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Current image job", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/image/job.json"}}}}}
+      }
+    },
+    "/v1/video-jobs": {
+      "post": {
+        "operationId": "createVideoJob",
+        "parameters": [{"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/video/generation-request.json"}}}},
+        "responses": {"202": {"description": "Accepted", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/video/job.json"}}}}}
+      }
+    },
+    "/v1/video-jobs/{job}": {
+      "get": {
+        "operationId": "getVideoJob",
+        "parameters": [{"name": "job", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Current job", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/video/job.json"}}}}}
+      }
+    },
+    "/v1/video-jobs/{job}/content": {
+      "get": {
+        "operationId": "downloadVideoJobContent",
+        "parameters": [{"name": "job", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "responses": {"200": {"description": "Provider-authenticated video stream", "content": {"video/mp4": {"schema": {"type": "string", "contentEncoding": "binary"}}}}}
+      }
+    },
+    "/v1/slides/validate": {"post": {"operationId": "validateSlides", "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/slide/request.json"}}}}, "responses": {"200": {"description": "Validation report"}}}},
+    "/v1/slides/render": {"post": {"operationId": "renderSlides", "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/slide/request.json"}}}}, "responses": {"200": {"description": "Deterministic HTML"}}}},
+    "/v1/static-builds": {
+      "post": {
+        "operationId": "compileStaticSite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "../schemas/v1/static-build/request.json"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Artifact manifest",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "../schemas/v1/static-build/manifest.json"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/document-previews": {
+      "post": {
+        "tags": ["Document"],
+        "operationId": "previewDocumentHtml",
+        "description": "Synchronously secure and return caller-supplied HTML for an isolated same-origin preview. This side-effect-free operation does not use an Idempotency-Key.",
+        "security": [{"documentServiceBearer": []}],
+        "x-magic-html-isolation": {
+          "external_communication": "blocked",
+          "javascript": "disabled",
+          "embedded_content": "rejected",
+          "csp": "sandbox; default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; font-src data:; form-action 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'"
+        },
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/document/preview-request.json"}}}},
+        "responses": {
+          "200": {
+            "description": "Secured HTML with an injected CSP meta element and isolation headers",
+            "headers": {
+              "Content-Security-Policy": {"schema": {"const": "sandbox; default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; font-src data:; form-action 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'"}},
+              "Cache-Control": {"schema": {"type": "string", "enum": ["private, no-store", "no-store, private"]}},
+              "Cross-Origin-Resource-Policy": {"schema": {"const": "same-origin"}},
+              "Referrer-Policy": {"schema": {"const": "no-referrer"}},
+              "X-Content-Type-Options": {"schema": {"const": "nosniff"}},
+              "X-Frame-Options": {"schema": {"const": "SAMEORIGIN"}}
+            },
+            "content": {"text/html": {"schema": {"type": "string"}}}
+          },
+          "401": {"$ref": "#/components/responses/DocumentProblem"},
+          "422": {"$ref": "#/components/responses/DocumentProblem"},
+          "503": {"$ref": "#/components/responses/DocumentProblem"}
+        }
+      }
+    },
+    "/v1/document-jobs": {
+      "post": {
+        "tags": ["Document"],
+        "operationId": "createDocumentPdfJob",
+        "description": "Claim an idempotent asynchronous PDF render. HTML CSS @page owns page size, orientation, and margins when format, landscape, and margins are omitted; supplying any of those fields preserves explicit renderer override behavior. While the job is retained, an exact retry returns the same job with 202 and never dispatches another render; reuse with different input returns 409.",
+        "security": [{"documentServiceBearer": []}],
+        "x-magic-html-isolation": {
+          "external_communication": "blocked_by_validation_request_interception_and_host_resolution",
+          "javascript": "disabled",
+          "redirects": "disabled",
+          "csp_injected": true
+        },
+        "parameters": [{"$ref": "#/components/parameters/DocumentIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/document/pdf-request.json"}}}},
+        "responses": {
+          "202": {"description": "Queued/current document job", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/document/job.json"}}}},
+          "401": {"$ref": "#/components/responses/DocumentProblem"},
+          "409": {"$ref": "#/components/responses/DocumentProblem"},
+          "422": {"$ref": "#/components/responses/DocumentProblem"},
+          "503": {"$ref": "#/components/responses/DocumentProblem"}
+        }
+      }
+    },
+    "/v1/document-jobs/{job}": {
+      "get": {
+        "tags": ["Document"],
+        "operationId": "getDocumentPdfJob",
+        "description": "Poll a queued, running, succeeded, or failed document job until its configured expiry.",
+        "security": [{"documentServiceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DocumentJob"}],
+        "responses": {
+          "200": {"description": "Current document job", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/document/job.json"}}}},
+          "401": {"$ref": "#/components/responses/DocumentProblem"},
+          "404": {"$ref": "#/components/responses/DocumentProblem"},
+          "503": {"$ref": "#/components/responses/DocumentProblem"}
+        }
+      }
+    },
+    "/v1/document-jobs/{job}/content": {
+      "get": {
+        "tags": ["Document"],
+        "operationId": "getDocumentPdfArtifact",
+        "description": "Stream the private PDF artifact after the job succeeds. The artifact is never exposed through a public provider URL.",
+        "security": [{"documentServiceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DocumentJob"}],
+        "responses": {
+          "200": {
+            "description": "Validated PDF bytes",
+            "headers": {
+              "Content-Length": {"schema": {"type": "integer", "minimum": 1}},
+              "Content-Disposition": {"schema": {"type": "string", "pattern": "^inline; filename=.+"}},
+              "Cache-Control": {"schema": {"type": "string", "enum": ["private, no-store", "no-store, private"]}},
+              "ETag": {"schema": {"type": "string", "pattern": "^\"[a-f0-9]{64}\"$"}},
+              "X-Content-Type-Options": {"schema": {"const": "nosniff"}}
+            },
+            "content": {"application/pdf": {"schema": {"type": "string", "contentEncoding": "binary", "contentMediaType": "application/pdf"}}}
+          },
+          "401": {"$ref": "#/components/responses/DocumentProblem"},
+          "404": {"$ref": "#/components/responses/DocumentProblem"},
+          "409": {"$ref": "#/components/responses/DocumentProblem"},
+          "410": {"$ref": "#/components/responses/DocumentProblem"},
+          "503": {"$ref": "#/components/responses/DocumentProblem"}
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "documentServiceBearer": {"type": "http", "scheme": "bearer", "description": "Service-to-service credential required for preview, job status, and private artifact access."}
+    },
+    "parameters": {
+      "DocumentIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque key scoped to the Document Service. While its job is retained, exact input replays that job and changed input returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
+      "DocumentJob": {"name": "job", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
+    },
+    "responses": {
+      "DocumentProblem": {"description": "Document API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/document/problem.json"}}}}
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/interview/structured-data.json",
+  "title": "Structured website interview data",
+  "description": "The bounded website brief accumulated by a scripted interview or supplied by import. Active sessions may contain no values or only the fields confirmed so far.",
+  "oneOf": [
+    {
+      "type": "array",
+      "maxItems": 0
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "organization": {"type": "string", "maxLength": 1000},
+        "goals": {"type": "string", "maxLength": 4000},
+        "audience": {"type": "string", "maxLength": 4000},
+        "tone": {"type": "string", "maxLength": 2000},
+        "requirements": {"type": "string", "maxLength": 8000},
+        "materials": {
+          "type": "array",
+          "items": {"type": "string", "maxLength": 8000}
+        }
+      }
+    }
+  ]
+}

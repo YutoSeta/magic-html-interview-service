@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/document.json",
+  "title": "Indexed knowledge document",
+  "type": "object",
+  "required": ["contract_version", "id", "tenant_id", "knowledge_base_id", "sha256", "byte_size", "metadata", "chunk_count", "indexed_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "knowledge_base_id": {"type": "string", "format": "uuid"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "byte_size": {"type": "integer", "minimum": 1, "maximum": 52428800},
+    "metadata": {"$ref": "document-metadata.json"},
+    "chunk_count": {"type": "integer", "minimum": 1, "maximum": 10000},
+    "indexed_at": {"type": "string", "format": "date-time"}
+  }
+}

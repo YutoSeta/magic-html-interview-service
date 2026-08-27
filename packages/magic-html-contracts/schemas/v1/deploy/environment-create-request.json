@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/deploy/environment-create-request.json",
+  "title": "Create deployment environment",
+  "type": "object",
+  "required": ["contract_version", "name", "tier", "driver", "configuration", "credentials"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 100},
+    "tier": {"enum": ["preview", "staging", "production"], "description": "Production is supported only with github or cloudflare_pages; sftp and ftps are limited to preview and staging in v1."},
+    "driver": {"enum": ["github", "cloudflare_pages", "sftp", "ftps"]},
+    "configuration": {"type": "object"},
+    "credentials": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"driver": {"const": "github"}}},
+      "then": {
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "required": ["owner", "repository", "branch", "root_path"],
+            "additionalProperties": false,
+            "properties": {
+              "owner": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$"},
+              "repository": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,100}$"},
+              "branch": {"type": "string", "minLength": 1, "maxLength": 255},
+              "root_path": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^(?!/)(?!.*//)(?!.*\\\\)(?!.*(?:^|/)\\.{1,2}(?:/|$)).+$"}
+            }
+          },
+          "credentials": {
+            "type": "object",
+            "required": ["token"],
+            "additionalProperties": false,
+            "properties": {
+              "token": {"type": "string", "minLength": 1, "maxLength": 4096}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"driver": {"const": "cloudflare_pages"}}},
+      "then": {
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "required": ["account_id", "project_name", "branch"],
+            "additionalProperties": false,
+            "properties": {
+              "account_id": {"type": "string", "pattern": "^[a-f0-9]{32}$"},
+              "project_name": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9-]{0,56}[a-z0-9])?$"},
+              "branch": {"type": "string", "minLength": 1, "maxLength": 255}
+            }
+          },
+          "credentials": {
+            "type": "object",
+            "required": ["api_token"],
+            "additionalProperties": false,
+            "properties": {
+              "api_token": {"type": "string", "minLength": 1, "maxLength": 4096}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"driver": {"const": "sftp"}}},
+      "then": {
+        "not": {"required": ["tier"], "properties": {"tier": {"const": "production"}}},
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "required": ["host", "port", "root_path", "host_key_fingerprint"],
+            "additionalProperties": false,
+            "properties": {
+              "host": {"type": "string", "minLength": 1, "maxLength": 253},
+              "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+              "root_path": {"type": "string", "minLength": 2, "maxLength": 1700, "pattern": "^(?!.*//)(?!.*\\\\)(?!.*[\\x00-\\x1F\\x7F])(?!.*(?:^|/)\\.{1,2}(?:/|$))/[^/].*$", "description": "Dedicated remote subtree path, capped at 1700 characters so derived deployment destinations remain within the 2048-character persistence boundary."},
+              "host_key_fingerprint": {"type": "string", "pattern": "^SHA256:[A-Za-z0-9+/]{43}$"}
+            }
+          },
+          "credentials": {
+            "type": "object",
+            "required": ["username"],
+            "additionalProperties": false,
+            "properties": {
+              "username": {"type": "string", "minLength": 1, "maxLength": 255},
+              "password": {"type": "string", "minLength": 1, "maxLength": 4096},
+              "private_key": {"type": "string", "minLength": 1, "maxLength": 65536},
+              "private_key_passphrase": {"type": "string", "minLength": 1, "maxLength": 4096}
+            },
+            "dependentRequired": {"private_key_passphrase": ["private_key"]},
+            "oneOf": [
+              {"required": ["password"], "not": {"required": ["private_key"]}},
+              {"required": ["private_key"], "not": {"required": ["password"]}}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"driver": {"const": "ftps"}}},
+      "then": {
+        "not": {"required": ["tier"], "properties": {"tier": {"const": "production"}}},
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "required": ["host", "port", "root_path", "tls_mode"],
+            "additionalProperties": false,
+            "properties": {
+              "host": {"type": "string", "minLength": 1, "maxLength": 253},
+              "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+              "root_path": {"type": "string", "minLength": 2, "maxLength": 1700, "pattern": "^(?!.*//)(?!.*\\\\)(?!.*[\\x00-\\x1F\\x7F])(?!.*(?:^|/)\\.{1,2}(?:/|$))/[^/].*$", "description": "Dedicated remote subtree path, capped at 1700 characters so derived deployment destinations remain within the 2048-character persistence boundary."},
+              "tls_mode": {"enum": ["explicit", "implicit"]}
+            }
+          },
+          "credentials": {
+            "type": "object",
+            "required": ["username", "password"],
+            "additionalProperties": false,
+            "properties": {
+              "username": {"type": "string", "minLength": 1, "maxLength": 255, "pattern": "^[^:\\x00-\\x1F\\x7F]+$"},
+              "password": {"type": "string", "minLength": 1, "maxLength": 4096}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/common/problem.json",
+  "title": "Problem",
+  "type": "object",
+  "required": ["contract_version", "type", "title", "status", "request_id"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"type": "string", "format": "uri-reference"},
+    "title": {"type": "string", "minLength": 1},
+    "status": {"type": "integer", "minimum": 400, "maximum": 599},
+    "detail": {"type": "string"},
+    "request_id": {"type": "string", "minLength": 1},
+    "errors": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string"}}}
+  },
+  "additionalProperties": false
+}

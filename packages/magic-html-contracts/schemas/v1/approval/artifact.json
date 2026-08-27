@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/artifact.json",
+  "title": "Approval artifact",
+  "description": "The normalized immutable artifact identity returned by the approval service.",
+  "type": "object",
+  "required": ["type", "id", "version", "digest", "preview_url"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {"enum": ["site_snapshot", "cms_snapshot", "static_build", "composer_artifact", "publication_candidate"]},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,254}$"},
+    "version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "preview_url": {"type": ["string", "null"], "format": "uri", "pattern": "^https?://", "maxLength": 2048}
+  }
+}

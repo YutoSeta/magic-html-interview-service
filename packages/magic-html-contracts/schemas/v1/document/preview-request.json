@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/document/preview-request.json",
+  "title": "Document preview request",
+  "type": "object",
+  "required": ["contract_version", "html"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "html": {"$ref": "html.json"}
+  }
+}

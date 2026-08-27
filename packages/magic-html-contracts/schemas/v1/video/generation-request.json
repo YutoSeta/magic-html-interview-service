@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/video/generation-request.json",
+  "title": "Video generation request",
+  "type": "object",
+  "required": ["contract_version", "prompt"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "prompt": {"type": "string", "minLength": 1, "maxLength": 16000},
+    "provider": {"enum": ["veo", "seedance"]},
+    "duration": {"type": "integer", "minimum": 4, "maximum": 15, "description": "Provider-specific constraints apply. Veo accepts 4, 6, or 8 seconds."},
+    "aspect_ratio": {"enum": ["16:9", "9:16"]},
+    "resolution": {"enum": ["720p", "1080p"]},
+    "first_frame_url": {"type": "string", "format": "uri"},
+    "last_frame_url": {"type": "string", "format": "uri"},
+    "reference_urls": {"type": "array", "maxItems": 8, "items": {"type": "string", "format": "uri"}},
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": false
+}

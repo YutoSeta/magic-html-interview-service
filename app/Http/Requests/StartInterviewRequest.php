@@ -18,4 +18,9 @@ final class StartInterviewRequest extends ContractRequest
     {
         $this->merge(['locale' => $this->input('locale', 'ja')]);
     }
+
+    protected function requiresIdempotency(): bool
+    {
+        return true;
+    }
 }

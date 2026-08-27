@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/deploy/environment-resource.json",
+  "title": "Deployment environment resource",
+  "type": "object",
+  "required": ["contract_version", "id", "tenant_id", "site_id", "name", "tier", "driver", "configuration", "credentials_configured", "verification_status", "last_verified_at", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 100},
+    "tier": {"enum": ["preview", "staging", "production"], "description": "Production is supported only with github or cloudflare_pages; sftp and ftps are limited to preview and staging in v1."},
+    "driver": {"enum": ["github", "cloudflare_pages", "sftp", "ftps"]},
+    "configuration": {"type": "object"},
+    "credentials_configured": {"const": true},
+    "verification_status": {"enum": ["unverified", "verified", "failed"]},
+    "last_verified_at": {"type": ["string", "null"], "format": "date-time", "description": "The most recent successful verification time, or null when no verification has succeeded."},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"driver": {"const": "github"}}},
+      "then": {
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "required": ["owner", "repository", "branch", "root_path"],
+            "additionalProperties": false,
+            "properties": {
+              "owner": {"type": "string"},
+              "repository": {"type": "string"},
+              "branch": {"type": "string"},
+              "root_path": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^(?!/)(?!.*//)(?!.*\\\\)(?!.*(?:^|/)\\.{1,2}(?:/|$)).+$"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"driver": {"const": "cloudflare_pages"}}},
+      "then": {
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "required": ["account_id", "project_name", "branch"],
+            "additionalProperties": false,
+            "properties": {
+              "account_id": {"type": "string"},
+              "project_name": {"type": "string"},
+              "branch": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"driver": {"const": "sftp"}}},
+      "then": {
+        "not": {"required": ["tier"], "properties": {"tier": {"const": "production"}}},
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "required": ["host", "port", "root_path", "host_key_fingerprint"],
+            "additionalProperties": false,
+            "properties": {
+              "host": {"type": "string"},
+              "port": {"type": "integer"},
+              "root_path": {"type": "string", "minLength": 2, "maxLength": 1700, "pattern": "^(?!.*//)(?!.*\\\\)(?!.*[\\x00-\\x1F\\x7F])(?!.*(?:^|/)\\.{1,2}(?:/|$))/[^/].*$", "description": "Dedicated remote subtree path, capped at 1700 characters so derived deployment destinations remain within the 2048-character persistence boundary."},
+              "host_key_fingerprint": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"driver": {"const": "ftps"}}},
+      "then": {
+        "not": {"required": ["tier"], "properties": {"tier": {"const": "production"}}},
+        "properties": {
+          "configuration": {
+            "type": "object",
+            "required": ["host", "port", "root_path", "tls_mode"],
+            "additionalProperties": false,
+            "properties": {
+              "host": {"type": "string"},
+              "port": {"type": "integer"},
+              "root_path": {"type": "string", "minLength": 2, "maxLength": 1700, "pattern": "^(?!.*//)(?!.*\\\\)(?!.*[\\x00-\\x1F\\x7F])(?!.*(?:^|/)\\.{1,2}(?:/|$))/[^/].*$", "description": "Dedicated remote subtree path, capped at 1700 characters so derived deployment destinations remain within the 2048-character persistence boundary."},
+              "tls_mode": {"enum": ["explicit", "implicit"]}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

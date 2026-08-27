@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/approval/create-request.json",
+  "title": "Create approval request",
+  "type": "object",
+  "required": ["contract_version", "artifact", "title", "requester"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "artifact": {"$ref": "artifact-input.json"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 255},
+    "requester": {"$ref": "actor.json"},
+    "message": {"type": ["string", "null"], "maxLength": 10000},
+    "metadata": {"type": ["object", "array"], "maxProperties": 100, "maxItems": 100}
+  }
+}

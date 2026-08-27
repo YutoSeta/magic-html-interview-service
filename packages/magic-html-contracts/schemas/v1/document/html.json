@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/document/html.json",
+  "title": "Isolated document HTML",
+  "description": "Untrusted HTML rendered without JavaScript or outbound communication. script, iframe, object, embed, base, link, portal, event attributes, security-sensitive meta directives, external/local URLs, protocol-relative URLs, CSS imports, and network-capable expressions are rejected. Images and fonts must use permitted data URLs.",
+  "type": "string",
+  "minLength": 1,
+  "maxLength": 1000000
+}

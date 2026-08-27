@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-import/result.json",
+  "title": "Normalized static site import",
+  "type": "object",
+  "required": ["contract_version", "site_id", "snapshot_id", "digest", "dynamic_detected", "normalized_html", "files", "excluded"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "site_id": {"type": "string"},
+    "snapshot_id": {"type": "string", "pattern": "^import:[A-Za-z0-9_-]+:[a-f0-9]{12}$"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "dynamic_detected": {"type": "boolean"},
+    "normalized_html": {"type": "boolean"},
+    "source": {"type": ["object", "null"]},
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "kind", "mime", "size", "sha256", "content_base64"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {"type": "string"},
+          "kind": {"enum": ["html", "asset"]},
+          "mime": {"type": "string"},
+          "size": {"type": "integer", "minimum": 0},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "content_base64": {"type": "string"}
+        }
+      }
+    },
+    "excluded": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "size", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {"type": "string"},
+          "size": {"type": "integer", "minimum": 0},
+          "reason": {"enum": ["excluded_dir", "dynamic", "extension", "too_large"]}
+        }
+      }
+    }
+  }
+}

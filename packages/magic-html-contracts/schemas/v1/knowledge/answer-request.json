@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge/answer-request.json",
+  "title": "Grounded knowledge answer request",
+  "description": "Request a cite-or-refuse answer. v1 permits only strict_grounded: every material claim must be supported by returned citations, otherwise the service refuses to answer.",
+  "type": "object",
+  "required": ["contract_version", "question"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "question": {"type": "string", "minLength": 1, "maxLength": 4000},
+    "grounding_policy": {"const": "strict_grounded", "default": "strict_grounded"},
+    "max_citations": {"type": "integer", "minimum": 1, "maximum": 20, "default": 8},
+    "retrieval": {"$ref": "retrieval-options.json"}
+  }
+}
