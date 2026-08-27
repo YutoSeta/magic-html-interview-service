@@ -10,6 +10,7 @@
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0",
         "yutoseta/interview-engine": "^0.3",
+        "yutoseta/laravel-admin": "^0.1.1",
         "yutoseta/magic-html-contracts": "^1.15"
     },
     "require-dev": {
@@ -87,6 +88,11 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "repositories": [
+        {
+            "name": "laravel-admin",
+            "type": "vcs",
+            "url": "https://github.com/YutoSeta/magic-html-laravel-admin.git"
+        },
         {
             "name": "interview-engine",
             "type": "vcs",
