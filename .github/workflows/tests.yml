@@ -20,7 +20,7 @@ jobs:
           composer config --global --auth github-oauth.github.com "$COMPOSER_GITHUB_TOKEN"
           git config --global url."https://x-access-token:${COMPOSER_GITHUB_TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
         env:
-          COMPOSER_GITHUB_TOKEN: ${{ secrets.COMPOSER_GITHUB_TOKEN }}
+          COMPOSER_GITHUB_TOKEN: ${{ secrets.MAGIC_HTML_REPOS_TOKEN }}
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: php artisan test --compact
       - run: composer audit
