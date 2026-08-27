@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Api\V1\InterviewController;
 use App\Http\Controllers\CapabilityController;
+use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', CapabilityController::class);
 Route::get('/__verify', [CapabilityController::class, 'verify']);
+Route::get('/health', HealthController::class)->name('health');
 
 Route::middleware(['service', 'throttle:interview-writes'])->group(function (): void {
     Route::post('/v1/interviews', [InterviewController::class, 'store']);
