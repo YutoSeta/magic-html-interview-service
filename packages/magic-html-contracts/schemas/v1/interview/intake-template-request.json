@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/interview/intake-template-request.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "title", "fields"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 200},
+    "description": {"type": "string", "maxLength": 2000},
+    "fields": {"type": "array", "items": {"$ref": "../template/field.json"}, "minItems": 1, "maxItems": 200},
+    "mode": {"enum": ["chat", "form"]},
+    "greeting": {"type": "string", "maxLength": 1000},
+    "closing_script": {"type": "string", "maxLength": 1000}
+  }
+}

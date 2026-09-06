@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/neo-styler/content.json",
+  "title": "Neo Styler Content",
+  "description": "Every word and image of a site, keyed by the Site AST: the hero, the top page's own sections and form, the 404 page, each page's and each collection item's sections. Each value becomes a named slot; the model sees slot names, not values, so it cannot rewrite copy and it cannot add words that are not here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["hero"],
+  "properties": {
+    "hero": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "properties": {
+        "eyebrow": { "type": "string", "maxLength": 80 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "lead": { "type": "string", "maxLength": 400 },
+        "cta_label": { "type": "string", "maxLength": 40, "description": "The hero's primary button (home.cta). Landing: defaults to site.cv.label." },
+        "sub_cta_label": { "type": "string", "maxLength": 40, "description": "The hero's secondary button (home.sub_cta)." },
+        "image": { "$ref": "./common.json#/$defs/imageSpec" }
+      }
+    },
+    "home": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sections": { "type": "array", "maxItems": 30, "items": { "$ref": "./common.json#/$defs/section" } },
+        "form": { "$ref": "./common.json#/$defs/form", "description": "Landing: the conversion form, rendered as fixed HTML at the end of the page." }
+      }
+    },
+    "not_found": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string", "maxLength": 80 },
+        "lead": { "type": "string", "maxLength": 400 },
+        "home_label": { "type": "string", "maxLength": 40 },
+        "sitemap_label": { "type": "string", "maxLength": 40 }
+      }
+    },
+    "pages": {
+      "type": "object",
+      "propertyNames": { "$ref": "./common.json#/$defs/key" },
+      "additionalProperties": { "$ref": "#/$defs/pageContent" },
+      "maxProperties": 40
+    },
+    "collections": {
+      "type": "object",
+      "propertyNames": { "$ref": "./common.json#/$defs/key" },
+      "maxProperties": 10,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["items"],
+        "properties": {
+          "lead": { "type": "string", "maxLength": 400 },
+          "items": {
+            "type": "object",
+            "propertyNames": { "pattern": "^[1-9][0-9]*$" },
+            "additionalProperties": { "$ref": "#/$defs/pageContent" },
+            "maxProperties": 200
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "pageContent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": "string", "maxLength": 400, "description": "Shown on the top page's digest and the sub-hero." },
+        "lead": { "type": "string", "maxLength": 400 },
+        "image": { "$ref": "./common.json#/$defs/imageSpec", "description": "The sub-hero / digest image." },
+        "sections": { "type": "array", "maxItems": 30, "items": { "$ref": "./common.json#/$defs/section" } },
+        "form": { "$ref": "./common.json#/$defs/form" }
+      }
+    }
+  }
+}

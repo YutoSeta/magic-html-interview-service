@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/media-artifact-create-request.json",
+  "title": "Create private Channel media artifact request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["video"],
+  "properties": {
+    "video": {"type": "string", "format": "binary", "contentMediaType": "video/mp4", "description": "One non-empty .mp4 file, maximum 536870912 bytes, with a valid ISO Base Media ftyp signature."}
+  }
+}

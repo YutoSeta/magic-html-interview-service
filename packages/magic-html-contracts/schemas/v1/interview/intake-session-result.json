@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/interview/intake-session-result.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "uuid", "template", "url", "expires_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "uuid": {"type": "string", "format": "uuid"},
+    "template": {"type": "string"},
+    "url": {"type": "string", "format": "uri"},
+    "expires_at": {"type": "string", "format": "date-time"}
+  }
+}

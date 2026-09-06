@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/gsc-report-request.json",
+  "title": "Search Console report request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "start_date", "end_date", "dimensions"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "start_date": {"type": "string", "format": "date"},
+    "end_date": {"type": "string", "format": "date"},
+    "dimensions": {"type": "array", "maxItems": 5, "uniqueItems": true, "items": {"enum": ["query", "page", "country", "device", "date", "hour", "searchAppearance"]}},
+    "search_type": {"enum": ["web", "image", "video", "news", "discover", "googleNews"]},
+    "row_limit": {"type": "integer", "minimum": 1, "maximum": 5000},
+    "start_row": {"type": "integer", "minimum": 0, "maximum": 100000},
+    "data_state": {"enum": ["final", "all", "hourly_all"]}
+  },
+  "description": "end_date must be on or after start_date and the date difference must not exceed 366 days."
+}

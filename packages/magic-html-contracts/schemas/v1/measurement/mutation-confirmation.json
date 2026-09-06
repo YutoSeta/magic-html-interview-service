@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/mutation-confirmation.json",
+  "title": "Measurement mutation confirmation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["confirmed", "summary_digest"],
+  "properties": {
+    "confirmed": {"const": true},
+    "summary_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

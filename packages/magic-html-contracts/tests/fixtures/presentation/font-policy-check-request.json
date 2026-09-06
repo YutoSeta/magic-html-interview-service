@@ -1,0 +1,40 @@
+{
+  "contract_version": "1.0",
+  "font_asset_set": {
+    "contract_version": "1.0",
+    "set_id": "google-fonts-inter-v20",
+    "provider": "google-fonts",
+    "family": "Inter",
+    "upstream": {
+      "catalog": "google/fonts",
+      "revision": "0123456789abcdef0123456789abcdef01234567",
+      "family_path": "ofl/inter",
+      "version": "v20",
+      "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "license": {
+      "spdx": "OFL-1.1",
+      "copyright_notice": "Copyright 2020 The Inter Project Authors",
+      "license_text_path": "licenses/google-fonts/inter/OFL.txt",
+      "license_text_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "reserved_font_names": []
+    },
+    "transformation": {
+      "kind": "none",
+      "metadata_preserved": true,
+      "renamed_family": null
+    },
+    "asset_refs": ["font-inter-400"]
+  },
+  "font_assets": [
+    {
+      "asset_ref": "font-inter-400",
+      "path": "assets/fonts/inter-v20-400.woff2",
+      "mime": "font/woff2",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "family": "Inter",
+      "weight": 400,
+      "style": "normal"
+    }
+  ]
+}

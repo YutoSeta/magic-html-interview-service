@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/change-run.json",
+  "title": "Site Change run",
+  "description": "The pollable state of one isolated workspace run. Instructions, workspace paths, commands, environment values, remote URLs, provider payloads, and credentials are not returned.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "tenant_id", "site_id", "repository_id", "status", "execution_profile", "expected_base_sha", "base_sha", "head_sha", "branch", "instruction_digest", "checks", "diff_digest", "changed_file_count", "error", "created_at", "started_at", "finished_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "repository_id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "running", "succeeded", "failed", "submitted", "merged", "conflicted"]},
+    "execution_profile": {"const": "site_content_v1"},
+    "expected_base_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "base_sha": {"type": ["string", "null"], "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "head_sha": {"type": ["string", "null"], "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "branch": {"type": ["string", "null"], "pattern": "^magic-html/change/[0-9a-f-]{36}$"},
+    "instruction_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "checks": {"type": "array", "maxItems": 4, "items": {"$ref": "check-result.json"}},
+    "diff_digest": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "changed_file_count": {"type": ["integer", "null"], "minimum": 0, "maximum": 200},
+    "error": {
+      "anyOf": [
+        {"type": "null"},
+        {"type": "object", "additionalProperties": false, "required": ["code", "detail"], "properties": {
+          "code": {"enum": ["base_changed", "workspace_failed", "agent_failed", "policy_failed", "credential_detected", "repository_limit_exceeded", "provider_failed"]},
+          "detail": {"type": "string", "minLength": 1, "maxLength": 500, "description": "Credential-redacted detail with no raw provider or command output."}
+        }}
+      ]
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
+    "finished_at": {"type": ["string", "null"], "format": "date-time"}
+  }
+}

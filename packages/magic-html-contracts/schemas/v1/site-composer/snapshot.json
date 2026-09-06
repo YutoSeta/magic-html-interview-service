@@ -26,7 +26,13 @@
           "title": {"type": "string", "minLength": 1},
           "html": {"type": "string", "minLength": 1},
           "css": {"type": "string"},
-          "design_ast": {"$ref": "../design/design-ast.json"}
+          "design_ast": {
+            "oneOf": [
+              {"$ref": "../design/design-ast.json"},
+              {"$ref": "../styler/pipeline-result.json#/properties/design_ast"}
+            ]
+          },
+          "styling_diagnostics": {"$ref": "../styler/pipeline-result.json#/properties/diagnostics"}
         }
       }
     },

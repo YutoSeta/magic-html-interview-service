@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/template/inspect-request.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "html"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "html": {"type": "string", "minLength": 1, "maxLength": 1048576}
+  }
+}

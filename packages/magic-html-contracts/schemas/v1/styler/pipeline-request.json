@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://magic-html.example/schemas/v1/styler/pipeline-request.json",
+  "title": "Styler Pipeline Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "brief"],
+  "properties": {
+    "contract_version": { "enum": ["1.1", "1.2", "1.3"] },
+    "page_key": { "type": "string", "minLength": 1, "maxLength": 255 },
+    "html": { "type": "string", "minLength": 1, "maxLength": 2000000 },
+    "brief": { "type": "string", "minLength": 1, "maxLength": 50000 },
+    "viewports": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["width", "height"],
+        "properties": {
+          "width": { "type": "integer", "minimum": 320, "maximum": 10000 },
+          "height": { "type": "integer", "minimum": 240, "maximum": 10000 }
+        }
+      },
+      "allOf": [
+        { "contains": { "type": "object", "properties": { "width": { "maximum": 480 } }, "required": ["width"] }, "minContains": 1 },
+        { "contains": { "type": "object", "properties": { "width": { "minimum": 1024 } }, "required": ["width"] }, "minContains": 1 }
+      ]
+    },
+    "design_context": { "$ref": "./design-context.json" },
+    "approved_layout": { "$ref": "./approved-layout.json" },
+    "layout_snapshot_ref": {
+      "$ref": "../layout/reference.json",
+      "description": "Contract 1.3 input. The Styler resolver requires this reference to resolve to a frozen/passed Layout Snapshot and verifies all repeated digests before reusing its exact Layout AST and CSS."
+    },
+    "refine_limit": { "type": "integer", "minimum": 0, "maximum": 5, "default": 0 },
+    "execution_profile": {
+      "type": "string",
+      "enum": ["fast", "balanced", "quality"],
+      "default": "fast",
+      "description": "Default execution profile for generative Styler stages. Under contract 1.3 Layout is deterministic snapshot reuse rather than a model call. Concrete provider model names are server-owned."
+    },
+    "stage_execution_profiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optional per-stage execution/telemetry overrides; omitted stages inherit execution_profile. The contract 1.3 Layout entry cannot turn frozen Layout reuse into model generation.",
+      "properties": {
+        "layout": { "enum": ["fast", "balanced", "quality"] },
+        "skin": { "enum": ["fast", "balanced", "quality"] },
+        "decor": { "enum": ["fast", "balanced", "quality"] },
+        "motion": { "enum": ["fast", "balanced", "quality"] }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "contract_version": { "const": "1.2" } },
+        "required": ["contract_version"]
+      },
+      "then": {
+        "required": ["page_key", "html", "viewports", "approved_layout"],
+        "properties": {
+          "viewports": {
+            "minItems": 3,
+            "contains": {
+              "type": "object",
+              "properties": { "width": { "minimum": 720, "maximum": 1023 } },
+              "required": ["width"]
+            },
+            "minContains": 1
+          }
+        },
+        "not": { "required": ["layout_snapshot_ref"] }
+      }
+    },
+    {
+      "if": {
+        "properties": { "contract_version": { "const": "1.1" } },
+        "required": ["contract_version"]
+      },
+      "then": {
+        "required": ["page_key", "html", "viewports"],
+        "not": {
+          "anyOf": [
+            { "required": ["approved_layout"] },
+            { "required": ["layout_snapshot_ref"] }
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "contract_version": { "const": "1.3" } },
+        "required": ["contract_version"]
+      },
+      "then": {
+        "required": ["layout_snapshot_ref"],
+        "not": {
+          "anyOf": [
+            { "required": ["page_key"] },
+            { "required": ["html"] },
+            { "required": ["viewports"] },
+            { "required": ["approved_layout"] }
+          ]
+        }
+      }
+    }
+  ]
+}

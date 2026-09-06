@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/presentation/materialize-request.json",
+  "title": "Magic HTML Presentation Materialization Request",
+  "description": "Synchronous and side-effect-free materialization input. Asset entries resolve only relative immutable paths and digests; the service never fetches asset or catalog URLs. Licensed self-hosted fonts additionally require a closed Font Asset Set with immutable provenance and license evidence.",
+  "type": "object",
+  "required": ["contract_version", "component_ast", "adapter_profile", "assets", "font_assets"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "component_ast": {"$ref": "./component-ast.json"},
+    "adapter_profile": {"$ref": "./adapter-profile.json"},
+    "assets": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {"$ref": "#/$defs/imageAsset"}
+    },
+    "font_assets": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {"$ref": "#/$defs/fontAsset"}
+    },
+    "font_asset_set": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "./font-asset-set.json"}
+      ]
+    }
+  },
+  "$defs": {
+    "identifier": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "relativeAssetPath": {"type": "string", "pattern": "^assets/(?:[A-Za-z0-9._-]+/)*[A-Za-z0-9][A-Za-z0-9._-]{0,199}$", "maxLength": 1000},
+    "imageAsset": {
+      "type": "object",
+      "required": ["asset_ref", "path", "mime", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+        "asset_ref": {"$ref": "#/$defs/identifier"},
+        "path": {"$ref": "#/$defs/relativeAssetPath"},
+        "mime": {"enum": ["image/jpeg", "image/png", "image/webp", "image/avif"]},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "fontAsset": {
+      "type": "object",
+      "required": ["asset_ref", "path", "mime", "sha256", "family", "weight", "style"],
+      "additionalProperties": false,
+      "properties": {
+        "asset_ref": {"$ref": "#/$defs/identifier"},
+        "path": {"$ref": "#/$defs/relativeAssetPath"},
+        "mime": {"const": "font/woff2"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "family": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,99}$"},
+        "weight": {"type": "integer", "minimum": 100, "maximum": 900, "multipleOf": 100},
+        "style": {"enum": ["normal", "italic"]}
+      }
+    }
+  }
+}

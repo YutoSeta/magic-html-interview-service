@@ -1,0 +1,111 @@
+{
+  "status": "passed",
+  "validator": "magic-html-preview-service",
+  "validator_version": "1.0.0",
+  "subject": {
+    "candidate_snapshot_id": "ls_81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d",
+    "candidate_snapshot_digest": "81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d"
+  },
+  "pages": [
+    {
+      "page_key": "home",
+      "route": "/",
+      "path": "page-home.html",
+      "viewports": [
+        {
+          "width_px": 390,
+          "height_px": 844,
+          "breakpoint": "compact",
+          "breakpoint_outcome": "passed",
+          "geometry_outcome": "passed",
+          "measurements": {
+            "container_width_px": 390,
+            "content_width_px": 358,
+            "horizontal_overflow_px": 0,
+            "minimum_action_height_px": 44,
+            "overlap_count": 0,
+            "clipped_content_count": 0,
+            "zero_dimension_count": 0,
+            "responsive_violation_count": 0,
+            "image_aspect_violation_count": 0,
+            "checks": {
+              "container_width_within_limit": true,
+              "content_width_within_limit": true,
+              "no_horizontal_overflow": true,
+              "minimum_action_height_met": true,
+              "source_order_preserved": true,
+              "no_overlap": true,
+              "no_clipped_content": true,
+              "no_zero_dimensions": true,
+              "responsive_behavior_matches": true,
+              "image_aspect_preserved": true
+            }
+          },
+          "issues": []
+        },
+        {
+          "width_px": 768,
+          "height_px": 1024,
+          "breakpoint": "medium",
+          "breakpoint_outcome": "passed",
+          "geometry_outcome": "passed",
+          "measurements": {
+            "container_width_px": 768,
+            "content_width_px": 720,
+            "horizontal_overflow_px": 0,
+            "minimum_action_height_px": 44,
+            "overlap_count": 0,
+            "clipped_content_count": 0,
+            "zero_dimension_count": 0,
+            "responsive_violation_count": 0,
+            "image_aspect_violation_count": 0,
+            "checks": {
+              "container_width_within_limit": true,
+              "content_width_within_limit": true,
+              "no_horizontal_overflow": true,
+              "minimum_action_height_met": true,
+              "source_order_preserved": true,
+              "no_overlap": true,
+              "no_clipped_content": true,
+              "no_zero_dimensions": true,
+              "responsive_behavior_matches": true,
+              "image_aspect_preserved": true
+            }
+          },
+          "issues": []
+        },
+        {
+          "width_px": 1440,
+          "height_px": 900,
+          "breakpoint": "wide",
+          "breakpoint_outcome": "passed",
+          "geometry_outcome": "passed",
+          "measurements": {
+            "container_width_px": 1200,
+            "content_width_px": 720,
+            "horizontal_overflow_px": 0,
+            "minimum_action_height_px": 44,
+            "overlap_count": 0,
+            "clipped_content_count": 0,
+            "zero_dimension_count": 0,
+            "responsive_violation_count": 0,
+            "image_aspect_violation_count": 0,
+            "checks": {
+              "container_width_within_limit": true,
+              "content_width_within_limit": true,
+              "no_horizontal_overflow": true,
+              "minimum_action_height_met": true,
+              "source_order_preserved": true,
+              "no_overlap": true,
+              "no_clipped_content": true,
+              "no_zero_dimensions": true,
+              "responsive_behavior_matches": true,
+              "image_aspect_preserved": true
+            }
+          },
+          "issues": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/validation-result.json",
+  "title": "Site-level Layout Snapshot validation result",
+  "description": "A bounded per-page browser-validation attestation. Every page records the mandatory 390/768/1440 CSS-pixel viewports, expected breakpoint, measured geometry, and finite issues.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "validator", "validator_version", "subject", "pages"],
+  "properties": {
+    "status": {"enum": ["pending", "passed", "failed"]},
+    "validator": {"type": "string", "minLength": 1, "maxLength": 100},
+    "validator_version": {"type": "string", "minLength": 1, "maxLength": 50},
+    "subject": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/candidateSubject"}
+      ]
+    },
+    "pages": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"$ref": "#/$defs/pageResult"}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "pending"}}, "required": ["status"]},
+      "then": {"properties": {"subject": {"type": "null"}, "pages": {"items": {"$ref": "#/$defs/pendingPage"}}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "passed"}}, "required": ["status"]},
+      "then": {"properties": {"subject": {"$ref": "#/$defs/candidateSubject"}, "pages": {"items": {"$ref": "#/$defs/passedPage"}}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "subject": {"$ref": "#/$defs/candidateSubject"},
+          "pages": {
+            "items": {"$ref": "#/$defs/completedPage"},
+            "contains": {"$ref": "#/$defs/failedPage"},
+            "minContains": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "snapshotId": {"type": "string", "pattern": "^ls_[a-f0-9]{64}$"},
+    "pageKey": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"},
+    "route": {"type": "string", "pattern": "^/(?:[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*)?$", "maxLength": 200},
+    "artifactPath": {"type": "string", "pattern": "^(?:[a-z0-9][a-z0-9-]*/)*[a-z0-9][a-z0-9-]*\\.html$", "maxLength": 200},
+    "candidateSubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_snapshot_id", "candidate_snapshot_digest"],
+      "properties": {
+        "candidate_snapshot_id": {"$ref": "#/$defs/snapshotId"},
+        "candidate_snapshot_digest": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "count"],
+      "properties": {
+        "code": {
+          "enum": [
+            "breakpoint_mismatch", "container_overflow", "content_overflow", "horizontal_overflow", "action_height", "source_order",
+            "overlap", "clipped_content", "zero_or_extreme_dimension", "section_spacing", "line_length", "grid_columns", "column_ratio",
+            "image_aspect", "form_dimensions", "mobile_order", "breakpoint_discontinuity", "anchor_collision"
+          ]
+        },
+        "message": {"type": "string", "minLength": 1, "maxLength": 500},
+        "count": {"type": "integer", "minimum": 1, "maximum": 10000}
+      }
+    },
+    "geometryChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["container_width_within_limit", "content_width_within_limit", "no_horizontal_overflow", "minimum_action_height_met", "source_order_preserved", "no_overlap", "no_clipped_content", "no_zero_dimensions", "responsive_behavior_matches", "image_aspect_preserved"],
+      "properties": {
+        "container_width_within_limit": {"type": "boolean"},
+        "content_width_within_limit": {"type": "boolean"},
+        "no_horizontal_overflow": {"type": "boolean"},
+        "minimum_action_height_met": {"type": "boolean"},
+        "source_order_preserved": {"type": "boolean"},
+        "no_overlap": {"type": "boolean"},
+        "no_clipped_content": {"type": "boolean"},
+        "no_zero_dimensions": {"type": "boolean"},
+        "responsive_behavior_matches": {"type": "boolean"},
+        "image_aspect_preserved": {"type": "boolean"}
+      }
+    },
+    "measurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["container_width_px", "content_width_px", "horizontal_overflow_px", "minimum_action_height_px", "overlap_count", "clipped_content_count", "zero_dimension_count", "responsive_violation_count", "image_aspect_violation_count", "checks"],
+      "properties": {
+        "container_width_px": {"type": "number", "minimum": 0, "maximum": 3840},
+        "content_width_px": {"type": "number", "minimum": 0, "maximum": 3840},
+        "horizontal_overflow_px": {"type": "number", "minimum": 0, "maximum": 3840},
+        "minimum_action_height_px": {"type": "number", "minimum": 0, "maximum": 512},
+        "overlap_count": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "clipped_content_count": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "zero_dimension_count": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "responsive_violation_count": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "image_aspect_violation_count": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "checks": {"$ref": "#/$defs/geometryChecks"}
+      }
+    },
+    "passedMeasurements": {
+      "allOf": [
+        {"$ref": "#/$defs/measurements"},
+        {
+          "properties": {
+            "horizontal_overflow_px": {"const": 0},
+            "overlap_count": {"const": 0},
+            "clipped_content_count": {"const": 0},
+            "zero_dimension_count": {"const": 0},
+            "responsive_violation_count": {"const": 0},
+            "image_aspect_violation_count": {"const": 0},
+            "checks": {
+              "properties": {
+                "container_width_within_limit": {"const": true},
+                "content_width_within_limit": {"const": true},
+                "no_horizontal_overflow": {"const": true},
+                "minimum_action_height_met": {"const": true},
+                "source_order_preserved": {"const": true},
+                "no_overlap": {"const": true},
+                "no_clipped_content": {"const": true},
+                "no_zero_dimensions": {"const": true},
+                "responsive_behavior_matches": {"const": true},
+                "image_aspect_preserved": {"const": true}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "viewportResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width_px", "height_px", "breakpoint", "breakpoint_outcome", "geometry_outcome", "measurements", "issues"],
+      "properties": {
+        "width_px": {"type": "integer", "minimum": 320, "maximum": 3840},
+        "height_px": {"type": "integer", "minimum": 320, "maximum": 4320},
+        "breakpoint": {"enum": ["compact", "medium", "wide"]},
+        "breakpoint_outcome": {"enum": ["pending", "passed", "failed"]},
+        "geometry_outcome": {"enum": ["pending", "passed", "failed"]},
+        "measurements": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/measurements"}]},
+        "issues": {"type": "array", "maxItems": 50, "items": {"$ref": "#/$defs/issue"}}
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "breakpoint_outcome": {"const": "pending"},
+            "geometry_outcome": {"const": "pending"},
+            "measurements": {"type": "null"},
+            "issues": {"maxItems": 0}
+          }
+        },
+        {
+          "properties": {
+            "breakpoint_outcome": {"const": "passed"},
+            "geometry_outcome": {"const": "passed"},
+            "measurements": {"$ref": "#/$defs/passedMeasurements"},
+            "issues": {"maxItems": 0}
+          }
+        },
+        {
+          "properties": {
+            "breakpoint_outcome": {"enum": ["passed", "failed"]},
+            "geometry_outcome": {"enum": ["passed", "failed"]},
+            "measurements": {"$ref": "#/$defs/measurements"},
+            "issues": {"minItems": 1}
+          },
+          "anyOf": [
+            {"properties": {"breakpoint_outcome": {"const": "failed"}}},
+            {"properties": {"geometry_outcome": {"const": "failed"}}}
+          ]
+        }
+      ]
+    },
+    "pageResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["page_key", "route", "path", "viewports"],
+      "properties": {
+        "page_key": {"$ref": "#/$defs/pageKey"},
+        "route": {"$ref": "#/$defs/route"},
+        "path": {"$ref": "#/$defs/artifactPath"},
+        "viewports": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": false,
+          "prefixItems": [
+            {"allOf": [{"$ref": "#/$defs/viewportResult"}, {"properties": {"width_px": {"const": 390}, "breakpoint": {"const": "compact"}}}]},
+            {"allOf": [{"$ref": "#/$defs/viewportResult"}, {"properties": {"width_px": {"const": 768}, "breakpoint": {"const": "medium"}}}]},
+            {"allOf": [{"$ref": "#/$defs/viewportResult"}, {"properties": {"width_px": {"const": 1440}, "breakpoint": {"const": "wide"}}}]}
+          ]
+        }
+      }
+    },
+    "pendingViewport": {"properties": {"breakpoint_outcome": {"const": "pending"}, "geometry_outcome": {"const": "pending"}}},
+    "passedViewport": {"properties": {"breakpoint_outcome": {"const": "passed"}, "geometry_outcome": {"const": "passed"}}},
+    "completedViewport": {
+      "properties": {
+        "breakpoint_outcome": {"enum": ["passed", "failed"]},
+        "geometry_outcome": {"enum": ["passed", "failed"]}
+      }
+    },
+    "failedViewport": {
+      "anyOf": [
+        {"properties": {"breakpoint_outcome": {"const": "failed"}}},
+        {"properties": {"geometry_outcome": {"const": "failed"}}}
+      ]
+    },
+    "pendingPage": {
+      "properties": {"viewports": {"prefixItems": [{"$ref": "#/$defs/pendingViewport"}, {"$ref": "#/$defs/pendingViewport"}, {"$ref": "#/$defs/pendingViewport"}]}}
+    },
+    "passedPage": {
+      "properties": {"viewports": {"prefixItems": [{"$ref": "#/$defs/passedViewport"}, {"$ref": "#/$defs/passedViewport"}, {"$ref": "#/$defs/passedViewport"}]}}
+    },
+    "completedPage": {
+      "properties": {"viewports": {"prefixItems": [{"$ref": "#/$defs/completedViewport"}, {"$ref": "#/$defs/completedViewport"}, {"$ref": "#/$defs/completedViewport"}]}}
+    },
+    "failedPage": {"properties": {"viewports": {"contains": {"$ref": "#/$defs/failedViewport"}, "minContains": 1}}}
+  }
+}

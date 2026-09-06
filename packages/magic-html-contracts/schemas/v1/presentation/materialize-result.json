@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/presentation/materialize-result.json",
+  "title": "Magic HTML Presentation Materialization Result",
+  "description": "Deterministic canonical HTML, compiled CSS, required immutable assets, and a source map. The output contains no executable script or remote dependency discovery instructions.",
+  "type": "object",
+  "required": ["contract_version", "surface_id", "profile_id", "catalog_locks", "font_policy", "html", "css", "required_assets", "source_map", "digest"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "surface_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "profile_id": {"type": "string", "pattern": "^[a-z][a-z0-9.-]{0,99}$"},
+    "catalog_locks": {
+      "description": "The exact immutable adapter locks used for this materialization, preserving the request order.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {"$ref": "./adapter-profile.json#/$defs/catalogLock"}
+    },
+    "font_policy": {
+      "description": "The deterministic licensed-font policy decision, or null when the registered system or generic self-hosted adapter is used.",
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "./font-policy-check-result.json"}
+      ]
+    },
+    "html": {"type": "string", "minLength": 1, "maxLength": 1000000},
+    "css": {"type": "string", "minLength": 1, "maxLength": 1000000},
+    "required_assets": {
+      "type": "array",
+      "maxItems": 70,
+      "items": {
+        "type": "object",
+        "required": ["asset_ref", "path", "mime", "sha256"],
+        "additionalProperties": false,
+        "properties": {
+          "asset_ref": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+          "path": {"type": "string", "pattern": "^assets/(?:[A-Za-z0-9._-]+/)*[A-Za-z0-9][A-Za-z0-9._-]{0,199}$", "maxLength": 1000},
+          "mime": {"enum": ["image/jpeg", "image/png", "image/webp", "image/avif", "font/woff2"]},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+        }
+      }
+    },
+    "source_map": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": ["component_key", "composition", "variant", "html_id", "slot_roles"],
+        "additionalProperties": false,
+        "properties": {
+          "component_key": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+          "composition": {"enum": ["hero", "feature-grid", "content", "steps", "testimonials", "faq", "cta", "contact"]},
+          "variant": {"type": "string", "minLength": 1, "maxLength": 100},
+          "html_id": {"type": "string", "pattern": "^m-component-[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+          "slot_roles": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "uniqueItems": true,
+            "items": {"enum": ["Eyebrow", "Title", "Text", "Items", "Actions", "Image"]}
+          }
+        }
+      }
+    },
+    "digest": {
+      "description": "SHA-256 lowercase hex of canonical JSON containing surface_id, profile_id, catalog_locks, font_policy, html, css, required_assets, and source_map. Object keys are bytewise sorted and list order is preserved.",
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

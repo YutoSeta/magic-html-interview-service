@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/discovery.json",
+  "title": "Bounded Composer artifact discovery",
+  "type": "object",
+  "required": ["contract_version", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "data": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": ["public_id", "key", "name", "kind", "status", "revision", "etag", "document_hash"],
+        "additionalProperties": false,
+        "properties": {
+          "public_id": {"type": "string", "minLength": 8, "maxLength": 200},
+          "key": {"type": "string", "minLength": 1, "maxLength": 120},
+          "name": {"type": "string", "minLength": 1, "maxLength": 180},
+          "kind": {"enum": ["page", "section", "component"]},
+          "status": {"enum": ["draft", "published"]},
+          "revision": {"type": "integer", "minimum": 0},
+          "etag": {"type": "string", "pattern": "^\"(0|[1-9][0-9]*)\"$"},
+          "document_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+        }
+      }
+    }
+  }
+}

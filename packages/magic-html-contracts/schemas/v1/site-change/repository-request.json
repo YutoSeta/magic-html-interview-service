@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/repository-request.json",
+  "title": "Register or provision a Site Change repository",
+  "description": "Names a GitHub repository without accepting a remote URL or credential. The service resolves a tenant-authorized GitHub App installation and always uses its fixed GitHub API endpoint.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "operation", "provider", "owner", "repository", "default_branch"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "operation": {"enum": ["register", "provision"]},
+    "provider": {"const": "github"},
+    "owner": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$"},
+    "repository": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,100}$"},
+    "default_branch": {"type": "string", "pattern": "^(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*\\.lock$)[A-Za-z0-9](?:[A-Za-z0-9._/-]{0,253}[A-Za-z0-9._-])?$"},
+    "visibility": {"enum": ["private", "public"]},
+    "description": {"type": ["string", "null"], "maxLength": 500}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"operation": {"const": "provision"}}, "required": ["operation"]},
+      "then": {"required": ["visibility"]},
+      "else": {"not": {"anyOf": [{"required": ["visibility"]}, {"required": ["description"]}]}}
+    }
+  ]
+}

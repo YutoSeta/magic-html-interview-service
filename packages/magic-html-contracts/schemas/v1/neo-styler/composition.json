@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/neo-styler/composition.json",
+  "title": "Neo Styler Landing Composition",
+  "description": "A landing page's proposed structure and draft copy: the first view, the sections in display order (the last one is a closing CV section, then the form), and the form. propose returns one from a brief; a person or an agent may edit it before materialize turns it into a Site AST and content. Only facts from the brief are allowed; a section with no material is left out rather than invented.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["hero", "sections", "form"],
+  "properties": {
+    "hero": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "lead", "image"],
+      "properties": {
+        "eyebrow": { "type": "string", "maxLength": 80 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "lead": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "cta_label": { "type": "string", "maxLength": 40, "description": "Defaults to the brief's CV label." },
+        "sub_cta_label": { "type": "string", "maxLength": 40 },
+        "sub_cta_section": { "$ref": "./common.json#/$defs/key", "description": "The secondary button scrolls to this section." },
+        "image": { "$ref": "./common.json#/$defs/imageSpec" }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 20,
+      "items": { "$ref": "./common.json#/$defs/section" },
+      "description": "Keys are unique. cta / cta-2 … are mid-page CV sections and closing is the last one; their link is target form. Any other key is free."
+    },
+    "form": { "$ref": "./common.json#/$defs/form" },
+    "notes": { "type": "string", "maxLength": 2000, "description": "Why the page is composed this way, for the person reviewing it; also lists any link the service dropped because its destination was not in the brief." }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "contract_version": "1.0",
+  "set_id": "google-fonts-inter-v20",
+  "provider": "google-fonts",
+  "family": "Inter",
+  "policy_version": "google-fonts-self-host-v1",
+  "eligible_for_materialization": true,
+  "requirements": ["retain-license-text", "retain-copyright-notice", "serve-declared-woff2-only"],
+  "warnings": [],
+  "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}

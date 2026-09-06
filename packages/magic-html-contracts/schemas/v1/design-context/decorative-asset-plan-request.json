@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/design-context/decorative-asset-plan-request.json",
+  "title": "Plan Decorative Assets Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "canvas"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "canvas": { "$ref": "./common.json#/$defs/canvasReference" },
+    "design_dna": { "type": "object", "maxProperties": 30 },
+    "interview_text": { "type": "string", "maxLength": 30000 },
+    "max_assets": { "type": "integer", "minimum": 0, "maximum": 8, "default": 8 },
+    "execution_profile": { "$ref": "./common.json#/$defs/executionProfile" }
+  }
+}

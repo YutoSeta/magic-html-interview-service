@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/interview/intake-template-result.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "template", "title", "fields", "mode"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "template": {"type": "string"},
+    "title": {"type": "string"},
+    "fields": {"type": "array", "items": {"$ref": "../template/field.json"}},
+    "mode": {"enum": ["chat", "form"]}
+  }
+}

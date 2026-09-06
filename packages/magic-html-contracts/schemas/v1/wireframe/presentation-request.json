@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/wireframe/presentation-request.json",
+  "title": "Wireframe presentation request",
+  "description": "Selects one candidate or frozen Layout Snapshot page for deterministic Wireframe review presentation. The service resolves and verifies every referenced digest before rendering.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "layout_snapshot_ref"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "layout_snapshot_ref": {"$ref": "../layout/reference.json"}
+  }
+}

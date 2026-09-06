@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/publication.json",
+  "title": "Channel publication",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "tenant_id", "connection_id", "provider", "status", "content", "provider_content_id", "permalink", "error", "started_at", "finished_at", "created_at", "updated_at"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "connection_id": {"type": "string", "format": "uuid"},
+    "provider": {"enum": ["x", "threads", "instagram", "line", "youtube"]},
+    "status": {"enum": ["queued", "dispatching", "succeeded", "failed", "unknown"], "description": "unknown is an ambiguous delivery outcome that must be reconciled before another publication is attempted."},
+    "content": {"$ref": "publication-content.json"},
+    "provider_content_id": {"type": ["string", "null"], "maxLength": 255},
+    "permalink": {"type": ["string", "null"], "format": "uri", "maxLength": 2048},
+    "error": {"anyOf": [{"$ref": "publication-error.json"}, {"type": "null"}]},
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
+    "finished_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

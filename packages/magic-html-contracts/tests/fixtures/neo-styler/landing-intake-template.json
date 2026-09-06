@@ -1,0 +1,312 @@
+{
+    "contract_version": "1.0",
+    "title": "ランディングページのヒアリング",
+    "description": "1 枚のランディングページを作るために聞くこと。売るもの・コンバージョン・証拠・フォーム・法務・見た目。事実（実績・声・料金）は書かれたものだけを使い、無ければそのセクションは作らない。",
+    "fields": [
+        {
+            "path": "site_name",
+            "label": "事業名・サービス名（ロゴの文字になります）",
+            "question": "事業名・サービス名（ロゴの文字になります）",
+            "section": "content",
+            "type": "string",
+            "required": true
+        },
+        {
+            "path": "offer",
+            "label": "売るもの（商品・サービス）を一言で",
+            "question": "売るもの（商品・サービス）を一言で",
+            "section": "content",
+            "type": "string",
+            "required": true,
+            "description": "例: 介護保険の申請業務をクラウドで進める SaaS"
+        },
+        {
+            "path": "cv_goal",
+            "label": "このページのコンバージョン",
+            "question": "このページのコンバージョン",
+            "section": "content",
+            "type": "string",
+            "required": true,
+            "options": [
+                "資料請求",
+                "お問い合わせ",
+                "無料相談",
+                "予約",
+                "申込",
+                "購入",
+                "見積もり依頼"
+            ]
+        },
+        {
+            "path": "cv_label",
+            "label": "CV ボタンの文言（空なら cv_goal から決めます）",
+            "question": "CV ボタンの文言（空なら cv_goal から決めます）",
+            "section": "content",
+            "type": "string",
+            "required": false,
+            "description": "例: 資料を請求する"
+        },
+        {
+            "path": "cv_note",
+            "label": "CV に添える一言（任意。例: 1 か月の無料試用つき）",
+            "question": "CV に添える一言（任意。例: 1 か月の無料試用つき）",
+            "section": "content",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "industry",
+            "label": "業種",
+            "question": "業種",
+            "section": "content",
+            "type": "string",
+            "required": false,
+            "options": [
+                "建設・工事・住宅",
+                "製造・ものづくり",
+                "飲食・食品",
+                "小売・EC",
+                "美容・健康・フィットネス",
+                "医療・福祉・介護",
+                "教育・スクール",
+                "士業・コンサルティング",
+                "IT・ソフトウェア・Web",
+                "不動産",
+                "運輸・物流",
+                "宿泊・観光・レジャー",
+                "文化・芸術・エンタメ",
+                "農林水産",
+                "公共・団体・NPO",
+                "その他"
+            ]
+        },
+        {
+            "path": "industry_detail",
+            "label": "具体的に何をしている事業か",
+            "question": "具体的に何をしている事業か",
+            "section": "content",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "target_audience",
+            "label": "主なターゲット（誰に）",
+            "question": "主なターゲット（誰に）",
+            "section": "content",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "pain",
+            "label": "相手の困りごと・課題（「こんなお悩み」の材料）",
+            "question": "相手の困りごと・課題（「こんなお悩み」の材料）",
+            "section": "content",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "strengths",
+            "label": "強み・選ばれる理由（箇条書き可）",
+            "question": "強み・選ばれる理由（箇条書き可）",
+            "section": "content",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "proof",
+            "label": "実績・数字・導入社数・受賞（事実のみ。無ければ空欄）",
+            "question": "実績・数字・導入社数・受賞（事実のみ。無ければ空欄）",
+            "section": "content",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "voices",
+            "label": "お客様の声（実例のみ。無ければ空欄）",
+            "question": "お客様の声（実例のみ。無ければ空欄）",
+            "section": "content",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "pricing",
+            "label": "料金・プラン（任意）",
+            "question": "料金・プラン（任意）",
+            "section": "content",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "flow",
+            "label": "申込・導入までの流れ",
+            "question": "申込・導入までの流れ",
+            "section": "content",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "faq",
+            "label": "よくある質問と答え",
+            "question": "よくある質問と答え",
+            "section": "content",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "tagline",
+            "label": "タグライン（一言紹介）",
+            "question": "タグライン（一言紹介）",
+            "section": "content",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "tone",
+            "label": "文章のトーン（例: 丁寧で誠実／親しみやすい）",
+            "question": "文章のトーン（例: 丁寧で誠実／親しみやすい）",
+            "section": "content",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "tel",
+            "label": "電話番号（ページに「電話する」ボタンを置くなら）",
+            "question": "電話番号（ページに「電話する」ボタンを置くなら）",
+            "section": "content",
+            "type": "string",
+            "required": false,
+            "description": "例: 03-1234-5678"
+        },
+        {
+            "path": "links",
+            "label": "フォーム以外の行き先（予約サイト・LINE・地図など。「用途: URL」を 1 行ずつ）",
+            "question": "フォーム以外の行き先（予約サイト・LINE・地図など。「用途: URL」を 1 行ずつ）",
+            "section": "content",
+            "type": "text",
+            "required": false,
+            "description": "例:\nLINE で予約: https://lin.ee/xxxx\n地図: https://maps.app.goo.gl/xxxx"
+        },
+        {
+            "path": "form_fields",
+            "label": "フォーム項目の希望（既定: 名前・会社名・メール・電話・内容・同意）",
+            "question": "フォーム項目の希望（既定: 名前・会社名・メール・電話・内容・同意）",
+            "section": "form",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "notify_to",
+            "label": "フォーム送信の通知先メール",
+            "question": "フォーム送信の通知先メール",
+            "section": "form",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "business_name",
+            "label": "事業者名（会社名。規約・ポリシー・© 表記）",
+            "question": "事業者名（会社名。規約・ポリシー・© 表記）",
+            "section": "legal",
+            "type": "string",
+            "required": true
+        },
+        {
+            "path": "address",
+            "label": "所在地",
+            "question": "所在地",
+            "section": "legal",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "contact_email",
+            "label": "連絡先メールアドレス",
+            "question": "連絡先メールアドレス",
+            "section": "legal",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "privacy_purposes",
+            "label": "個人情報の利用目的（既定: 問い合わせ対応・資料送付・サービスの案内）",
+            "question": "個人情報の利用目的（既定: 問い合わせ対応・資料送付・サービスの案内）",
+            "section": "legal",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "atmosphere",
+            "label": "見た目の雰囲気（例: 誠実・温もり・静けさ）",
+            "question": "見た目の雰囲気（例: 誠実・温もり・静けさ）",
+            "section": "design",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "design_keywords",
+            "label": "デザインの方向性（例: 和モダン・ミニマル・編集誌風）",
+            "question": "デザインの方向性（例: 和モダン・ミニマル・編集誌風）",
+            "section": "design",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "color_preference",
+            "label": "色の好み・ブランドカラー（HEX 可）",
+            "question": "色の好み・ブランドカラー（HEX 可）",
+            "section": "design",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "typography_preference",
+            "label": "文字の印象（明朝系・ゴシック系・おまかせ）",
+            "question": "文字の印象（明朝系・ゴシック系・おまかせ）",
+            "section": "design",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "image_style",
+            "label": "画像の種類",
+            "question": "画像の種類",
+            "section": "design",
+            "type": "string",
+            "required": false,
+            "options": [
+                "写真",
+                "イラスト（フラット）",
+                "イラスト（線画・幾何学）",
+                "写真とイラストの混在",
+                "おまかせ"
+            ]
+        },
+        {
+            "path": "motif",
+            "label": "モチーフ・あしらいのアイデア",
+            "question": "モチーフ・あしらいのアイデア",
+            "section": "design",
+            "type": "string",
+            "required": false
+        },
+        {
+            "path": "reference",
+            "label": "参考にしたいサイト・好きな雰囲気",
+            "question": "参考にしたいサイト・好きな雰囲気",
+            "section": "design",
+            "type": "text",
+            "required": false
+        },
+        {
+            "path": "avoid",
+            "label": "避けたい表現・NG",
+            "question": "避けたい表現・NG",
+            "section": "design",
+            "type": "text",
+            "required": false
+        }
+    ],
+    "mode": "chat",
+    "greeting": "ランディングページを作るために、いくつか伺います。分からない項目は空欄で構いません。",
+    "closing_script": "ありがとうございます。この内容で構成案を作ります。"
+}

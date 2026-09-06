@@ -1,0 +1,19 @@
+{
+  "contract_version": "1.0",
+  "surface_id": "home",
+  "profile_id": "tailwindcss-heroicons-system-v1",
+  "catalog_locks": [
+    {"provider": "tailwindcss-core", "version": "1.0.0", "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "license_scope": "open-source"},
+    {"provider": "heroicons-v2", "version": "2.2.0", "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "license_scope": "open-source"}
+  ],
+  "font_policy": null,
+  "html": "<main data-m-surface=\"home\"><section id=\"m-component-hero\" m-component=\"hero\"></section></main>",
+  "css": ":root{--m-font-sans:ui-sans-serif,system-ui,sans-serif}",
+  "required_assets": [
+    {"asset_ref": "hero-image", "path": "assets/images/hero.webp", "mime": "image/webp", "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+  ],
+  "source_map": [
+    {"component_key": "hero", "composition": "hero", "variant": "split-media", "html_id": "m-component-hero", "slot_roles": ["Eyebrow", "Title", "Text", "Actions", "Image"]}
+  ],
+  "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}

@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/presentation/component-ast.json",
+  "title": "Magic HTML Presentation Component AST",
+  "description": "Provider-neutral, finite component and slot intent. It contains no CSS classes, provider component IDs, executable code, credentials, or remote asset lookup instructions.",
+  "type": "object",
+  "required": ["contract_version", "surface_id", "components"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "surface_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "locale": {"type": "string", "minLength": 2, "maxLength": 20, "default": "ja-JP"},
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": {"$ref": "#/$defs/component"}
+    }
+  },
+  "$defs": {
+    "identifier": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "component": {
+      "type": "object",
+      "required": ["key", "composition", "variant", "slots"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {"$ref": "#/$defs/identifier"},
+        "composition": {"enum": ["hero", "feature-grid", "content", "steps", "testimonials", "faq", "cta", "contact"]},
+        "variant": {"enum": ["centered", "split-media", "cards", "icon-grid", "prose", "split", "numbered", "timeline", "spotlight", "stacked", "two-column", "banner"]},
+        "design_key": {"type": "string", "pattern": "^d_[a-f0-9]{12}$"},
+        "slots": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "oneOf": [
+              {"$ref": "#/$defs/textSlot"},
+              {"$ref": "#/$defs/itemsSlot"},
+              {"$ref": "#/$defs/actionsSlot"},
+              {"$ref": "#/$defs/imageSlot"}
+            ]
+          }
+        }
+      },
+      "allOf": [
+        {"if": {"properties": {"composition": {"const": "hero"}}}, "then": {"properties": {"variant": {"enum": ["centered", "split-media"]}}}},
+        {"if": {"properties": {"composition": {"const": "feature-grid"}}}, "then": {"properties": {"variant": {"enum": ["cards", "icon-grid"]}}}},
+        {"if": {"properties": {"composition": {"const": "content"}}}, "then": {"properties": {"variant": {"enum": ["prose", "split"]}}}},
+        {"if": {"properties": {"composition": {"const": "steps"}}}, "then": {"properties": {"variant": {"enum": ["numbered", "timeline"]}}}},
+        {"if": {"properties": {"composition": {"const": "testimonials"}}}, "then": {"properties": {"variant": {"enum": ["cards", "spotlight"]}}}},
+        {"if": {"properties": {"composition": {"const": "faq"}}}, "then": {"properties": {"variant": {"enum": ["stacked", "two-column"]}}}},
+        {"if": {"properties": {"composition": {"const": "cta"}}}, "then": {"properties": {"variant": {"enum": ["banner", "centered"]}}}},
+        {"if": {"properties": {"composition": {"const": "contact"}}}, "then": {"properties": {"variant": {"enum": ["split", "centered"]}}}}
+      ]
+    },
+    "textContent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "value"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "text"},
+            "value": {"type": "string", "minLength": 1, "maxLength": 8000}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "resource_key", "path"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "binding"},
+            "resource_key": {"type": "string", "pattern": "^(?:content|collection|form):[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+            "path": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]*(?:\\.[A-Za-z][A-Za-z0-9_-]*)*$", "maxLength": 500},
+            "fallback": {"type": "string", "maxLength": 8000}
+          }
+        }
+      ]
+    },
+    "textSlot": {
+      "type": "object",
+      "required": ["role", "content"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"enum": ["Eyebrow", "Title", "Text"]},
+        "content": {"$ref": "#/$defs/textContent"}
+      }
+    },
+    "itemsSlot": {
+      "type": "object",
+      "required": ["role", "content"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"const": "Items"},
+        "content": {
+          "type": "object",
+          "required": ["kind", "items"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "items"},
+            "items": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 12,
+              "items": {
+                "type": "object",
+                "required": ["key", "title"],
+                "additionalProperties": false,
+                "properties": {
+                  "key": {"$ref": "#/$defs/identifier"},
+                  "title": {"type": "string", "minLength": 1, "maxLength": 500},
+                  "text": {"type": "string", "maxLength": 4000},
+                  "icon_intent": {"$ref": "#/$defs/iconIntent"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "actionsSlot": {
+      "type": "object",
+      "required": ["role", "content"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"const": "Actions"},
+        "content": {
+          "type": "object",
+          "required": ["kind", "actions"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "actions"},
+            "actions": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "required": ["label", "href", "tone"],
+                "additionalProperties": false,
+                "properties": {
+                  "label": {"type": "string", "minLength": 1, "maxLength": 200},
+                  "href": {"type": "string", "pattern": "^(?:/(?:[^/\\s][^\\s]*)?|#[A-Za-z][A-Za-z0-9_-]*|https://[^\\s]+)$", "maxLength": 2048},
+                  "tone": {"enum": ["primary", "secondary"]},
+                  "icon_intent": {"$ref": "#/$defs/iconIntent"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "imageSlot": {
+      "type": "object",
+      "required": ["role", "content"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {"const": "Image"},
+        "content": {
+          "type": "object",
+          "required": ["kind", "asset_ref", "alt"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": {"const": "asset"},
+            "asset_ref": {"$ref": "#/$defs/identifier"},
+            "alt": {"type": "string", "maxLength": 500}
+          }
+        }
+      }
+    },
+    "iconIntent": {"enum": ["primary-action", "success", "feature", "search", "email", "phone", "play", "disclosure"]}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/patch-request.json",
+  "title": "Apply deterministic visual stage patch request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "patch_plan"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "patch_plan": {"$ref": "patch-plan.json"}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/publication-create-request.json",
+  "title": "Create Channel publication request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["connection_id", "content"],
+  "properties": {
+    "connection_id": {"type": "string", "format": "uuid"},
+    "content": {"$ref": "publication-content.json"}
+  }
+}

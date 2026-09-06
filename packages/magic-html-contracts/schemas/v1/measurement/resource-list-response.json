@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/resource-list-response.json",
+  "title": "Measurement provider resource list response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "provider", "operation", "data"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "provider": {"enum": ["gtm", "gbp"]},
+    "operation": {"enum": ["gtm.resources.list", "gbp.resources.list"]},
+    "data": {"type": ["object", "array"]}
+  },
+  "allOf": [
+    {"if": {"properties": {"provider": {"const": "gtm"}}, "required": ["provider"]}, "then": {"properties": {"operation": {"const": "gtm.resources.list"}}}},
+    {"if": {"properties": {"provider": {"const": "gbp"}}, "required": ["provider"]}, "then": {"properties": {"operation": {"const": "gbp.resources.list"}}}}
+  ]
+}

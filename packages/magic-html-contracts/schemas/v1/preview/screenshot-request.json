@@ -6,7 +6,7 @@
   "required": ["contract_version", "viewport"],
   "additionalProperties": false,
   "properties": {
-    "contract_version": {"const": "1.0"},
+    "contract_version": {"enum": ["1.0", "1.1", "1.2", "1.3"]},
     "viewport": {
       "type": "object",
       "required": ["width", "height"],
@@ -19,6 +19,47 @@
     "full_page": {"type": "boolean", "default": false},
     "format": {"enum": ["png", "jpeg"], "default": "png"},
     "quality": {"type": "integer", "minimum": 1, "maximum": 100, "default": 90},
-    "wait_ms": {"type": "integer", "minimum": 0, "maximum": 5000, "default": 300}
+    "wait_ms": {"type": "integer", "minimum": 0, "maximum": 5000, "default": 300},
+    "renderer": {"enum": ["local", "cloudflare"]},
+    "capture_state": {"$ref": "#/$defs/captureState"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"contract_version": {"const": "1.0"}}, "required": ["contract_version"]},
+      "then": {"not": {"required": ["renderer"]}}
+    },
+    {
+      "if": {"properties": {"contract_version": {"const": "1.1"}}, "required": ["contract_version"]},
+      "then": {"required": ["renderer"]}
+    },
+    {
+      "if": {"properties": {"contract_version": {"const": "1.2"}}, "required": ["contract_version"]},
+      "then": {"required": ["renderer"]}
+    },
+    {
+      "if": {"properties": {"contract_version": {"const": "1.3"}}, "required": ["contract_version"]},
+      "then": {
+        "required": ["renderer", "capture_state"],
+        "not": {"required": ["wait_ms"]}
+      }
+    }
+  ],
+  "$defs": {
+    "captureState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target_id", "elapsed_ms"],
+      "properties": {
+        "kind": {"enum": ["rest", "enter"]},
+        "target_id": {"type": "null"},
+        "elapsed_ms": {"type": "integer", "minimum": 0, "maximum": 5000}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "rest"}}, "required": ["kind"]},
+          "then": {"properties": {"elapsed_ms": {"const": 0}}}
+        }
+      ]
+    }
   }
 }

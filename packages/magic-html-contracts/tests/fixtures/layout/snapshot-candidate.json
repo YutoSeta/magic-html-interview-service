@@ -1,0 +1,105 @@
+{
+  "contract_version": "1.0",
+  "profile": "layout-snapshot-v1",
+  "snapshot_id": "ls_81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d",
+  "snapshot_digest": "81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d",
+  "status": "candidate",
+  "source_structure_digest": "3a578a55738c7c0f4386757aac52ea294ccb90ac979c83978100d99004b4db04",
+  "layout_ast_version": 2,
+  "constraints": {
+    "container_max_width_px": 1200,
+    "content_max_width_px": 720,
+    "responsive": {"compact_max_px": 639.98, "medium_min_px": 640, "wide_min_px": 1024},
+    "validation_viewports_px": [390, 768, 1440],
+    "minimum_action_height_px": 44,
+    "mobile": {"reflow": "single-column", "preserve_source_order": true}
+  },
+  "pages": [
+    {
+      "page_key": "home",
+      "route": "/",
+      "path": "page-home.html",
+      "title": "Layout snapshot",
+      "source_html": {
+        "mime": "text/html; charset=UTF-8",
+        "content_base64": "PG1haW4+PGgxPkxheW91dCBzbmFwc2hvdDwvaDE+PC9tYWluPgo=",
+        "sha256": "eeea7fe33ef82bdac3dec34108780aead3980a162356b94a58c2b23d5c41fa55"
+      },
+      "layout": {
+        "profile": "geometry-layout-v2",
+        "ast": {
+          "version": 2,
+          "constraints": {
+            "container_max_width_px": 1200,
+            "content_max_width_px": 720,
+            "responsive": {"compact_max_px": 639.98, "medium_min_px": 640, "wide_min_px": 1024},
+            "validation_viewports_px": [390, 768, 1440],
+            "minimum_action_height_px": 44,
+            "mobile": {"reflow": "single-column", "preserve_source_order": true}
+          },
+          "tokens": {
+            "space": {"md": "16px"},
+            "size": {"body": "16px", "action-min": "44px"},
+            "container": {"site": "1200px", "content": "720px", "medium": "640px", "wide": "1024px"}
+          },
+          "rules": [
+            {
+              "id": "page-flow",
+              "layer": "global",
+              "target": {"role": "Page"},
+              "style": {"layout": {"flow": "stack", "width": "container"}}
+            }
+          ]
+        },
+        "css": "/* Generated from Layout AST v2. Do not edit this CSS directly. */\n@layer mh-layout, mh-skin, mh-decor, mh-motion;\n@layer mh-layout.base {\n  :root {\n    --mh-container-content: 720px;\n    --mh-container-medium: 640px;\n    --mh-container-site: 1200px;\n    --mh-container-wide: 1024px;\n    --mh-size-action-min: 44px;\n    --mh-size-body: 16px;\n    --mh-space-md: 16px;\n  }\n  \n  *, *::before, *::after { box-sizing: border-box; }\n  html, body { margin: 0; min-inline-size: 0; }\n  figure { margin: 0; min-inline-size: 0; }\n  img, svg, video, canvas, iframe { display: block; max-inline-size: 100%; block-size: auto; }\n  input, textarea, select, button { font: inherit; }\n  [data-mh-design-container] { container-type: inline-size; min-inline-size: 0; }\n  body { font-family: ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", \"Hiragino Sans\", sans-serif; line-height: 1.6; }\n}\n\n@layer mh-layout.global {\n  /* page-flow */\n  [data-mh-role=\"Page\"] {\n    display: flex;\n    flex-direction: column;\n    flex-wrap: nowrap;\n    width: min(100%, var(--mh-container-site, 72rem));\n    margin-inline: auto;\n  }\n}\n",
+        "ast_digest": "7a3b1466c7c3db02b425188ab597f385845b74dcade245ce34d3eb2383604e75",
+        "css_digest": "10ad47eabcdbc599670b7a14b08f4db2a59fb9e2ea6350eb4df5b3678166b4a5",
+        "compiler": "yutoseta/magic-html-layout-ast",
+        "compiler_version": "2.0"
+      }
+    }
+  ],
+  "validation": {
+    "status": "pending",
+    "validator": "magic-html-preview-service",
+    "validator_version": "1.0.0",
+    "subject": null,
+    "pages": [
+      {
+        "page_key": "home",
+        "route": "/",
+        "path": "page-home.html",
+        "viewports": [
+          {
+            "width_px": 390,
+            "height_px": 844,
+            "breakpoint": "compact",
+            "breakpoint_outcome": "pending",
+            "geometry_outcome": "pending",
+            "measurements": null,
+            "issues": []
+          },
+          {
+            "width_px": 768,
+            "height_px": 1024,
+            "breakpoint": "medium",
+            "breakpoint_outcome": "pending",
+            "geometry_outcome": "pending",
+            "measurements": null,
+            "issues": []
+          },
+          {
+            "width_px": 1440,
+            "height_px": 900,
+            "breakpoint": "wide",
+            "breakpoint_outcome": "pending",
+            "geometry_outcome": "pending",
+            "measurements": null,
+            "issues": []
+          }
+        ]
+      }
+    ]
+  },
+  "lineage": null
+}

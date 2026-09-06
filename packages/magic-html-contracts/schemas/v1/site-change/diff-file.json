@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/diff-file.json",
+  "title": "Immutable Site Change diff file entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "path", "previous_path", "before_blob_sha", "after_blob_sha", "before_mode", "after_mode", "patch", "patch_sha256", "additions", "deletions", "binary"],
+  "properties": {
+    "status": {"enum": ["added", "modified", "deleted", "renamed"]},
+    "path": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$)).+$"},
+    "previous_path": {"type": ["string", "null"], "maxLength": 1024, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$)).+$"},
+    "before_blob_sha": {"type": ["string", "null"], "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "after_blob_sha": {"type": ["string", "null"], "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "before_mode": {"type": ["string", "null"], "enum": ["100644", "100755", null], "description": "Previous regular-file Git mode. Symlink and submodule modes are forbidden."},
+    "after_mode": {"type": ["string", "null"], "enum": ["100644", "100755", null], "description": "New regular-file Git mode. Symlink and submodule modes are forbidden."},
+    "patch": {"type": ["string", "null"], "maxLength": 200000, "description": "Exact normalized UTF-8 unified patch for a text file, bounded to 200,000 characters. Binary entries use null. The whole manifest response is limited to 5,000,000 bytes by the service."},
+    "patch_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$", "description": "SHA-256 of the exact stored normalized patch bytes for this file; binary entries hash their exact stored binary-diff descriptor bytes."},
+    "additions": {"type": "integer", "minimum": 0, "maximum": 100000},
+    "deletions": {"type": "integer", "minimum": 0, "maximum": 100000},
+    "binary": {"type": "boolean"}
+  },
+  "allOf": [
+    {"if": {"properties": {"status": {"const": "added"}}, "required": ["status"]}, "then": {"properties": {"before_blob_sha": {"type": "null"}, "after_blob_sha": {"type": "string"}, "before_mode": {"type": "null"}, "after_mode": {"type": "string"}, "previous_path": {"type": "null"}}}},
+    {"if": {"properties": {"status": {"const": "deleted"}}, "required": ["status"]}, "then": {"properties": {"before_blob_sha": {"type": "string"}, "after_blob_sha": {"type": "null"}, "before_mode": {"type": "string"}, "after_mode": {"type": "null"}, "previous_path": {"type": "null"}}}},
+    {"if": {"properties": {"status": {"enum": ["modified", "renamed"]}}, "required": ["status"]}, "then": {"properties": {"before_blob_sha": {"type": "string"}, "after_blob_sha": {"type": "string"}, "before_mode": {"type": "string"}, "after_mode": {"type": "string"}}}},
+    {"if": {"properties": {"status": {"const": "renamed"}}, "required": ["status"]}, "then": {"properties": {"previous_path": {"type": "string", "minLength": 1}}}, "else": {"properties": {"previous_path": {"type": "null"}}}},
+    {"if": {"properties": {"binary": {"const": true}}, "required": ["binary"]}, "then": {"properties": {"patch": {"type": "null"}}}, "else": {"properties": {"patch": {"type": "string"}}}}
+  ]
+}

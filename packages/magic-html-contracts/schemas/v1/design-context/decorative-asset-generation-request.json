@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/design-context/decorative-asset-generation-request.json",
+  "title": "Generate Selected Decorative Asset Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "canvas", "asset_spec", "plan_sha256"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "canvas": { "$ref": "./common.json#/$defs/canvasReference" },
+    "asset_spec": { "$ref": "./common.json#/$defs/assetSpec" },
+    "plan_sha256": { "$ref": "./common.json#/$defs/sha256" },
+    "execution_profile": { "$ref": "./common.json#/$defs/executionProfile" }
+  }
+}

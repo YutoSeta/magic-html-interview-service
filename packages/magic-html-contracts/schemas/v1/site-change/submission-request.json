@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/submission-request.json",
+  "title": "Submit an immutable Site Change branch or pull request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "mode", "expected_base_sha", "expected_head_sha", "expected_diff_digest", "title"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "mode": {"enum": ["branch", "pull_request"]},
+    "expected_base_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "expected_head_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "expected_diff_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 255},
+    "body": {"type": ["string", "null"], "maxLength": 10000}
+  }
+}

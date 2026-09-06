@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/patch-snapshot-result.json",
+  "title": "Patched Layout Snapshot candidate result",
+  "description": "The shared write-once Layout Snapshot resource envelope constrained to the new candidate/pending snapshot produced by a finite Layout patch.",
+  "allOf": [
+    {"$ref": "create-snapshot-result.json"},
+    {
+      "type": "object",
+      "properties": {
+        "layout_snapshot": {
+          "allOf": [
+            {"$ref": "snapshot.json"},
+            {
+              "properties": {
+                "status": {"const": "candidate"},
+                "validation": {
+                  "allOf": [
+                    {"$ref": "validation-result.json"},
+                    {"properties": {"status": {"const": "pending"}}}
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

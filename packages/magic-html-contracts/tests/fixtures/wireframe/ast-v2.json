@@ -1,0 +1,334 @@
+{
+  "version": 2,
+  "locale": "ja",
+  "pages": [
+    {
+      "key": "home",
+      "path": "/",
+      "title": "ウェブ修理工房",
+      "root": {
+        "type": "Region",
+        "id": "home-document",
+        "semantic": "document",
+        "layout": "stack",
+        "journey_stage": "none",
+        "emphasis": "neutral",
+        "children": [
+          {
+            "type": "Region",
+            "id": "home-header",
+            "semantic": "header",
+            "layout": "cluster",
+            "journey_stage": "none",
+            "emphasis": "supporting",
+            "children": [
+              {
+                "type": "Text",
+                "id": "home-brand",
+                "role": "label",
+                "content": "ウェブ修理工房"
+              },
+              {
+                "type": "Region",
+                "id": "home-navigation",
+                "semantic": "navigation",
+                "layout": "cluster",
+                "journey_stage": "none",
+                "emphasis": "neutral",
+                "children": [
+                  {
+                    "type": "Link",
+                    "id": "home-navigation-consultation",
+                    "label": "無料相談",
+                    "href": "#consultation",
+                    "emphasis": "primary"
+                  },
+                  {
+                    "type": "Link",
+                    "id": "home-navigation-privacy",
+                    "label": "個人情報の取扱い",
+                    "href": "/privacy",
+                    "emphasis": "plain"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Region",
+            "id": "home-main",
+            "semantic": "main",
+            "layout": "stack",
+            "journey_stage": "none",
+            "emphasis": "neutral",
+            "children": [
+              {
+                "type": "Region",
+                "id": "promise",
+                "semantic": "section",
+                "layout": "split-wide-start",
+                "journey_stage": "attention",
+                "emphasis": "primary",
+                "children": [
+                  {
+                    "type": "Region",
+                    "id": "promise-copy",
+                    "semantic": "group",
+                    "layout": "stack",
+                    "journey_stage": "attention",
+                    "emphasis": "strong",
+                    "children": [
+                      {
+                        "type": "Text",
+                        "id": "promise-eyebrow",
+                        "role": "eyebrow",
+                        "content": "壊れても、直せるウェブへ。"
+                      },
+                      {
+                        "type": "Text",
+                        "id": "promise-title",
+                        "role": "heading-1",
+                        "content": "作り直す前に、まず直せるか診断します"
+                      },
+                      {
+                        "type": "Text",
+                        "id": "promise-summary",
+                        "role": "summary",
+                        "content": "古いサイトや他社制作サイトを確認し、必要最小限の修理から検討します。"
+                      },
+                      {
+                        "type": "Link",
+                        "id": "promise-action",
+                        "label": "URLだけで相談する",
+                        "href": "#consultation",
+                        "emphasis": "primary"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Image",
+                    "id": "promise-image",
+                    "alt": "修理前後のウェブサイトを比較する画面の配置意図",
+                    "caption": "診断対象と修理結果を同じ画面で比較",
+                    "aspect": "4:3"
+                  }
+                ]
+              },
+              {
+                "type": "Region",
+                "id": "consultation",
+                "semantic": "section",
+                "layout": "split-wide-end",
+                "journey_stage": "action",
+                "emphasis": "strong",
+                "children": [
+                  {
+                    "type": "Region",
+                    "id": "consultation-copy",
+                    "semantic": "aside",
+                    "layout": "stack",
+                    "journey_stage": "action",
+                    "emphasis": "supporting",
+                    "children": [
+                      {
+                        "type": "Text",
+                        "id": "consultation-title",
+                        "role": "heading-2",
+                        "content": "まずはURLと症状をお送りください"
+                      },
+                      {
+                        "type": "Text",
+                        "id": "consultation-hours",
+                        "role": "body",
+                        "content": "相談フォームは24時間受付。営業時間は9:00〜18:00です。"
+                      },
+                      {
+                        "type": "Button",
+                        "id": "consultation-explain",
+                        "label": "入力項目を確認する",
+                        "button_type": "button",
+                        "emphasis": "secondary"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Region",
+                    "id": "consultation-form",
+                    "semantic": "form",
+                    "layout": "stack",
+                    "journey_stage": "action",
+                    "emphasis": "primary",
+                    "children": [
+                      {
+                        "type": "Input",
+                        "id": "consultation-site-url",
+                        "input_type": "url",
+                        "label": "サイトURL",
+                        "name": "site_url",
+                        "placeholder": "https://example.jp",
+                        "required": true
+                      },
+                      {
+                        "type": "Input",
+                        "id": "consultation-email",
+                        "input_type": "email",
+                        "label": "メールアドレス",
+                        "name": "email",
+                        "placeholder": "name@example.jp",
+                        "required": true
+                      },
+                      {
+                        "type": "Input",
+                        "id": "consultation-phone",
+                        "input_type": "tel",
+                        "label": "電話番号",
+                        "name": "phone",
+                        "placeholder": null,
+                        "required": false
+                      },
+                      {
+                        "type": "Select",
+                        "id": "consultation-symptom",
+                        "label": "主な症状",
+                        "name": "symptom",
+                        "placeholder": "近いものを選択",
+                        "required": true,
+                        "options": [
+                          { "label": "フォームが届かない", "value": "form" },
+                          { "label": "スマホ表示が崩れる", "value": "mobile" },
+                          { "label": "更新できない", "value": "update" }
+                        ]
+                      },
+                      {
+                        "type": "Textarea",
+                        "id": "consultation-detail",
+                        "label": "気になる症状",
+                        "name": "detail",
+                        "placeholder": "分かる範囲でご記入ください",
+                        "required": true
+                      },
+                      {
+                        "type": "Checkbox",
+                        "id": "consultation-consent",
+                        "label": "個人情報の取扱いに同意します",
+                        "name": "privacy_consent",
+                        "value": "accepted",
+                        "required": true
+                      },
+                      {
+                        "type": "Button",
+                        "id": "consultation-submit",
+                        "label": "無料相談を送信する",
+                        "button_type": "submit",
+                        "emphasis": "primary"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Region",
+            "id": "home-footer",
+            "semantic": "footer",
+            "layout": "cluster",
+            "journey_stage": "none",
+            "emphasis": "supporting",
+            "children": [
+              {
+                "type": "Text",
+                "id": "home-footer-note",
+                "role": "small",
+                "content": "合同会社eclair"
+              },
+              {
+                "type": "Link",
+                "id": "home-footer-privacy",
+                "label": "プライバシーポリシー",
+                "href": "/privacy",
+                "emphasis": "plain"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "key": "privacy",
+      "path": "/privacy",
+      "title": "プライバシーポリシー",
+      "root": {
+        "type": "Region",
+        "id": "privacy-document",
+        "semantic": "document",
+        "layout": "stack",
+        "journey_stage": "none",
+        "emphasis": "neutral",
+        "children": [
+          {
+            "type": "Region",
+            "id": "privacy-main",
+            "semantic": "main",
+            "layout": "stack",
+            "journey_stage": "none",
+            "emphasis": "neutral",
+            "children": [
+              {
+                "type": "Region",
+                "id": "privacy-introduction",
+                "semantic": "section",
+                "layout": "stack",
+                "journey_stage": "none",
+                "emphasis": "standard",
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "privacy-title",
+                    "role": "heading-1",
+                    "content": "プライバシーポリシー"
+                  },
+                  {
+                    "type": "Text",
+                    "id": "privacy-summary",
+                    "role": "body",
+                    "content": "取得する情報と利用目的を定め、必要な範囲で適切に取り扱います。"
+                  }
+                ]
+              },
+              {
+                "type": "Region",
+                "id": "privacy-contact",
+                "semantic": "section",
+                "layout": "stack",
+                "journey_stage": "action",
+                "emphasis": "supporting",
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "privacy-contact-title",
+                    "role": "heading-2",
+                    "content": "お問い合わせ"
+                  },
+                  {
+                    "type": "Text",
+                    "id": "privacy-contact-body",
+                    "role": "body",
+                    "content": "個人情報の取扱いに関するお問い合わせは運営者窓口で受け付けます。"
+                  },
+                  {
+                    "type": "Link",
+                    "id": "privacy-back-home",
+                    "label": "無料相談へ戻る",
+                    "href": "/",
+                    "emphasis": "secondary"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

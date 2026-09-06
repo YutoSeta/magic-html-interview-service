@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge-source/connection-update-request.json",
+  "title": "Update Knowledge source connection",
+  "type": "object",
+  "required": ["contract_version", "expected_version", "driver"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "expected_version": {"type": "integer", "minimum": 1},
+    "driver": {"enum": ["google_drive", "rss", "wordpress", "storage", "line_works"], "description": "Immutable driver assertion."},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "configuration": {"$ref": "configuration.json"},
+    "credentials": {"$ref": "credentials.json"},
+    "active": {"type": "boolean"}
+  }
+}

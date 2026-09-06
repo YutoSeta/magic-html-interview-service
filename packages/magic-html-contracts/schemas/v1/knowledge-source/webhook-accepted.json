@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge-source/webhook-accepted.json",
+  "title": "LINE WORKS source callback accepted",
+  "type": "object",
+  "required": ["contract_version", "accepted", "replayed", "event_id"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "accepted": {"const": true},
+    "replayed": {"type": "boolean"},
+    "event_id": {"type": "string", "format": "uuid"}
+  }
+}

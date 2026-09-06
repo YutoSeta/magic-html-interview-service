@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/conversation.json",
+  "title": "Messaging conversation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "tenant_id", "channel_id", "external_conversation_id", "subject", "status", "metadata", "created_at", "updated_at"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "format": "uuid"},
+    "channel_id": {"type": "string", "format": "uuid"},
+    "external_conversation_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 191},
+    "subject": {"type": ["string", "null"], "maxLength": 200},
+    "status": {"enum": ["open", "closed"]},
+    "metadata": {"$ref": "metadata.json"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

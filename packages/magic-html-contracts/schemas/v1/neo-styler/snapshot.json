@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/neo-styler/snapshot.json",
+  "title": "Neo Styler Site Snapshot",
+  "description": "The authored site. Each page's html is a complete document with the reset stylesheet and its own stylesheet linked root-relatively (/css/reset.css, /css/<page>.css) and the fixed parts filled in; css is that stylesheet's text. Image slots are rendered as placeholders carrying data-img-* attributes and listed in image_requests for a caller to generate and bind. Pages and stylesheets map one-to-one onto static-build/request.json pages and assets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "site_id", "digest", "pages", "image_requests", "telemetry"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "site_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+    "digest": { "$ref": "./common.json#/$defs/sha256", "description": "SHA-256 over pages sorted by path: path + NUL + sha256(html) + NUL + sha256(css) + NUL for each." },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 300,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "path", "kind", "title", "html", "css", "authored_by"],
+        "properties": {
+          "key": { "type": "string", "maxLength": 80 },
+          "path": { "type": "string", "pattern": "^/", "maxLength": 200 },
+          "kind": { "enum": ["top", "landing", "page", "collection_list", "collection_show", "sitemap", "system_404"] },
+          "title": { "type": "string", "maxLength": 120 },
+          "html": { "type": "string", "minLength": 1, "maxLength": 1000000 },
+          "css": { "type": "string", "maxLength": 500000 },
+          "authored_by": { "enum": ["model", "expanded"], "description": "expanded: filled from the collection's first item without a model." },
+          "attempts": { "type": "integer", "minimum": 0, "maximum": 4 },
+          "judge": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["passed", "findings"],
+            "properties": {
+              "passed": { "type": "boolean" },
+              "findings": { "type": "array", "maxItems": 50, "items": { "type": "string", "maxLength": 500 } }
+            }
+          }
+        }
+      }
+    },
+    "image_requests": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slot", "page_path", "spec"],
+        "properties": {
+          "slot": { "$ref": "./common.json#/$defs/slotName" },
+          "page_path": { "type": "string", "pattern": "^/", "maxLength": 200 },
+          "shared": { "type": "boolean", "default": false, "description": "The same image appears on more than one page (e.g. a page's digest on the top page); generate it once." },
+          "spec": { "$ref": "./common.json#/$defs/imageSpec" }
+        }
+      }
+    },
+    "telemetry": { "$ref": "./common.json#/$defs/telemetry" }
+  }
+}

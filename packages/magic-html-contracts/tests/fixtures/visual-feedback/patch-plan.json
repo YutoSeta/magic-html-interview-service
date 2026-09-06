@@ -1,0 +1,13 @@
+{
+  "contract_version": "1.0",
+  "stage": "layout",
+  "base_ast_digest": "7a3b1466c7c3db02b425188ab597f385845b74dcade245ce34d3eb2383604e75",
+  "issues": [
+    {
+      "target_id": "page-flow",
+      "viewport": {"max_width": 719},
+      "problem": "unintended_wrap",
+      "operation": {"type": "set_cluster_wrap", "value": "wrap"}
+    }
+  ]
+}

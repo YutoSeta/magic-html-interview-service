@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/conversation-create-request.json",
+  "title": "Create Messaging conversation request",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "external_conversation_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 191, "description": "When non-null, unique within the channel."},
+    "subject": {"type": ["string", "null"], "maxLength": 200},
+    "metadata": {"$ref": "metadata.json"}
+  }
+}

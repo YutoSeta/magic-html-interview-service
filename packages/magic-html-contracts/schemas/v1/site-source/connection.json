@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-source/connection.json",
+  "title": "Site Source Connection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "tenant_id", "site_id", "name", "driver", "configuration", "credentials_configured", "verification_status", "verified_at", "created_at", "updated_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 100},
+    "driver": {"enum": ["github", "sftp", "ftps", "ftp"]},
+    "configuration": {
+      "oneOf": [
+        {"$ref": "connection-create-request.json#/$defs/github_configuration"},
+        {"$ref": "connection-create-request.json#/$defs/sftp_configuration"},
+        {"$ref": "connection-create-request.json#/$defs/ftps_configuration"},
+        {"$ref": "connection-create-request.json#/$defs/ftp_configuration"}
+      ]
+    },
+    "credentials_configured": {"const": true},
+    "verification_status": {"enum": ["unverified", "verified", "failed"]},
+    "verified_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

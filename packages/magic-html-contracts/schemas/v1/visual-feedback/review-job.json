@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/review-job.json",
+  "title": "Visual stage review job",
+  "description": "An asynchronous multimodal review whose only successful correction output is the finite, digest-bound patch plan in review-result.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "status", "created_at", "updated_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "result": {"$ref": "review-result.json"},
+    "error": {"type": ["object", "null"], "maxProperties": 30},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "succeeded"}}, "required": ["status"]},
+      "then": {"required": ["result", "error"], "properties": {"error": {"const": null}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}, "required": ["status"]},
+      "then": {"required": ["error"]}
+    }
+  ]
+}

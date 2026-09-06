@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/publication-list-query.json",
+  "title": "Channel publication list query",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "connection_id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "dispatching", "succeeded", "failed", "unknown"]},
+    "page": {"type": "integer", "minimum": 1, "default": 1},
+    "per_page": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25}
+  }
+}

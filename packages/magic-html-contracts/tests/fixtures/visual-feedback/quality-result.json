@@ -1,0 +1,70 @@
+{
+  "profile": "balanced-order-richness-v1",
+  "algorithm_version": "1.1.0",
+  "subject_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+  "objective_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+  "rubric_digest": "33993231fc66fd321d37cdb7187c2e0017a311eed9acfab31c31b75adf69c44d",
+  "evidence_digest": "8ed6351c12f9d6915adfa685aab2c270855f58af31ced9d345e8a291dc330b9a",
+  "evidence_coverage": {
+    "required_ids": ["cdp:390", "cdp:768", "cdp:1440", "shot:390", "shot:768", "shot:1440", "objective:brief"],
+    "observed_ids": ["cdp:390", "cdp:768", "cdp:1440", "shot:390", "shot:768", "shot:1440", "objective:brief"],
+    "missing_ids": [],
+    "complete": true
+  },
+  "source_evidence_digests": {
+    "browser": "afb2331b0c166c5e9dceec896d6f4fdb3292b32b0b9a3803cff466d3092ebb75",
+    "screenshot_reviewer": "59b32cd5864ab5a21108bb7138db9c968a0a847ce706456c36b22f56ffd3d3cc",
+    "agentic": "ff4acfa1a7710115f18f9215e9294bdad551ffeabede59ed47d4cf0e9cf4a471"
+  },
+  "evidence_bindings": {
+    "hard_gates": {
+      "readability": [
+        {"source": "browser", "outcome": "passed", "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]},
+        {"source": "screenshot_reviewer", "outcome": "passed", "evidence_ids": ["shot:390", "shot:768", "shot:1440"]}
+      ],
+      "accessibility": [{"source": "browser", "outcome": "passed", "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]}],
+      "responsive_integrity": [{"source": "browser", "outcome": "passed", "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]}],
+      "operability": [{"source": "browser", "outcome": "passed", "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]}],
+      "visual_hierarchy": [{"source": "screenshot_reviewer", "outcome": "passed", "evidence_ids": ["shot:390", "shot:768", "shot:1440"]}],
+      "information_priority": [{"source": "agentic", "outcome": "passed", "evidence_ids": ["objective:brief", "shot:390", "shot:1440"]}],
+      "primary_action_clarity": [{"source": "agentic", "outcome": "passed", "evidence_ids": ["objective:brief", "shot:390", "shot:1440"]}]
+    },
+    "accessibility": ["cdp:390", "cdp:768", "cdp:1440"],
+    "order": {
+      "hierarchy": ["shot:390", "shot:768", "shot:1440"], "alignment": ["shot:390", "shot:768", "shot:1440"],
+      "spacing_rhythm": ["shot:390", "shot:768", "shot:1440"], "component_consistency": ["shot:390", "shot:768", "shot:1440"],
+      "visual_system_consistency": ["shot:390", "shot:768", "shot:1440"]
+    },
+    "richness": {
+      "useful_information_density": ["shot:390", "shot:768", "shot:1440"], "focal_variety": ["shot:390", "shot:768", "shot:1440"],
+      "content_specificity": ["shot:390", "shot:768", "shot:1440"], "brand_distinctiveness": ["shot:390", "shot:768", "shot:1440"]
+    },
+    "purpose_fit": ["objective:brief", "shot:390", "shot:1440"]
+  },
+  "assessment": {
+    "order": {"hierarchy": 84, "alignment": 82, "spacing_rhythm": 81, "component_consistency": 83, "visual_system_consistency": 80},
+    "richness": {"useful_information_density": 79, "focal_variety": 78, "content_specificity": 82, "brand_distinctiveness": 77},
+    "purpose_fit": 85,
+    "accessibility": 86,
+    "gates": {"readability": true, "accessibility": true, "responsive_integrity": true, "operability": true, "visual_hierarchy": true, "information_priority": true, "primary_action_clarity": true}
+  },
+  "weights": {
+    "order": {"hierarchy": 0.25, "alignment": 0.2, "spacing_rhythm": 0.2, "component_consistency": 0.2, "visual_system_consistency": 0.15},
+    "richness": {"useful_information_density": 0.35, "focal_variety": 0.3, "content_specificity": 0.15, "brand_distinctiveness": 0.2}
+  },
+  "weights_bp": {
+    "order": {"hierarchy": 2500, "alignment": 2000, "spacing_rhythm": 2000, "component_consistency": 2000, "visual_system_consistency": 1500},
+    "richness": {"useful_information_density": 3500, "focal_variety": 3000, "content_specificity": 1500, "brand_distinctiveness": 2000}
+  },
+  "scores": {"order": 82.2, "richness": 78.75, "core": 80.46, "purpose_fit": 85, "accessibility": 86, "final": 68.39},
+  "scores_bp": {"order": 8220, "richness": 7875, "core": 8046, "purpose_fit": 8500, "accessibility": 8600, "final": 6839},
+  "gate_outcomes": {"readability": "passed", "accessibility": "passed", "responsive_integrity": "passed", "operability": "passed", "visual_hierarchy": "passed", "information_priority": "passed", "primary_action_clarity": "passed"},
+  "gates_passed": true,
+  "failed_gates": [],
+  "score_floors": {"order": 60, "richness": 50, "purpose_fit": 70, "accessibility": 80, "final": 50},
+  "score_floors_bp": {"order": 6000, "richness": 5000, "purpose_fit": 7000, "accessibility": 8000, "final": 5000},
+  "score_floors_passed": true,
+  "failed_score_floors": [],
+  "automation_ready": true,
+  "scorecard_digest": "0504160d2013b7a0fcc97156b31d53cf3fc87e8ed816a94ceeb923f060e7be73"
+}

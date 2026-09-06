@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/non-root-pointer.json",
+  "title": "Revision-pinned non-root Composer AST pointer",
+  "description": "A positional pointer to a non-root AST item in the revision identified by base_revision and the matching strong If-Match header.",
+  "type": "string",
+  "pattern": "^(/children/(0|[1-9][0-9]*))+$"
+}

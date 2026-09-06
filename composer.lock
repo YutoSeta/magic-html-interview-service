@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee5f0bedf2cd6fa93d60999d34f97ddd",
+    "content-hash": "8f79ef8356e0cb8b782e554822b8b53e",
     "packages": [
         {
             "name": "brick/math",
@@ -6093,16 +6093,16 @@
         },
         {
             "name": "yutoseta/laravel-admin",
-            "version": "v0.1.2",
+            "version": "v0.1.4",
             "source": {
                 "type": "git",
                 "url": "git@github.com:YutoSeta/magic-html-laravel-admin.git",
-                "reference": "fd71314924b110846f096f003c4bb787a96cbd43"
+                "reference": "34849a727c6ec14d917cd3f15e8916bb7b90bbec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/YutoSeta/magic-html-laravel-admin/zipball/fd71314924b110846f096f003c4bb787a96cbd43",
-                "reference": "fd71314924b110846f096f003c4bb787a96cbd43",
+                "url": "https://api.github.com/repos/YutoSeta/magic-html-laravel-admin/zipball/34849a727c6ec14d917cd3f15e8916bb7b90bbec",
+                "reference": "34849a727c6ec14d917cd3f15e8916bb7b90bbec",
                 "shasum": ""
             },
             "require": {
@@ -6146,10 +6146,10 @@
             ],
             "description": "Composable Laravel administration primitives and orchestration contracts for tenant access, typed settings, encrypted secrets, and revision publishing.",
             "support": {
-                "source": "https://github.com/YutoSeta/magic-html-laravel-admin/tree/v0.1.2",
+                "source": "https://github.com/YutoSeta/magic-html-laravel-admin/tree/v0.1.4",
                 "issues": "https://github.com/YutoSeta/magic-html-laravel-admin/issues"
             },
-            "time": "2026-08-27T08:53:10+00:00"
+            "time": "2026-08-27T23:57:02+00:00"
         },
         {
             "name": "yutoseta/laravel-llm-adapter",
@@ -6217,11 +6217,11 @@
         },
         {
             "name": "yutoseta/magic-html-contracts",
-            "version": "1.15.0",
+            "version": "1.29.0",
             "dist": {
                 "type": "path",
                 "url": "packages/magic-html-contracts",
-                "reference": "0f38c4d7016a522595a1130b25c7e5ccfc1814ce"
+                "reference": "7b55bb7a504487d20c9f422d790d83c3e82d6efb"
             },
             "require": {
                 "php": "^8.3"

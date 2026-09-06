@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/styler/stage-subject-reference.json",
+  "title": "Styler stage subject reference",
+  "description": "A server-owned, immutable reference to the exact succeeded Skin, Decor, or Motion job revision reviewed by Visual Feedback. The Styler service resolves the referenced Stage Bundle and verifies both its canonical context digest and the selected stage AST digest; callers do not transport or reconstruct that authority payload.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "stage", "job_id", "context_digest", "ast_digest"],
+  "properties": {
+    "profile": {"const": "styler-stage-subject-reference-v1"},
+    "stage": {"enum": ["skin", "decor", "motion"]},
+    "job_id": {"type": "string", "format": "uuid"},
+    "context_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "ast_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

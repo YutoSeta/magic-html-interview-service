@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-source/connection-update-request.json",
+  "title": "Site Source Connection Update Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "driver"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "driver": {"enum": ["github", "sftp", "ftps", "ftp"]},
+    "name": {"type": "string", "minLength": 1, "maxLength": 100},
+    "configuration": {"type": "object"},
+    "credentials": {"type": "object"}
+  },
+  "anyOf": [{"required": ["name"]}, {"required": ["configuration"]}, {"required": ["credentials"]}],
+  "allOf": [
+    {
+      "if": {"properties": {"driver": {"const": "github"}}},
+      "then": {"properties": {"configuration": {"$ref": "connection-create-request.json#/$defs/github_configuration"}, "credentials": {"$ref": "connection-create-request.json#/$defs/github_credentials"}}}
+    },
+    {
+      "if": {"properties": {"driver": {"const": "sftp"}}},
+      "then": {"properties": {"configuration": {"$ref": "connection-create-request.json#/$defs/sftp_configuration"}, "credentials": {"$ref": "connection-create-request.json#/$defs/sftp_credentials"}}}
+    },
+    {
+      "if": {"properties": {"driver": {"const": "ftps"}}},
+      "then": {"properties": {"configuration": {"$ref": "connection-create-request.json#/$defs/ftps_configuration"}, "credentials": {"$ref": "connection-create-request.json#/$defs/password_credentials"}}}
+    },
+    {
+      "if": {"properties": {"driver": {"const": "ftp"}}},
+      "then": {"properties": {"configuration": {"$ref": "connection-create-request.json#/$defs/ftp_configuration"}, "credentials": {"$ref": "connection-create-request.json#/$defs/password_credentials"}}}
+    }
+  ]
+}

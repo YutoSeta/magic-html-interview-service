@@ -1,8 +1,172 @@
 {
   "openapi": "3.1.0",
-  "info": {"title": "Magic HTML Tier 1 APIs", "version": "1.10.0", "description": "Independent styling, forms, content, collection, media, illustration, replay-safe interview, knowledge retrieval, approval, static-site import, safe static-page target inspection and editing, and isolated preview services."},
+  "info": {"title": "Magic HTML Tier 1 APIs", "version": "1.21.0", "description": "Design Context (Design DNA, direction prose, mobile and desktop canvases, decorative assets), Neo Styler page authoring (a model writes HTML and CSS inside slot, link and judge seat belts), independent styling with immutable Layout Snapshots, signed same-run CDP browser evidence, and finite visual-feedback loops, forms, content, collection, media, illustration, deterministic semantic document templates, replay-safe fixed and generic intake interviews, knowledge retrieval and document lifecycle, tenant-isolated CRM and Messaging, bounded outbound Channel publishing, tenant-safe Measurement and Presence reporting and confirmed writes, isolated remote site-source acquisition, Approval including immutable site-change artifacts, static-site import, safe static-page target inspection and editing, and isolated preview services."},
   "servers": [{"url": "/api"}],
   "paths": {
+    "/v1/template-inspections": {
+      "post": {
+        "operationId": "inspectDocumentTemplate",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/inspect-request.json"}}}},
+        "responses": {"200": {"description": "Template manifest", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/inspect-result.json"}}}}}
+      }
+    },
+    "/v1/markdown-renders": {
+      "post": {
+        "operationId": "renderDocumentMarkdown",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/markdown-request.json"}}}},
+        "responses": {"200": {"description": "Self-contained document HTML", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/markdown-result.json"}}}}}
+      }
+    },
+    "/v1/templates/{template}": {
+      "parameters": [{"name": "template", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"}}],
+      "put": {
+        "operationId": "putDocumentTemplateVersion",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/upsert-request.json"}}}},
+        "responses": {"200": {"description": "Current immutable template version", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/template-result.json"}}}}}
+      },
+      "get": {
+        "operationId": "getCurrentDocumentTemplate",
+        "security": [{"serviceBearer": []}],
+        "responses": {"200": {"description": "Current immutable template version", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/template-result.json"}}}}}
+      }
+    },
+    "/v1/templates/{template}/versions/{version}": {
+      "get": {
+        "operationId": "getDocumentTemplateVersion",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"name": "template", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "version", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^v1-[a-f0-9]{20}$"}}
+        ],
+        "responses": {"200": {"description": "Pinned immutable template version", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/template-result.json"}}}}}
+      }
+    },
+    "/v1/templates/{template}/bindings": {
+      "post": {
+        "operationId": "bindDocumentTemplate",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"name": "template", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/bind-request.json"}}}},
+        "responses": {"200": {"description": "Filled HTML derived from the pinned template", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/template/bind-result.json"}}}}}
+      }
+    },
+    "/v1/intake-templates/{template}": {
+      "put": {
+        "operationId": "putGenericIntakeTemplate",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"name": "template", "in": "path", "required": true, "schema": {"type": "string"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/intake-template-request.json"}}}},
+        "responses": {
+          "200": {"description": "Existing identical immutable intake definition", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/intake-template-result.json"}}}},
+          "201": {"description": "Created immutable intake definition", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/intake-template-result.json"}}}},
+          "409": {"description": "The key already represents another definition"}
+        }
+      }
+    },
+    "/v1/intake-templates/{template}/sessions": {
+      "post": {
+        "operationId": "createGenericIntakeSession",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"name": "template", "in": "path", "required": true, "schema": {"type": "string"}},
+          {"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 200}}
+        ],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/intake-session-request.json"}}}},
+        "responses": {
+          "200": {"description": "Idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/intake-session-result.json"}}}},
+          "201": {"description": "Created intake session and temporary signed URL", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/intake-session-result.json"}}}}
+        }
+      }
+    },
+    "/v1/intake-sessions/{interview}": {
+      "get": {
+        "operationId": "getGenericIntakeSession",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"name": "interview", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "responses": {"200": {"description": "Intake state and values", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/intake-session-status.json"}}}}}
+      }
+    },
+    "/v1/layout-snapshots": {
+      "post": {
+        "tags": ["Layout Snapshot"],
+        "operationId": "createLayoutSnapshotCandidate",
+        "description": "Compile Wireframe AST v2 through the common geometry-only Layout compiler and store the resulting site-level candidate/pending snapshot without browser validation.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/create-snapshot-request.json"}}}},
+        "responses": {
+          "200": {"description": "Existing byte-identical write-once candidate", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/create-snapshot-result.json"}}}},
+          "201": {"description": "Created write-once candidate", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/create-snapshot-result.json"}}}},
+          "422": {"description": "The Wireframe AST or Layout Snapshot is invalid"},
+          "503": {"description": "Layout Snapshot storage is unavailable"}
+        }
+      }
+    },
+    "/v1/layout-snapshots/{layoutSnapshot}": {
+      "parameters": [{"$ref": "#/components/parameters/LayoutSnapshot"}],
+      "get": {
+        "tags": ["Layout Snapshot"],
+        "operationId": "getLayoutSnapshot",
+        "description": "Resolve one immutable candidate or frozen Layout Snapshot by its content-addressed identifier.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Stored immutable Layout Snapshot", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/create-snapshot-result.json"}}}},
+          "404": {"description": "Layout Snapshot absent or expired"},
+          "503": {"description": "Layout Snapshot storage is unavailable"}
+        }
+      }
+    },
+    "/v1/layout-snapshots/{layoutSnapshot}/patches": {
+      "parameters": [{"$ref": "#/components/parameters/LayoutSnapshot"}],
+      "post": {
+        "tags": ["Layout Snapshot", "Visual Feedback"],
+        "operationId": "patchLayoutSnapshotCandidate",
+        "description": "Apply a non-empty digest-bound Layout-only finite patch plan and store a new immutable candidate/pending snapshot. The source candidate is never mutated.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/patch-snapshot-request.json"}}}},
+        "responses": {
+          "200": {"description": "Existing byte-identical patched candidate", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/patch-snapshot-result.json"}}}},
+          "201": {"description": "Created patched candidate", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/patch-snapshot-result.json"}}}},
+          "404": {"description": "Source candidate absent or expired"},
+          "422": {"description": "Stale digest, foreign-stage operation, no-op, or invalid finite Layout patch"},
+          "503": {"description": "Layout Snapshot storage is unavailable"}
+        }
+      }
+    },
+    "/v1/layout-snapshots/{layoutSnapshot}/freeze": {
+      "parameters": [{"$ref": "#/components/parameters/LayoutSnapshot"}],
+      "post": {
+        "tags": ["Layout Snapshot"],
+        "operationId": "freezeLayoutSnapshot",
+        "description": "Create a new immutable frozen snapshot only when Preview supplies passed candidate-bound geometry validation for every page at 390, 768, and 1440 CSS pixels.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/freeze-snapshot-request.json"}}}},
+        "responses": {
+          "200": {"description": "Existing byte-identical frozen snapshot", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/freeze-snapshot-result.json"}}}},
+          "201": {"description": "Created frozen snapshot", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/layout/freeze-snapshot-result.json"}}}},
+          "404": {"description": "Candidate absent or expired"},
+          "422": {"description": "Candidate digest or Preview validation attestation is invalid"},
+          "503": {"description": "Layout Snapshot storage is unavailable"}
+        }
+      }
+    },
+    "/v1/wireframe-presentations": {
+      "post": {
+        "tags": ["Layout Snapshot", "Wireframe"],
+        "operationId": "createWireframePresentation",
+        "description": "Render the exact Layout Snapshot source HTML and Layout CSS with fixed paint-only Wireframe Skin/Decor for review. The overlay is not included in downstream handoff.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/wireframe/presentation-request.json"}}}},
+        "responses": {
+          "200": {"description": "Deterministic Wireframe presentation", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/wireframe/presentation-result.json"}}}},
+          "404": {"description": "Referenced Layout Snapshot absent or expired"},
+          "422": {"description": "Layout Snapshot reference integrity check failed"},
+          "503": {"description": "Layout Snapshot storage is unavailable"}
+        }
+      }
+    },
     "/v1/style-jobs": {
       "post": {
         "operationId": "createStyleJob",
@@ -12,6 +176,112 @@
       }
     },
     "/v1/style-jobs/{job}": {"get": {"operationId": "getStyleJob", "responses": {"200": {"description": "Current style job"}}}},
+    "/v1/pipeline-jobs": {
+      "post": {
+        "tags": ["Styler"],
+        "operationId": "createStylerPipelineJob",
+        "description": "Run Layout, Skin, Decor, and Motion. Contract 1.3 requires a frozen Layout Snapshot reference, reuses its exact Layout AST/CSS without a Layout LLM call, and produces later stages from that shared source.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/StylerIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/styler/pipeline-request.json"}}}},
+        "responses": {
+          "202": {"description": "Pipeline accepted or exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/styler/pipeline-job.json"}}}},
+          "409": {"description": "Idempotency conflict or inconsistent Layout Snapshot"},
+          "422": {"description": "The selected pipeline contract is invalid"},
+          "503": {"description": "Layout Snapshot resolution is unavailable"}
+        }
+      }
+    },
+    "/v1/pipeline-jobs/{job}": {
+      "parameters": [{"$ref": "#/components/parameters/StylerJob"}],
+      "get": {
+        "tags": ["Styler"],
+        "operationId": "getStylerPipelineJob",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Current pipeline job and, when succeeded, the immutable Stage Bundle", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/styler/pipeline-job.json"}}}},
+          "404": {"description": "Pipeline job absent or expired"}
+        }
+      }
+    },
+    "/v1/visual-review-jobs": {
+      "post": {
+        "tags": ["Visual Feedback"],
+        "operationId": "createVisualReviewJob",
+        "description": "Review one pending-candidate Layout, Skin, Decor, or Motion AST against signed screenshots and optional Preview-signed same-run CDP evidence. Layout authority is layout_snapshot_ref; Skin, Decor, and Motion authority is the server-owned stage_subject_ref emitted by a succeeded stage job or immutable finite-patch revision, never a caller-transported Stage Bundle. Omission of browser evidence is compatibility-only and fails automated evidence coverage closed. CDP, Screenshot Reviewer, and objective-bound agentic evidence are independently digest-bound; no source can approve alone. Design Core algorithm 1.1 returns the exact scorecard, then policy 1.1 returns the exact bounded-loop decision. The loop permits at most four evaluations and three accepted finite patches. loop_context is server-owned state loaded by the service or carried only through service-authenticated transport; state_digest is integrity, not authentication. Frozen Layout Snapshots are immutable downstream inputs and are not patch-review subjects.",
+        "x-magic-html-capture-boundary": {
+          "preview_service_review": ["rest", "enter"],
+          "local_in_app_agent": ["rest", "enter", "hover", "focus", "active", "open", "expanded", "disabled", "reduced-motion"],
+          "cloudflare_browser_run_cdp": "Preview service owns the Cloudflare CDP session and returns one signed screenshot plus DOM/geometry/accessibility envelope; submit it unchanged",
+          "evidence_identity": ["preview_id", "preview_snapshot_id", "entry_path", "viewport", "full_page", "capture_state", "sha256", "capture_receipt"]
+        },
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/StylerIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/review-request.json"}}}},
+        "responses": {
+          "202": {"description": "Visual review accepted or exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/review-job.json"}}}},
+          "409": {"description": "Idempotency conflict"},
+          "422": {"description": "Screenshot evidence, subject, or base digest is invalid"}
+        }
+      }
+    },
+    "/v1/visual-review-jobs/{job}": {
+      "parameters": [{"$ref": "#/components/parameters/StylerJob"}],
+      "get": {
+        "tags": ["Visual Feedback"],
+        "operationId": "getVisualReviewJob",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Current review job and, when succeeded, its exact Design Core 1.1 scorecard, loop decision, and finite patch plan", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/review-job.json"}}}},
+          "404": {"description": "Visual review job absent or expired"}
+        }
+      }
+    },
+    "/v1/skin-jobs/{job}/patches": {
+      "parameters": [{"$ref": "#/components/parameters/StylerJob"}],
+      "post": {
+        "tags": ["Styler", "Visual Feedback"],
+        "operationId": "applySkinVisualPatch",
+        "description": "Apply a digest-bound Skin-only finite patch to the completed Skin stage and create an immutable stage revision.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/patch-request.json"}}}},
+        "responses": {
+          "200": {"description": "Patched Skin stage and auditable digest delta", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/patch-result.json"}}}},
+          "404": {"description": "Completed Skin stage absent or expired"},
+          "422": {"description": "Stale digest, cross-stage operation, no-op, or invalid patch"}
+        }
+      }
+    },
+    "/v1/decor-jobs/{job}/patches": {
+      "parameters": [{"$ref": "#/components/parameters/StylerJob"}],
+      "post": {
+        "tags": ["Styler", "Visual Feedback"],
+        "operationId": "applyDecorVisualPatch",
+        "description": "Apply a digest-bound Decor-only finite patch to the completed Decor stage and create an immutable stage revision.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/patch-request.json"}}}},
+        "responses": {
+          "200": {"description": "Patched Decor stage and auditable digest delta", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/patch-result.json"}}}},
+          "404": {"description": "Completed Decor stage absent or expired"},
+          "422": {"description": "Stale digest, cross-stage operation, no-op, or invalid patch"}
+        }
+      }
+    },
+    "/v1/motion-jobs/{job}/patches": {
+      "parameters": [{"$ref": "#/components/parameters/StylerJob"}],
+      "post": {
+        "tags": ["Styler", "Visual Feedback"],
+        "operationId": "applyMotionVisualPatch",
+        "description": "Apply a digest-bound Motion-only finite patch to the completed Motion stage and create an immutable stage revision.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/patch-request.json"}}}},
+        "responses": {
+          "200": {"description": "Patched Motion stage and auditable digest delta", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/visual-feedback/patch-result.json"}}}},
+          "404": {"description": "Completed Motion stage absent or expired"},
+          "422": {"description": "Stale digest, cross-stage operation, no-op, or invalid patch"}
+        }
+      }
+    },
     "/v1/sites/{site}/forms/{form}": {"put": {"operationId": "upsertFormDefinition", "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/forms/definition.json"}}}}, "responses": {"200": {"description": "Form definition"}}}},
     "/v1/sites/{site}/forms/{form}/submissions": {
       "post": {
@@ -29,12 +299,25 @@
     "/v1/sites/{site}/media": {
       "post": {
         "operationId": "uploadMedia",
+        "security": [{"serviceBearer": []}],
+        "description": "Store an object privately. Text, HTML, CSV, OOXML, and SQLite documents remain authenticated attachment downloads and cannot be published.",
+        "x-magic-html-media-boundary": {"private_document_mime_types": ["text/plain", "text/markdown", "text/html", "text/csv", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.sqlite3"], "private_document_delivery": "authenticated_attachment", "private_document_publication": "forbidden", "content_processing": "none"},
         "requestBody": {"required": true, "content": {"multipart/form-data": {"schema": {"type": "object", "required": ["file"], "additionalProperties": false, "properties": {"file": {"type": "string", "format": "binary"}, "name": {"type": "string", "minLength": 1, "maxLength": 255}}}}}},
-        "responses": {"201": {"description": "Stored draft media asset", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/media/asset.json"}}}}}
+        "responses": {"201": {"description": "Stored private media asset", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/media/asset.json"}}}}, "401": {"$ref": "#/components/responses/MediaProblem"}, "422": {"$ref": "#/components/responses/MediaProblem"}}
       }
     },
-    "/v1/sites/{site}/media/{media}": {"get": {"operationId": "getMediaMetadata", "responses": {"200": {"description": "Media metadata", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/media/asset.json"}}}}}}},
-    "/v1/sites/{site}/media/{media}/file": {"get": {"operationId": "previewMedia", "responses": {"200": {"description": "Authenticated draft or published media bytes"}}}},
+    "/v1/sites/{site}/media/{media}": {
+      "get": {"operationId": "getMediaMetadata", "security": [{"serviceBearer": []}], "responses": {"200": {"description": "Media metadata", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/media/asset.json"}}}}, "401": {"$ref": "#/components/responses/MediaProblem"}, "404": {"$ref": "#/components/responses/MediaProblem"}}},
+      "delete": {
+        "operationId": "deletePrivateMedia",
+        "security": [{"serviceBearer": []}],
+        "description": "Delete one unpublished private object. Published objects are immutable. A partial failure is hidden from reads and remains retryable with the same request.",
+        "x-magic-html-private-delete": {"confirmation_required": true, "accepts_file": false, "published_assets_immutable": true, "success_requires": ["object_absent", "metadata_absent"], "failure_visibility": "not_readable_or_publishable", "retryable_failure_status": 503},
+        "responses": {"204": {"description": "Object and metadata are absent; no response body."}, "401": {"$ref": "#/components/responses/MediaProblem"}, "404": {"$ref": "#/components/responses/MediaProblem"}, "409": {"$ref": "#/components/responses/MediaProblem"}, "422": {"$ref": "#/components/responses/MediaProblem"}, "503": {"$ref": "#/components/responses/MediaProblem"}}
+      }
+    },
+    "/v1/sites/{site}/media/{media}/file": {"get": {"operationId": "previewMedia", "security": [{"serviceBearer": []}], "responses": {"200": {"description": "Authenticated media bytes; private document types use Content-Disposition: attachment."}, "401": {"$ref": "#/components/responses/MediaProblem"}, "404": {"$ref": "#/components/responses/MediaProblem"}}}},
+    "/v1/sites/{site}/media/{media}/publish": {"post": {"operationId": "publishMedia", "security": [{"serviceBearer": []}], "description": "Publish an existing media asset only when its MIME type is in the existing public-media allowlist.", "responses": {"200": {"description": "Published media metadata", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/media/asset.json"}}}}, "401": {"$ref": "#/components/responses/MediaProblem"}, "404": {"$ref": "#/components/responses/MediaProblem"}, "409": {"$ref": "#/components/responses/MediaProblem"}}}},
     "/media/{site}/{media}": {"get": {"operationId": "getPublishedMedia", "security": [], "responses": {"200": {"description": "Public immutable media bytes"}, "404": {"description": "Media is absent or not published"}}}},
     "/v1/illustration-jobs": {
       "post": {
@@ -99,9 +382,12 @@
       "delete": {"operationId": "deleteStaticSitePreview", "responses": {"204": {"description": "Preview deleted"}}}
     },
     "/v1/previews/{preview}/screenshots": {
+      "parameters": [{"name": "preview", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
       "post": {
         "operationId": "captureStaticSitePreview",
-        "description": "Render the isolated preview in a real headless browser and return image bytes.",
+        "description": "Render the isolated preview in a real browser and return image bytes. Use contract 1.3 for visual feedback: it requires an explicit local or Cloudflare renderer plus a server-renderable capture state, then returns a short-lived signed receipt binding the screenshot and Preview provenance. Contracts 1.0 through 1.2 remain compatible for non-review consumers.",
+        "x-magic-html-recommended-contract-version": "1.3",
+        "security": [{"serviceBearer": []}],
         "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/screenshot-request.json"}}}},
         "responses": {
           "200": {"description": "Rendered screenshot", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/screenshot-result.json"}}}},
@@ -109,8 +395,147 @@
         }
       }
     },
+    "/v1/previews/{preview}/layout-validations": {
+      "post": {
+        "tags": ["Layout Snapshot", "Visual Feedback"],
+        "operationId": "validateLayoutPreviewGeometry",
+        "description": "Inspect one candidate-bound Wireframe presentation through Chromium DevTools Protocol at exactly 390, 768, and 1440 CSS pixels and return structured DOM geometry evidence. Contract 1.2 requires an explicit local or Cloudflare provider and signs the exact acceptance envelope for Styler. This deterministic structural signal supplements, but never replaces, screenshot and agentic visual assessment.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"name": "preview", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/layout-validation-request.json"}}}},
+        "responses": {
+          "200": {"description": "Candidate-bound page geometry result", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/layout-validation-result.json"}}}},
+          "404": {"description": "Preview absent or expired"},
+          "422": {"description": "Preview provenance does not match the Layout Snapshot page"},
+          "503": {"description": "The isolated geometry inspector is unavailable"}
+        }
+      }
+    },
+    "/v1/previews/{preview}/browser-evidence": {
+      "post": {
+        "tags": ["Visual Feedback"],
+        "operationId": "capturePreviewBrowserEvidence",
+        "description": "Use one isolated Puppeteer/CDP session to capture three to ten screenshots together with raw DOM geometry and Accessibility Tree evidence. Rest captures at 390, 768, and 1440 CSS pixels are mandatory. The response signs the exact Preview/Snapshot/entry/subject/screenshot identities, counters, gates, provider, and lifetime. standalone_approval=false means this evidence cannot approve a stage without Screenshot Reviewer and objective-bound agentic evidence.",
+        "x-magic-html-required-rest-widths": [390, 768, 1440],
+        "x-magic-html-standalone-approval": false,
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"name": "preview", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/browser-evidence-request.json"}}}},
+        "responses": {
+          "200": {"description": "Signed same-run screenshots and browser evidence", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/preview/browser-evidence-result.json"}}}},
+          "404": {"description": "Preview absent or expired"},
+          "422": {"description": "Preview artifact does not bind the reviewed subject"},
+          "503": {"description": "The isolated CDP browser or evidence signer is unavailable"}
+        }
+      }
+    },
     "/previews/{preview}/{path}": {
       "get": {"operationId": "serveStaticSitePreviewFile", "security": [], "responses": {"200": {"description": "Short-lived preview file with an operation-specific content type"}, "404": {"description": "Preview expired or file absent"}}}
+    },
+    "/v1/design-dna-jobs": {
+      "post": {
+        "tags": ["Design Context"],
+        "operationId": "createDesignDnaJob",
+        "description": "Derive portable Design DNA (dna-v2) from design-interview text. Asynchronous; poll /v1/jobs/{job}.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DesignContextIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/design-dna-request.json"}}}},
+        "responses": {"202": {"description": "Accepted, or the exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/job.json"}}}}, "422": {"description": "Request is outside the contract"}}
+      }
+    },
+    "/v1/design-direction-jobs": {
+      "post": {
+        "tags": ["Design Context"],
+        "operationId": "createDesignDirectionJob",
+        "description": "Render Design DNA as the direction prose page authoring reads and the canvas brief canvas generation reads. Both say only what the DNA and interview text say.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DesignContextIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/design-direction-request.json"}}}},
+        "responses": {"202": {"description": "Accepted, or the exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/job.json"}}}}, "422": {"description": "Request is outside the contract"}}
+      }
+    },
+    "/v1/design-canvas-jobs": {
+      "post": {
+        "tags": ["Design Context"],
+        "operationId": "createDesignCanvasJob",
+        "description": "Render one first-view design comp for a viewport (desktop or mobile) and a framing (site top or landing page). A landing page is made mobile first, then desktop with the mobile canvas as style_reference.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DesignContextIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/design-canvas-request.json"}}}},
+        "responses": {"202": {"description": "Accepted, or the exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/job.json"}}}}, "422": {"description": "Request is outside the contract or a reference digest does not match"}}
+      }
+    },
+    "/v1/decorative-asset-plan-jobs": {
+      "post": {
+        "tags": ["Design Context"],
+        "operationId": "createDecorativeAssetPlanJob",
+        "description": "List Canvas-grounded decorative assets. Planning never generates images.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DesignContextIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/decorative-asset-plan-request.json"}}}},
+        "responses": {"202": {"description": "Accepted, or the exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/job.json"}}}}, "422": {"description": "Request is outside the contract"}}
+      }
+    },
+    "/v1/decorative-asset-jobs": {
+      "post": {
+        "tags": ["Design Context"],
+        "operationId": "createDecorativeAssetJob",
+        "description": "Generate one explicitly selected plan item.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/DesignContextIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/decorative-asset-generation-request.json"}}}},
+        "responses": {"202": {"description": "Accepted, or the exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/job.json"}}}}, "422": {"description": "Request is outside the contract or plan_sha256 does not match"}}
+      }
+    },
+    "/v1/jobs/{job}": {
+      "get": {
+        "tags": ["Design Context"],
+        "operationId": "getDesignContextJob",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"name": "job", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "responses": {"200": {"description": "Job state; result is present once succeeded", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/design-context/job.json"}}}}, "404": {"description": "Unknown job"}}
+      }
+    },
+    "/v1/propose-jobs": {
+      "post": {
+        "tags": ["Neo Styler"],
+        "operationId": "createNeoStylerProposeJob",
+        "description": "Ask a model for a landing page composition from a brief. The result is meant to be reviewed and edited before materialize.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/NeoStylerIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/neo-styler/propose-request.json"}}}},
+        "responses": {"202": {"description": "Accepted, or the exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/neo-styler/job.json"}}}}, "422": {"description": "Request is outside the contract"}}
+      }
+    },
+    "/v1/materializations": {
+      "post": {
+        "tags": ["Neo Styler"],
+        "operationId": "materializeLanding",
+        "description": "Deterministically turn a brief and a composition into a landing Site AST and content, with the legal pages from fixed templates. Synchronous; no model call.",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/neo-styler/materialize-request.json"}}}},
+        "responses": {"200": {"description": "Site AST and content", "content": {"application/json": {"schema": {"type": "object", "additionalProperties": false, "required": ["contract_version", "site_ast", "content"], "properties": {"contract_version": {"const": "1.0"}, "site_ast": {"$ref": "../schemas/v1/neo-styler/site-ast.json"}, "content": {"$ref": "../schemas/v1/neo-styler/content.json"}}}}}}, "422": {"description": "The composition is not well formed (duplicate keys, a link whose destination does not resolve, a raw href field)"}}
+      }
+    },
+    "/v1/author-jobs": {
+      "post": {
+        "tags": ["Neo Styler"],
+        "operationId": "createNeoStylerAuthorJob",
+        "description": "Author every page of a site as HTML and CSS from a Site AST, content and a Design Context, judging each page and regenerating with findings up to retry_limit. Returns a snapshot whose pages and stylesheets map onto a Static Builder request.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/NeoStylerIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/neo-styler/author-request.json"}}}},
+        "responses": {"202": {"description": "Accepted, or the exact idempotent replay", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/neo-styler/job.json"}}}}, "422": {"description": "Request is outside the contract, or the content does not fit the Site AST"}}
+      }
+    },
+    "/v1/neo-styler-jobs/{job}": {
+      "get": {
+        "tags": ["Neo Styler"],
+        "operationId": "getNeoStylerJob",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"name": "job", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}],
+        "responses": {"200": {"description": "Job state with stage and progress; result is present once succeeded", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/neo-styler/job.json"}}}}, "404": {"description": "Unknown job"}}
+      }
     },
     "/v1/interviews": {
       "post": {
@@ -298,6 +723,24 @@
         }
       }
     },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/documents/{document}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/KnowledgeBase"},
+        {"$ref": "#/components/parameters/KnowledgeDocument"}
+      ],
+      "delete": {
+        "tags": ["Knowledge"],
+        "operationId": "deleteKnowledgeDocument",
+        "description": "Delete one indexed document and its chunks only within the tenant and knowledge-base scope. The Knowledge service remains source-agnostic; callers decide which upstream lifecycle event requires deletion.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "204": {"description": "Knowledge document and indexed chunks deleted"},
+          "401": {"$ref": "#/components/responses/KnowledgeProblem"},
+          "404": {"$ref": "#/components/responses/KnowledgeProblem"}
+        }
+      }
+    },
     "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/search": {
       "parameters": [
         {"$ref": "#/components/parameters/Tenant"},
@@ -357,6 +800,898 @@
         }
       }
     },
+    "/v1/tenants/{tenant}/crm/companies": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}],
+      "get": {
+        "tags": ["CRM"],
+        "operationId": "listCrmCompanies",
+        "description": "List active companies in one tenant. Search text is treated as a literal substring and ordering is stabilized by the record UUID in the selected direction.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/CrmSearch"},
+          {"$ref": "#/components/parameters/CrmSort"},
+          {"$ref": "#/components/parameters/CrmDirection"},
+          {"$ref": "#/components/parameters/CrmPage"},
+          {"$ref": "#/components/parameters/CrmPerPage"}
+        ],
+        "responses": {
+          "200": {"description": "Tenant-scoped company page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/company-list.json"}}}},
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "422": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      },
+      "post": {
+        "tags": ["CRM"],
+        "operationId": "createCrmCompany",
+        "description": "Create a company in one tenant. Corporate number uniqueness is tenant-local and includes soft-deleted records.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/CrmIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/company-create-request.json"}}}},
+        "responses": {
+          "201": {
+            "description": "Company created, or the exact completed response replayed",
+            "headers": {
+              "Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"},
+              "Location": {"description": "Canonical URL of the company resource.", "schema": {"type": "string", "format": "uri-reference"}}
+            },
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/company.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "409": {"$ref": "#/components/responses/CrmProblem"},
+          "422": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/crm/companies/{company}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/CrmCompany"}
+      ],
+      "get": {
+        "tags": ["CRM"],
+        "operationId": "getCrmCompany",
+        "description": "Read one active company only within its tenant scope; missing and cross-tenant records return the same not-found Problem.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant-scoped company", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/company.json"}}}},
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "404": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      },
+      "patch": {
+        "tags": ["CRM"],
+        "operationId": "updateCrmCompany",
+        "description": "Update at least one company field when expected_version matches, then increment the version exactly once.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/CrmIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/company-update-request.json"}}}},
+        "responses": {
+          "200": {"description": "Company updated, or the exact completed response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/company.json"}}}},
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "404": {"$ref": "#/components/responses/CrmProblem"},
+          "409": {"$ref": "#/components/responses/CrmProblem"},
+          "422": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      },
+      "delete": {
+        "tags": ["CRM"],
+        "operationId": "deleteCrmCompany",
+        "description": "Soft-delete the company when expected_version matches. Linked people are not cascaded.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/CrmIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/delete-request.json"}}}},
+        "responses": {
+          "200": {"description": "Company deleted, or the exact completed response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/deletion.json"}}}},
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "404": {"$ref": "#/components/responses/CrmProblem"},
+          "409": {"$ref": "#/components/responses/CrmProblem"},
+          "422": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/crm/people": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}],
+      "get": {
+        "tags": ["CRM"],
+        "operationId": "listCrmPeople",
+        "description": "List active people in one tenant, optionally limited to an active company in that same tenant. Search is literal and ordering is stabilized by UUID.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/CrmSearch"},
+          {"$ref": "#/components/parameters/CrmCompanyFilter"},
+          {"$ref": "#/components/parameters/CrmSort"},
+          {"$ref": "#/components/parameters/CrmDirection"},
+          {"$ref": "#/components/parameters/CrmPage"},
+          {"$ref": "#/components/parameters/CrmPerPage"}
+        ],
+        "responses": {
+          "200": {"description": "Tenant-scoped people page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/person-list.json"}}}},
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "422": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      },
+      "post": {
+        "tags": ["CRM"],
+        "operationId": "createCrmPerson",
+        "description": "Create a person in one tenant, optionally linked to an active company in that same tenant.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/CrmIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/person-create-request.json"}}}},
+        "responses": {
+          "201": {
+            "description": "Person created, or the exact completed response replayed",
+            "headers": {
+              "Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"},
+              "Location": {"description": "Canonical URL of the person resource.", "schema": {"type": "string", "format": "uri-reference"}}
+            },
+            "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/person.json"}}}
+          },
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "409": {"$ref": "#/components/responses/CrmProblem"},
+          "422": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/crm/people/{person}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/CrmPerson"}
+      ],
+      "get": {
+        "tags": ["CRM"],
+        "operationId": "getCrmPerson",
+        "description": "Read one active person only within its tenant scope; missing and cross-tenant records return the same not-found Problem.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant-scoped person", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/person.json"}}}},
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "404": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      },
+      "patch": {
+        "tags": ["CRM"],
+        "operationId": "updateCrmPerson",
+        "description": "Update at least one person field when expected_version matches, then increment the version exactly once. company_id may be null or an active company in the same tenant.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/CrmIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/person-update-request.json"}}}},
+        "responses": {
+          "200": {"description": "Person updated, or the exact completed response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/person.json"}}}},
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "404": {"$ref": "#/components/responses/CrmProblem"},
+          "409": {"$ref": "#/components/responses/CrmProblem"},
+          "422": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      },
+      "delete": {
+        "tags": ["CRM"],
+        "operationId": "deleteCrmPerson",
+        "description": "Soft-delete the person when expected_version matches.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/CrmIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/delete-request.json"}}}},
+        "responses": {
+          "200": {"description": "Person deleted, or the exact completed response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/deletion.json"}}}},
+          "401": {"$ref": "#/components/responses/CrmProblem"},
+          "404": {"$ref": "#/components/responses/CrmProblem"},
+          "409": {"$ref": "#/components/responses/CrmProblem"},
+          "422": {"$ref": "#/components/responses/CrmProblem"},
+          "429": {"description": "CRM route rate limit exceeded"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/messaging/channels": {
+      "parameters": [{"$ref": "#/components/parameters/TenantUuid"}],
+      "get": {
+        "tags": ["Messaging"],
+        "operationId": "listMessagingChannels",
+        "description": "List provider-independent channels in one tenant, ordered by created_at and UUID descending.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/MessagingProvider"},
+          {"$ref": "#/components/parameters/MessagingActive"},
+          {"$ref": "#/components/parameters/MessagingSearch"},
+          {"$ref": "#/components/parameters/MessagingPage"},
+          {"$ref": "#/components/parameters/MessagingPerPage"}
+        ],
+        "responses": {
+          "200": {"description": "Tenant-scoped channel page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/channel-list.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "422": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Messaging"],
+        "operationId": "createMessagingChannel",
+        "description": "Create a normalized channel. credential_reference is encrypted at rest and never returned; responses expose only credentials_configured.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/MessagingIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/channel-create-request.json"}}}},
+        "responses": {
+          "201": {"description": "Channel created, or exact completed response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/channel-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "409": {"$ref": "#/components/responses/MessagingProblem"},
+          "422": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/messaging/channels/{channel}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/TenantUuid"},
+        {"$ref": "#/components/parameters/MessagingChannel"}
+      ],
+      "get": {
+        "tags": ["Messaging"],
+        "operationId": "getMessagingChannel",
+        "description": "Read a channel only within its tenant; missing and cross-tenant identifiers return the same Problem.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant-scoped channel", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/channel-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "404": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/messaging/channels/{channel}/conversations": {
+      "parameters": [
+        {"$ref": "#/components/parameters/TenantUuid"},
+        {"$ref": "#/components/parameters/MessagingChannel"}
+      ],
+      "get": {
+        "tags": ["Messaging"],
+        "operationId": "listMessagingConversations",
+        "description": "List conversations scoped to both tenant and channel, ordered by created_at and UUID descending.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/MessagingConversationStatus"},
+          {"$ref": "#/components/parameters/MessagingSearch"},
+          {"$ref": "#/components/parameters/MessagingPage"},
+          {"$ref": "#/components/parameters/MessagingPerPage"}
+        ],
+        "responses": {
+          "200": {"description": "Channel-scoped conversation page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/conversation-list.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "404": {"$ref": "#/components/responses/MessagingProblem"},
+          "422": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Messaging"],
+        "operationId": "createMessagingConversation",
+        "description": "Create one open conversation under the tenant-scoped channel. A non-null provider conversation identifier is unique within that channel.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/MessagingIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/conversation-create-request.json"}}}},
+        "responses": {
+          "201": {"description": "Conversation created, or exact completed response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/conversation-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "404": {"$ref": "#/components/responses/MessagingProblem"},
+          "409": {"$ref": "#/components/responses/MessagingProblem"},
+          "422": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/messaging/channels/{channel}/conversations/{conversation}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/TenantUuid"},
+        {"$ref": "#/components/parameters/MessagingChannel"},
+        {"$ref": "#/components/parameters/MessagingConversation"}
+      ],
+      "get": {
+        "tags": ["Messaging"],
+        "operationId": "getMessagingConversation",
+        "description": "Read a conversation only when both the channel and conversation belong to the tenant scope.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant- and channel-scoped conversation", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/conversation-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "404": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/messaging/conversations/{conversation}/messages": {
+      "parameters": [
+        {"$ref": "#/components/parameters/TenantUuid"},
+        {"$ref": "#/components/parameters/MessagingConversation"}
+      ],
+      "get": {
+        "tags": ["Messaging"],
+        "operationId": "listMessagingMessages",
+        "description": "List normalized messages in a tenant-owned conversation, ordered by created_at and UUID descending.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/MessagingDirection"},
+          {"$ref": "#/components/parameters/MessagingPage"},
+          {"$ref": "#/components/parameters/MessagingPerPage"}
+        ],
+        "responses": {
+          "200": {"description": "Conversation-scoped message page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/message-list.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "404": {"$ref": "#/components/responses/MessagingProblem"},
+          "422": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Messaging"],
+        "operationId": "createMessagingMessage",
+        "description": "Persist one normalized outbound message and invoke the runtime-bound DeliveryAdapter once. Exact retries return the stored response without redelivery. Slack uses the fixed chat.postMessage endpoint; ambiguous outcomes are returned as unknown and are never auto-retried.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/MessagingIdempotencyKey"}],
+        "x-magic-html-delivery-boundary": {
+          "providers": ["local", "slack"],
+          "slack_endpoint": "https://slack.com/api/chat.postMessage",
+          "provider_endpoints_server_owned": true,
+          "runtime_credential_resolution": true,
+          "credential_scope": "active_channel_tenant_and_provider",
+          "credentials_or_provider_payloads_persisted": false,
+          "automatic_retry": false,
+          "confirmed_success_status": "sent",
+          "definite_failure_status": "failed",
+          "ambiguous_outcome_status": "unknown",
+          "unknown_requires_reconciliation_before_retry": true,
+          "idempotent_replay_redelivers": false
+        },
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/message-create-request.json"}}}},
+        "responses": {
+          "201": {"description": "Message delivered, or exact completed response replayed without redelivery", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/message-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "404": {"$ref": "#/components/responses/MessagingProblem"},
+          "409": {"$ref": "#/components/responses/MessagingProblem"},
+          "422": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"},
+          "503": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/messaging/channels/{channel}/webhooks/slack": {
+      "parameters": [
+        {"$ref": "#/components/parameters/TenantUuid"},
+        {"$ref": "#/components/parameters/MessagingChannel"}
+      ],
+      "post": {
+        "tags": ["Messaging"],
+        "operationId": "ingestSlackMessagingWebhook",
+        "description": "Authenticate the exact raw body with Slack v0 HMAC, enforce a five-minute timestamp window, deduplicate event_callback by channel and event_id plus raw-body digest, and persist only normalized inbound fields. Callback-looking URLs remain inert data and are never executed or persisted.",
+        "security": [{"slackHmacV0": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/SlackRequestTimestamp"},
+          {"$ref": "#/components/parameters/SlackSignature"}
+        ],
+        "x-magic-html-webhook-security": {
+          "signature_version": "v0_hmac_sha256",
+          "signature_base": "v0:timestamp:exact_raw_body",
+          "maximum_timestamp_skew_seconds": 300,
+          "maximum_payload_bytes": 262144,
+          "signing_credential_scope": "active_channel_tenant_and_slack_provider",
+          "dedupe_scope": "messaging_channel_and_provider_event_id",
+          "dedupe_fingerprint": "sha256_exact_raw_body",
+          "changed_replay_status": 409,
+          "provider_callback_execution": false,
+          "provider_urls_persisted": false,
+          "raw_payload_persisted": false,
+          "normalized_fields_only": true
+        },
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/slack-webhook-request.json"}}}},
+        "responses": {
+          "200": {"description": "Verified Slack URL challenge", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/slack-url-verification-response.json"}}}},
+          "202": {"description": "Event normalized, ignored, or exact provider event replay deduplicated", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/messaging/slack-webhook-accepted-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MessagingProblem"},
+          "404": {"$ref": "#/components/responses/MessagingProblem"},
+          "409": {"$ref": "#/components/responses/MessagingProblem"},
+          "413": {"$ref": "#/components/responses/MessagingProblem"},
+          "422": {"$ref": "#/components/responses/MessagingProblem"},
+          "429": {"$ref": "#/components/responses/MessagingProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/channels/connections": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}],
+      "get": {
+        "tags": ["Channel"],
+        "operationId": "listChannelConnections",
+        "description": "List credential-redacted connections in deterministic newest-first order with UUID tie-breaking.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/ChannelProviderFilter"},
+          {"$ref": "#/components/parameters/ChannelPage"},
+          {"$ref": "#/components/parameters/ChannelPerPage"}
+        ],
+        "responses": {
+          "200": {"description": "Tenant-scoped connection page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-list.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "422": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Channel"],
+        "operationId": "createChannelConnection",
+        "description": "Create a provider connection. Credentials are encrypted, write-only, and never returned; provider endpoints are server-owned.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/ChannelIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-create-request.json"}}}},
+        "responses": {
+          "201": {"description": "Connection created or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "409": {"$ref": "#/components/responses/ChannelProblem"},
+          "422": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/channels/connections/{connection}": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/ChannelConnection"}],
+      "get": {
+        "tags": ["Channel"],
+        "operationId": "getChannelConnection",
+        "description": "Return one credential-redacted connection from the tenant scope.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant-scoped connection", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "404": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      },
+      "patch": {
+        "tags": ["Channel"],
+        "operationId": "updateChannelConnection",
+        "description": "Optimistically update a connection. Credential rotation increments credential_version and invalidates verification.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/ChannelIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-update-request.json"}}}},
+        "responses": {
+          "200": {"description": "Connection updated or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "404": {"$ref": "#/components/responses/ChannelProblem"},
+          "409": {"$ref": "#/components/responses/ChannelProblem"},
+          "422": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      },
+      "delete": {
+        "tags": ["Channel"],
+        "operationId": "deleteChannelConnection",
+        "description": "Soft-delete a version-matched connection only when no queued or dispatching publication uses it.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/ChannelIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-version-request.json"}}}},
+        "responses": {
+          "200": {"description": "Connection deleted or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/deleted-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "404": {"$ref": "#/components/responses/ChannelProblem"},
+          "409": {"$ref": "#/components/responses/ChannelProblem"},
+          "422": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/channels/connections/{connection}/verify": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/ChannelConnection"}],
+      "post": {
+        "tags": ["Channel"],
+        "operationId": "verifyChannelConnection",
+        "description": "Resolve encrypted credentials and perform a read-only identity lookup at the fixed provider endpoint before atomically marking the exact credential version verified.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/ChannelIdempotencyKey"}],
+        "x-magic-html-channel-verification-boundary": {"provider_endpoints_server_owned": true, "credentials_encrypted_and_redacted": true, "read_only_identity_lookup": true, "youtube_channels_list_mine": true, "verified_credential_version_must_match": true},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-version-request.json"}}}},
+        "responses": {
+          "200": {"description": "Connection verified or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/connection-verification-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "404": {"$ref": "#/components/responses/ChannelProblem"},
+          "409": {"$ref": "#/components/responses/ChannelProblem"},
+          "422": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"},
+          "503": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/channels/media-artifacts": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}],
+      "post": {
+        "tags": ["Channel"],
+        "operationId": "createChannelMediaArtifact",
+        "description": "Stream one bounded MP4 into private service storage. No caller path or remote video URL is accepted or fetched.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/ChannelIdempotencyKey"}],
+        "x-magic-html-channel-media-boundary": {"storage": "private", "maximum_bytes": 536870912, "accepted_mime_types": ["video/mp4", "application/mp4"], "accepted_extension": "mp4", "iso_base_media_ftyp_required": true, "streamed_storage": true, "caller_path_or_url_fetch": false, "idempotency_fingerprint": ["sha256", "size_bytes", "normalized_mime_type", "extension"], "available_retention_hours": 24, "unknown_retention_hours": 24},
+        "requestBody": {"required": true, "content": {"multipart/form-data": {"schema": {"$ref": "../schemas/v1/channel/media-artifact-create-request.json"}}}},
+        "responses": {
+          "201": {"description": "Private artifact created or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/media-artifact-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "409": {"$ref": "#/components/responses/ChannelProblem"},
+          "413": {"$ref": "#/components/responses/ChannelProblem"},
+          "422": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"},
+          "503": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/channels/media-artifacts/{artifact}": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/ChannelMediaArtifact"}],
+      "get": {
+        "tags": ["Channel"],
+        "operationId": "getChannelMediaArtifact",
+        "description": "Return safe immutable artifact metadata without a storage disk, path, or public URL.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant-scoped private artifact metadata", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/media-artifact-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "404": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/channels/publications": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}],
+      "get": {
+        "tags": ["Channel"],
+        "operationId": "listChannelPublications",
+        "description": "List normalized publication state in deterministic newest-first order with UUID tie-breaking.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [
+          {"$ref": "#/components/parameters/ChannelConnectionFilter"},
+          {"$ref": "#/components/parameters/ChannelPublicationStatus"},
+          {"$ref": "#/components/parameters/ChannelPage"},
+          {"$ref": "#/components/parameters/ChannelPerPage"}
+        ],
+        "responses": {
+          "200": {"description": "Tenant-scoped publication page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/publication-list.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "422": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Channel"],
+        "operationId": "createChannelPublication",
+        "description": "Create one immutable provider-specific publication against a currently verified connection and enqueue one single-attempt delivery job.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/ChannelIdempotencyKey"}],
+        "x-magic-html-channel-delivery-boundary": {"providers": ["x", "threads", "instagram", "line", "youtube"], "provider_endpoints_server_owned": true, "credentials_encrypted_and_redacted": true, "verified_current_credentials_required": true, "queue_job_tries": 1, "automatic_retry_after_dispatch": false, "confirmed_success_status": "succeeded", "definite_failure_status": "failed", "ambiguous_outcome_status": "unknown", "unknown_requires_reconciliation_before_new_publication": true, "idempotent_replay_redelivers": false},
+        "x-magic-html-youtube-resumable-boundary": {"session_endpoint": "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet%2Cstatus", "private_media_artifact_required": true, "artifact_sha256_in_idempotency_fingerprint": true, "returned_location_https_only": true, "returned_location_exact_host": "www.googleapis.com", "returned_location_port": 443, "returned_location_expected_upload_path": true, "returned_location_credentials_or_fragment_allowed": false, "single_streamed_put": true, "automatic_status_query_or_resume": false, "ambiguous_delivery_status": "unknown"},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/publication-create-request.json"}}}},
+        "responses": {
+          "202": {"description": "Publication queued or exact response replayed without another job", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/publication-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "404": {"$ref": "#/components/responses/ChannelProblem"},
+          "409": {"$ref": "#/components/responses/ChannelProblem"},
+          "422": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"},
+          "503": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/channels/publications/{publication}": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/ChannelPublication"}],
+      "get": {
+        "tags": ["Channel"],
+        "operationId": "getChannelPublication",
+        "description": "Return normalized queued, terminal, or ambiguous delivery state without raw provider envelopes.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Tenant-scoped publication", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/channel/publication-response.json"}}}},
+          "401": {"$ref": "#/components/responses/ChannelProblem"},
+          "404": {"$ref": "#/components/responses/ChannelProblem"},
+          "429": {"$ref": "#/components/responses/ChannelProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/measurement-connections": {
+      "parameters": [{"$ref": "#/components/parameters/MeasurementTenant"}],
+      "get": {
+        "operationId": "listMeasurementConnections",
+        "tags": ["Measurement"],
+        "summary": "List tenant-scoped Measurement connections",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/MeasurementPage"}, {"$ref": "#/components/parameters/MeasurementPerPage"}],
+        "x-magic-html-query-schema": "../schemas/v1/measurement/connection-list-query.json",
+        "responses": {
+          "200": {"description": "Bounded connection page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/connection-list.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"},
+          "422": {"$ref": "#/components/responses/MeasurementProblem"},
+          "429": {"$ref": "#/components/responses/MeasurementRateLimited"}
+        }
+      },
+      "post": {
+        "operationId": "createMeasurementConnection",
+        "tags": ["Measurement"],
+        "summary": "Create a provider connection with write-only credentials",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/connection-create-request.json"}}}},
+        "responses": {
+          "201": {"description": "Created connection without credential values", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/connection-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"},
+          "422": {"$ref": "#/components/responses/MeasurementProblem"},
+          "429": {"$ref": "#/components/responses/MeasurementRateLimited"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/measurement-connections/{connection}": {
+      "parameters": [{"$ref": "#/components/parameters/MeasurementTenant"}, {"$ref": "#/components/parameters/MeasurementConnection"}],
+      "get": {
+        "operationId": "getMeasurementConnection",
+        "tags": ["Measurement"],
+        "summary": "Read a tenant-scoped connection without secrets",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Credential-redacted connection", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/connection-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"},
+          "404": {"$ref": "#/components/responses/MeasurementProblem"},
+          "422": {"$ref": "#/components/responses/MeasurementProblem"},
+          "429": {"$ref": "#/components/responses/MeasurementRateLimited"}
+        }
+      },
+      "patch": {
+        "operationId": "updateMeasurementConnection",
+        "tags": ["Measurement"],
+        "summary": "Update mutable connection fields and invalidate verification when provider material changes",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/connection-update-request.json"}}}},
+        "responses": {
+          "200": {"description": "Updated credential-redacted connection", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/connection-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"},
+          "404": {"$ref": "#/components/responses/MeasurementProblem"},
+          "422": {"$ref": "#/components/responses/MeasurementProblem"},
+          "429": {"$ref": "#/components/responses/MeasurementRateLimited"}
+        }
+      },
+      "delete": {
+        "operationId": "deleteMeasurementConnection",
+        "tags": ["Measurement"],
+        "summary": "Delete a tenant-scoped connection",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "204": {"description": "Deleted with no response body"},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"},
+          "404": {"$ref": "#/components/responses/MeasurementProblem"},
+          "422": {"$ref": "#/components/responses/MeasurementProblem"},
+          "429": {"$ref": "#/components/responses/MeasurementRateLimited"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/measurement-connections/{connection}/verify": {
+      "parameters": [{"$ref": "#/components/parameters/MeasurementTenant"}, {"$ref": "#/components/parameters/MeasurementConnection"}],
+      "post": {
+        "operationId": "verifyMeasurementConnection",
+        "tags": ["Measurement"],
+        "summary": "Verify credentials and configured resource through a fixed provider endpoint",
+        "security": [{"serviceBearer": []}],
+        "x-magic-html-measurement-verification-boundary": {
+          "provider_endpoints_server_owned": true,
+          "fixed_endpoints": {
+            "token": "https://oauth2.googleapis.com/token",
+            "ga4_data": "https://analyticsdata.googleapis.com/v1beta",
+            "gsc": "https://www.googleapis.com/webmasters/v3",
+            "gtm": "https://tagmanager.googleapis.com/tagmanager/v2",
+            "gbp_account": "https://mybusinessaccountmanagement.googleapis.com/v1",
+            "gbp_business": "https://mybusinessbusinessinformation.googleapis.com/v1",
+            "gbp_reviews": "https://mybusiness.googleapis.com/v4",
+            "gbp_performance": "https://businessprofileperformance.googleapis.com/v1"
+          },
+          "credential_values_returned": false,
+          "provider_envelopes_returned_on_error": false,
+          "connection_revision_checked_before_success": true
+        },
+        "responses": {
+          "200": {"description": "Verified connection", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/verification-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"},
+          "404": {"$ref": "#/components/responses/MeasurementProblem"},
+          "409": {"$ref": "#/components/responses/MeasurementProblem"},
+          "422": {"$ref": "#/components/responses/MeasurementProblem"},
+          "429": {"$ref": "#/components/responses/MeasurementRateLimited"},
+          "502": {"$ref": "#/components/responses/MeasurementProblem"},
+          "503": {"$ref": "#/components/responses/MeasurementProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/measurement-connections/{connection}/ga4/reports": {
+      "parameters": [{"$ref": "#/components/parameters/MeasurementTenant"}, {"$ref": "#/components/parameters/MeasurementConnection"}],
+      "post": {
+        "operationId": "runGa4MeasurementReport",
+        "tags": ["Measurement"],
+        "summary": "Run a bounded GA4 report",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/ga4-report-request.json"}}}},
+        "x-magic-html-measurement-read-boundary": {"maximum_date_difference_days": 366, "maximum_rows": 5000, "maximum_offset": 100000, "maximum_dimensions": 9, "maximum_metrics": 10, "provider_response_maximum_bytes": 10485760},
+        "responses": {
+          "200": {"description": "Normalized GA4 provider data", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/report-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"}, "404": {"$ref": "#/components/responses/MeasurementProblem"}, "409": {"$ref": "#/components/responses/MeasurementProblem"}, "422": {"$ref": "#/components/responses/MeasurementProblem"}, "429": {"$ref": "#/components/responses/MeasurementRateLimited"}, "502": {"$ref": "#/components/responses/MeasurementProblem"}, "503": {"$ref": "#/components/responses/MeasurementProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/measurement-connections/{connection}/gsc/reports": {
+      "parameters": [{"$ref": "#/components/parameters/MeasurementTenant"}, {"$ref": "#/components/parameters/MeasurementConnection"}],
+      "post": {
+        "operationId": "runGscMeasurementReport",
+        "tags": ["Measurement"],
+        "summary": "Run a bounded Search Console report",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/gsc-report-request.json"}}}},
+        "x-magic-html-measurement-read-boundary": {"maximum_date_difference_days": 366, "maximum_rows": 5000, "maximum_offset": 100000, "maximum_dimensions": 5, "provider_response_maximum_bytes": 10485760},
+        "responses": {
+          "200": {"description": "Normalized Search Console provider data", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/report-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"}, "404": {"$ref": "#/components/responses/MeasurementProblem"}, "409": {"$ref": "#/components/responses/MeasurementProblem"}, "422": {"$ref": "#/components/responses/MeasurementProblem"}, "429": {"$ref": "#/components/responses/MeasurementRateLimited"}, "502": {"$ref": "#/components/responses/MeasurementProblem"}, "503": {"$ref": "#/components/responses/MeasurementProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/measurement-connections/{connection}/gbp/performance-reports": {
+      "parameters": [{"$ref": "#/components/parameters/MeasurementTenant"}, {"$ref": "#/components/parameters/MeasurementConnection"}],
+      "post": {
+        "operationId": "runGbpMeasurementPerformanceReport",
+        "tags": ["Measurement"],
+        "summary": "Run a bounded Google Business Profile performance report",
+        "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/gbp-performance-report-request.json"}}}},
+        "x-magic-html-measurement-read-boundary": {"maximum_date_difference_days": 366, "maximum_metrics": 10, "provider_response_maximum_bytes": 10485760},
+        "responses": {
+          "200": {"description": "Normalized Business Profile performance data", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/report-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"}, "404": {"$ref": "#/components/responses/MeasurementProblem"}, "409": {"$ref": "#/components/responses/MeasurementProblem"}, "422": {"$ref": "#/components/responses/MeasurementProblem"}, "429": {"$ref": "#/components/responses/MeasurementRateLimited"}, "502": {"$ref": "#/components/responses/MeasurementProblem"}, "503": {"$ref": "#/components/responses/MeasurementProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/resources": {
+      "parameters": [{"$ref": "#/components/parameters/MeasurementTenant"}, {"$ref": "#/components/parameters/MeasurementConnection"}, {"$ref": "#/components/parameters/MeasurementWritableProvider"}],
+      "get": {
+        "operationId": "listMeasurementProviderResources",
+        "tags": ["Measurement"],
+        "summary": "List a bounded page of GTM or GBP resources",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/MeasurementResourceKind"}, {"$ref": "#/components/parameters/MeasurementResourceParent"}, {"$ref": "#/components/parameters/MeasurementResourcePageSize"}, {"$ref": "#/components/parameters/MeasurementResourcePageToken"}],
+        "x-magic-html-query-schema": "../schemas/v1/measurement/resource-list-query.json",
+        "x-magic-html-measurement-read-boundary": {"maximum_page_size": 100, "maximum_page_token_length": 2048, "provider_response_maximum_bytes": 10485760, "provider_endpoint_server_owned": true},
+        "responses": {
+          "200": {"description": "Normalized provider resource page", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/resource-list-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"}, "404": {"$ref": "#/components/responses/MeasurementProblem"}, "409": {"$ref": "#/components/responses/MeasurementProblem"}, "422": {"$ref": "#/components/responses/MeasurementProblem"}, "429": {"$ref": "#/components/responses/MeasurementRateLimited"}, "502": {"$ref": "#/components/responses/MeasurementProblem"}, "503": {"$ref": "#/components/responses/MeasurementProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/mutations": {
+      "parameters": [{"$ref": "#/components/parameters/MeasurementTenant"}, {"$ref": "#/components/parameters/MeasurementConnection"}, {"$ref": "#/components/parameters/MeasurementWritableProvider"}],
+      "post": {
+        "operationId": "createMeasurementProviderMutation",
+        "tags": ["Measurement"],
+        "summary": "Execute a confirmed optimistic GTM or GBP mutation exactly once",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/MeasurementIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/mutation-request.json"}}}},
+        "x-magic-html-measurement-mutation-boundary": {
+          "provider_endpoints_server_owned": true,
+          "confirmation_digest": "sha256(canonical_json({provider,operation,resource,expected_version,payload}))",
+          "canonical_object_key_order": "recursive_bytewise_ascending",
+          "canonical_array_order_preserved": true,
+          "expected_live_version_required": true,
+          "idempotency_scope": "tenant_connection_key",
+          "automatic_retry_after_dispatch": false,
+          "ambiguous_outcome_record_state": "processing",
+          "ambiguous_outcome_retry": "409_idempotency_in_progress_until_reconciled",
+          "exact_completed_replay_calls_provider": false,
+          "maximum_payload_json_bytes": 65536
+        },
+        "responses": {
+          "200": {"description": "Completed or exactly replayed mutation", "headers": {"Idempotency-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/mutation-response.json"}}}},
+          "401": {"$ref": "#/components/responses/MeasurementProblem"}, "404": {"$ref": "#/components/responses/MeasurementProblem"}, "409": {"$ref": "#/components/responses/MeasurementProblem"}, "422": {"$ref": "#/components/responses/MeasurementProblem"}, "429": {"$ref": "#/components/responses/MeasurementRateLimited"}, "502": {"$ref": "#/components/responses/MeasurementProblem"}, "503": {"$ref": "#/components/responses/MeasurementProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/source-connections": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"}
+      ],
+      "get": {
+        "tags": ["Site Source"],
+        "operationId": "listSiteSourceConnections",
+        "description": "List credential-redacted source connections in one tenant and site scope.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Scoped source connections", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/connection-list.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteSourceProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Site Source"],
+        "operationId": "createSiteSourceConnection",
+        "description": "Create a driver-closed connection. Credentials are encrypted at rest and never returned.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/SiteSourceIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/connection-create-request.json"}}}},
+        "responses": {
+          "201": {"description": "Connection created or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/connection.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteSourceProblem"},
+          "409": {"$ref": "#/components/responses/SiteSourceProblem"},
+          "422": {"$ref": "#/components/responses/SiteSourceProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteSourceConnection"}
+      ],
+      "get": {
+        "tags": ["Site Source"], "operationId": "getSiteSourceConnection", "security": [{"serviceBearer": []}],
+        "responses": {"200": {"description": "Credential-redacted connection", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/connection.json"}}}}, "401": {"$ref": "#/components/responses/SiteSourceProblem"}, "404": {"$ref": "#/components/responses/SiteSourceProblem"}}
+      },
+      "patch": {
+        "tags": ["Site Source"], "operationId": "updateSiteSourceConnection", "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/SiteSourceIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/connection-update-request.json"}}}},
+        "responses": {"200": {"description": "Connection updated or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/connection.json"}}}}, "401": {"$ref": "#/components/responses/SiteSourceProblem"}, "404": {"$ref": "#/components/responses/SiteSourceProblem"}, "409": {"$ref": "#/components/responses/SiteSourceProblem"}, "422": {"$ref": "#/components/responses/SiteSourceProblem"}}
+      },
+      "delete": {
+        "tags": ["Site Source"], "operationId": "deleteSiteSourceConnection", "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/SiteSourceIdempotencyKey"}],
+        "responses": {"204": {"description": "Connection deleted or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}}, "401": {"$ref": "#/components/responses/SiteSourceProblem"}, "404": {"$ref": "#/components/responses/SiteSourceProblem"}, "409": {"$ref": "#/components/responses/SiteSourceProblem"}}
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/verify": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteSourceConnection"}
+      ],
+      "post": {
+        "tags": ["Site Source"], "operationId": "verifySiteSourceConnection", "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/SiteSourceIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/fetch-request.json"}}}},
+        "responses": {"200": {"description": "Bounded verification result or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/verification.json"}}}}, "401": {"$ref": "#/components/responses/SiteSourceProblem"}, "404": {"$ref": "#/components/responses/SiteSourceProblem"}, "409": {"$ref": "#/components/responses/SiteSourceProblem"}, "422": {"$ref": "#/components/responses/SiteSourceProblem"}, "503": {"$ref": "#/components/responses/SiteSourceProblem"}}
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/fetch-jobs": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteSourceConnection"}
+      ],
+      "post": {
+        "tags": ["Site Source"], "operationId": "createSiteSourceFetchJob", "security": [{"serviceBearer": []}],
+        "description": "Queue one bounded fetch from the configured source. The returned job eventually references an immutable, self-contained snapshot.",
+        "parameters": [{"$ref": "#/components/parameters/SiteSourceIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/fetch-request.json"}}}},
+        "x-magic-html-source-security": {"public_destinations_only": true, "credentials_encrypted_and_redacted": true, "tls_peer_or_sftp_host_key_verification": true, "plain_ftp_default_enabled": false, "reject_symlinks_submodules_git_metadata_secrets_and_server_executables": true, "max_files": 2000, "max_file_bytes": 10485760, "max_total_bytes": 52428800, "timeout_seconds": 30},
+        "responses": {"202": {"description": "Fetch queued or exact job response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/fetch-job.json"}}}}, "401": {"$ref": "#/components/responses/SiteSourceProblem"}, "404": {"$ref": "#/components/responses/SiteSourceProblem"}, "409": {"$ref": "#/components/responses/SiteSourceProblem"}, "422": {"$ref": "#/components/responses/SiteSourceProblem"}, "503": {"$ref": "#/components/responses/SiteSourceProblem"}}
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/fetch-jobs/{fetchJob}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteSourceConnection"}, {"$ref": "#/components/parameters/SiteSourceFetchJob"}
+      ],
+      "get": {
+        "tags": ["Site Source"], "operationId": "getSiteSourceFetchJob", "security": [{"serviceBearer": []}],
+        "responses": {"200": {"description": "Scoped fetch job", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/fetch-job.json"}}}}, "401": {"$ref": "#/components/responses/SiteSourceProblem"}, "404": {"$ref": "#/components/responses/SiteSourceProblem"}}
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/fetch-jobs/{fetchJob}/snapshot": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteSourceConnection"}, {"$ref": "#/components/parameters/SiteSourceFetchJob"}
+      ],
+      "get": {
+        "tags": ["Site Source"], "operationId": "getSiteSourceSnapshot", "security": [{"serviceBearer": []}],
+        "description": "Return the immutable resolved file snapshot for direct ingestion by Site Import. No source credential or remote locator is present.",
+        "responses": {"200": {"description": "Self-contained immutable source snapshot", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/snapshot.json"}}}}, "401": {"$ref": "#/components/responses/SiteSourceProblem"}, "404": {"$ref": "#/components/responses/SiteSourceProblem"}, "409": {"$ref": "#/components/responses/SiteSourceProblem"}}
+      }
+    },
     "/v1/tenants/{tenant}/sites/{site}/approval-requests": {
       "parameters": [
         {"$ref": "#/components/parameters/Tenant"},
@@ -369,7 +1704,7 @@
         "security": [{"serviceBearer": []}],
         "parameters": [
           {"name": "status", "in": "query", "schema": {"enum": ["pending", "approved", "rejected"]}},
-          {"name": "artifact_type", "in": "query", "schema": {"enum": ["site_snapshot", "cms_snapshot", "static_build", "composer_artifact", "publication_candidate"]}},
+          {"name": "artifact_type", "in": "query", "schema": {"enum": ["site_snapshot", "cms_snapshot", "static_build", "composer_artifact", "publication_candidate", "site_change", "layout_snapshot"]}},
           {"name": "artifact_id", "in": "query", "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,254}$"}},
           {"name": "artifact_version", "in": "query", "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
           {"name": "limit", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25}}
@@ -489,9 +1824,12 @@
   },
   "components": {
     "securitySchemes": {
-      "serviceBearer": {"type": "http", "scheme": "bearer", "description": "A trusted service credential. The caller authenticates and authorizes end users for tenant/site scope and asserts actor identity."}
+      "serviceBearer": {"type": "http", "scheme": "bearer", "description": "A trusted service credential. The caller authenticates and authorizes end users for tenant/site scope and asserts actor identity."},
+      "slackHmacV0": {"type": "apiKey", "in": "header", "name": "X-Slack-Signature", "description": "Slack v0 HMAC-SHA256 of v0:timestamp:exact_raw_body using the channel's runtime-resolved signing secret. X-Slack-Request-Timestamp is also required and limited to a 300-second skew."}
     },
     "parameters": {
+      "DesignContextIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 200}, "description": "Scoped to the service token; an exact retry replays the original response."},
+      "NeoStylerIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 200}, "description": "Scoped to the service token; an exact retry replays the original response."},
       "Tenant": {"name": "tenant", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
       "Site": {"name": "site", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
       "Interview": {"name": "interview", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
@@ -499,16 +1837,71 @@
       "InterviewWriteIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque start or answer key scoped to the relevant site and, for answers, interview session. Exact retries replay the original status and body; changed input or work already in progress returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
       "KnowledgeBase": {"name": "knowledgeBase", "in": "path", "required": true, "description": "Knowledge base UUID resolved together with the tenant scope; cross-tenant lookup must return 404.", "schema": {"type": "string", "format": "uuid"}},
       "KnowledgeIngestionJob": {"name": "ingestionJob", "in": "path", "required": true, "description": "Ingestion job UUID resolved together with tenant and knowledge-base scope.", "schema": {"type": "string", "format": "uuid"}},
+      "KnowledgeDocument": {"name": "document", "in": "path", "required": true, "description": "Indexed document UUID resolved together with tenant and knowledge-base scope.", "schema": {"type": "string", "format": "uuid"}},
       "KnowledgeIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque key scoped to the authenticated tenant and operation. Exact retries replay the original response; reuse with changed input returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
+      "CrmCompany": {"name": "company", "in": "path", "required": true, "description": "Company UUID resolved together with tenant scope; missing, deleted, and cross-tenant records return 404.", "schema": {"type": "string", "format": "uuid"}},
+      "CrmPerson": {"name": "person", "in": "path", "required": true, "description": "Person UUID resolved together with tenant scope; missing, deleted, and cross-tenant records return 404.", "schema": {"type": "string", "format": "uuid"}},
+      "CrmIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque key scoped to the tenant. Exact retries of the same operation and input replay the completed response; reuse for changed input, another operation, or work in progress returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
+      "CrmSearch": {"name": "q", "in": "query", "description": "Literal substring search, bounded to 200 characters.", "schema": {"type": "string", "maxLength": 200}},
+      "CrmCompanyFilter": {"name": "company_id", "in": "query", "description": "An active company UUID in the same tenant.", "schema": {"type": "string", "format": "uuid"}},
+      "CrmSort": {"name": "sort", "in": "query", "schema": {"enum": ["created_at", "updated_at", "name"], "default": "created_at"}},
+      "CrmDirection": {"name": "direction", "in": "query", "schema": {"enum": ["asc", "desc"], "default": "desc"}},
+      "CrmPage": {"name": "page", "in": "query", "schema": {"type": "integer", "minimum": 1, "default": 1}},
+      "CrmPerPage": {"name": "per_page", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25}},
+      "TenantUuid": {"name": "tenant", "in": "path", "required": true, "description": "Messaging tenant UUID. Every resource lookup is resolved together with this scope.", "schema": {"type": "string", "format": "uuid"}},
+      "MessagingChannel": {"name": "channel", "in": "path", "required": true, "description": "Channel UUID resolved within the tenant; cross-tenant identifiers return 404.", "schema": {"type": "string", "format": "uuid"}},
+      "MessagingConversation": {"name": "conversation", "in": "path", "required": true, "description": "Conversation UUID resolved within tenant and, where present, channel scope.", "schema": {"type": "string", "format": "uuid"}},
+      "MessagingIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Key scoped to tenant and resource operation. Exact retries replay the stored response without another delivery; changed input or active work returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200, "pattern": "^[A-Za-z0-9._:-]+$"}},
+      "MessagingProvider": {"name": "provider", "in": "query", "schema": {"enum": ["local", "slack"]}},
+      "MessagingActive": {"name": "active", "in": "query", "schema": {"type": "boolean"}},
+      "MessagingSearch": {"name": "q", "in": "query", "schema": {"type": "string", "minLength": 1, "maxLength": 100}},
+      "MessagingConversationStatus": {"name": "status", "in": "query", "schema": {"enum": ["open", "closed"]}},
+      "MessagingDirection": {"name": "direction", "in": "query", "schema": {"enum": ["inbound", "outbound"]}},
+      "MessagingPage": {"name": "page", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 10000, "default": 1}},
+      "MessagingPerPage": {"name": "per_page", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 50, "default": 20}},
+      "SlackRequestTimestamp": {"name": "X-Slack-Request-Timestamp", "in": "header", "required": true, "description": "Decimal Unix timestamp within 300 seconds of server time.", "schema": {"type": "string", "pattern": "^[0-9]+$"}},
+      "SlackSignature": {"name": "X-Slack-Signature", "in": "header", "required": true, "description": "Lowercase Slack v0 HMAC-SHA256 signature over timestamp and exact raw request bytes.", "schema": {"type": "string", "pattern": "^v0=[a-f0-9]{64}$"}},
+      "ChannelConnection": {"name": "connection", "in": "path", "required": true, "description": "Connection UUID resolved together with tenant scope; missing, deleted, and cross-tenant records return 404.", "schema": {"type": "string", "format": "uuid"}},
+      "ChannelMediaArtifact": {"name": "artifact", "in": "path", "required": true, "description": "Private media artifact UUID resolved together with tenant scope.", "schema": {"type": "string", "format": "uuid"}},
+      "ChannelPublication": {"name": "publication", "in": "path", "required": true, "description": "Publication UUID resolved together with tenant scope.", "schema": {"type": "string", "format": "uuid"}},
+      "ChannelIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque 8-200 character key scoped to tenant, resource, and operation. Exact retries replay the original response without another provider call or queue job; changed input or active work returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
+      "ChannelProviderFilter": {"name": "provider", "in": "query", "schema": {"enum": ["x", "threads", "instagram", "line", "youtube"]}},
+      "ChannelConnectionFilter": {"name": "connection_id", "in": "query", "schema": {"type": "string", "format": "uuid"}},
+      "ChannelPublicationStatus": {"name": "status", "in": "query", "schema": {"enum": ["queued", "dispatching", "succeeded", "failed", "unknown"]}},
+      "ChannelPage": {"name": "page", "in": "query", "schema": {"type": "integer", "minimum": 1, "default": 1}},
+      "ChannelPerPage": {"name": "per_page", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25}},
+      "MeasurementTenant": {"name": "tenant", "in": "path", "required": true, "description": "Measurement tenant scope. Every connection and provider operation is resolved together with this identifier.", "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"}},
+      "MeasurementConnection": {"name": "connection", "in": "path", "required": true, "description": "Measurement connection UUID resolved within tenant scope; cross-tenant identifiers return 404.", "schema": {"type": "string", "format": "uuid"}},
+      "MeasurementWritableProvider": {"name": "provider", "in": "path", "required": true, "description": "Provider surface that exposes resource listing and confirmed mutations.", "schema": {"enum": ["gtm", "gbp"]}},
+      "MeasurementPage": {"name": "page", "in": "query", "schema": {"type": "integer", "minimum": 1, "default": 1}},
+      "MeasurementPerPage": {"name": "per_page", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20}},
+      "MeasurementResourceKind": {"name": "kind", "in": "query", "required": true, "schema": {"enum": ["accounts", "containers", "workspaces", "tags", "triggers", "variables", "locations", "reviews"]}},
+      "MeasurementResourceParent": {"name": "parent", "in": "query", "schema": {"type": "string", "maxLength": 400, "pattern": "^[A-Za-z0-9_/-]+$"}},
+      "MeasurementResourcePageSize": {"name": "page_size", "in": "query", "schema": {"type": "integer", "minimum": 1, "maximum": 100}},
+      "MeasurementResourcePageToken": {"name": "page_token", "in": "query", "schema": {"type": "string", "maxLength": 2048, "pattern": "^[^\\u0000-\\u001F\\u007F]*$"}},
+      "MeasurementIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "8-200 byte key scoped to tenant and connection. Exact completed retries replay the stored response; changed input returns 409 and an ambiguous in-progress outcome remains blocked until reconciliation.", "schema": {"type": "string", "minLength": 8, "maxLength": 200, "pattern": "^[^\\u0000-\\u0020\\u007F]+$"}},
+      "SiteSourceConnection": {"name": "connection", "in": "path", "required": true, "description": "Source connection UUID resolved together with tenant and site; cross-scope lookup returns 404.", "schema": {"type": "string", "format": "uuid"}},
+      "SiteSourceFetchJob": {"name": "fetchJob", "in": "path", "required": true, "description": "Fetch job UUID resolved together with tenant, site, and connection.", "schema": {"type": "string", "format": "uuid"}},
+      "SiteSourceIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque write key scoped to tenant, site, resource, and operation. Exact retries replay the original response; changed input or active work returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
       "Approval": {"name": "approval", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "LayoutSnapshot": {"name": "layoutSnapshot", "in": "path", "required": true, "description": "Content-addressed Layout Snapshot identifier.", "schema": {"type": "string", "pattern": "^ls_[a-f0-9]{64}$"}},
+      "StylerJob": {"name": "job", "in": "path", "required": true, "description": "Pipeline, review, or stage job UUID resolved by the operation-specific job store.", "schema": {"type": "string", "format": "uuid"}},
+      "StylerIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque 8-200 character key. Exact retries return the same asynchronous job; reuse with changed input returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
       "IdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque globally unique key. Exact retries replay the original status and body; reuse for another operation or input returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}}
     },
     "headers": {
       "IdempotentReplayed": {"description": "Whether this response is an exact replay of a completed operation.", "schema": {"type": "string", "enum": ["true", "false"]}}
     },
     "responses": {
+      "MediaProblem": {"description": "Media API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/media/problem.json"}}}},
       "InterviewProblem": {"description": "Interview API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/interview/problem.json"}}}},
       "KnowledgeProblem": {"description": "Knowledge API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge/problem.json"}}}},
+      "CrmProblem": {"description": "CRM API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/crm/problem.json"}}}},
+      "MessagingProblem": {"description": "Messaging API Problem", "content": {"application/problem+json": {"schema": {"$ref": "../schemas/v1/messaging/problem.json"}}}},
+      "ChannelProblem": {"description": "Channel API Problem", "content": {"application/problem+json": {"schema": {"$ref": "../schemas/v1/channel/problem.json"}}}},
+      "MeasurementProblem": {"description": "Measurement API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/problem.json"}}}},
+      "MeasurementRateLimited": {"description": "Measurement request throttled by Laravel middleware", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/measurement/rate-limit-response.json"}}}},
+      "SiteSourceProblem": {"description": "Site Source API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-source/problem.json"}}}},
       "ApprovalProblem": {"description": "Approval API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/approval/problem.json"}}}}
     }
   }

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/provider-configuration.json",
+  "title": "Measurement provider configuration",
+  "oneOf": [
+    {
+      "title": "GA4 property",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["property_id"],
+      "properties": {"property_id": {"type": "string", "pattern": "^[0-9]{1,32}$"}}
+    },
+    {
+      "title": "Search Console site",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["site_url"],
+      "properties": {"site_url": {"type": "string", "pattern": "^(?:sc-domain:[A-Za-z0-9.-]{1,253}|https://[A-Za-z0-9.-]{1,253}(?::[0-9]{1,5})?/.*)$"}}
+    },
+    {
+      "title": "GTM or GBP account",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["account_id"],
+      "properties": {"account_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{1,100}$"}}
+    }
+  ]
+}

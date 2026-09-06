@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/template/template-result.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "template_key", "version", "sha256", "manifest_sha256", "digest", "title", "html", "manifest"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "template_key": {"type": "string"},
+    "version": {"type": "string", "pattern": "^v1-[a-f0-9]{20}$"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "title": {"type": "string"},
+    "description": {"type": "string"},
+    "html": {"type": "string"},
+    "manifest": {"$ref": "manifest.json"}
+  }
+}

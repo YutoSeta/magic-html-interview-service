@@ -1,0 +1,15 @@
+{
+  "contract_version": "1.0",
+  "data": [
+    {
+      "public_id": "2dd02bc9-19b5-4824-b983-cde9b52875d4",
+      "key": "home",
+      "name": "Home",
+      "kind": "page",
+      "status": "published",
+      "revision": 3,
+      "etag": "\"3\"",
+      "document_hash": "3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  ]
+}

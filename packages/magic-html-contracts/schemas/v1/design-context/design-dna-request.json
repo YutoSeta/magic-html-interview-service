@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/design-context/design-dna-request.json",
+  "title": "Generate Design DNA Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "interview_text"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "interview_text": { "type": "string", "minLength": 1, "maxLength": 30000 },
+    "materials": { "type": "object", "maxProperties": 30, "additionalProperties": { "type": "string", "maxLength": 4000 } },
+    "inspiration": { "type": "array", "maxItems": 20, "items": { "type": "string", "maxLength": 2000 } },
+    "execution_profile": { "$ref": "./common.json#/$defs/executionProfile" }
+  }
+}

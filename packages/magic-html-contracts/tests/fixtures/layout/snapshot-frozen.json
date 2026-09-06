@@ -1,0 +1,209 @@
+{
+  "contract_version": "1.0",
+  "profile": "layout-snapshot-v1",
+  "snapshot_id": "ls_68577583df4a60182630fd1d1c55eb86436c164ca7f23164172814176d5ffc46",
+  "snapshot_digest": "68577583df4a60182630fd1d1c55eb86436c164ca7f23164172814176d5ffc46",
+  "status": "frozen",
+  "source_structure_digest": "3a578a55738c7c0f4386757aac52ea294ccb90ac979c83978100d99004b4db04",
+  "layout_ast_version": 2,
+  "constraints": {
+    "container_max_width_px": 1200,
+    "content_max_width_px": 720,
+    "responsive": {
+      "compact_max_px": 639.98,
+      "medium_min_px": 640,
+      "wide_min_px": 1024
+    },
+    "validation_viewports_px": [390, 768, 1440],
+    "minimum_action_height_px": 44,
+    "mobile": {
+      "reflow": "single-column",
+      "preserve_source_order": true
+    }
+  },
+  "pages": [
+    {
+      "page_key": "home",
+      "route": "/",
+      "path": "page-home.html",
+      "title": "Layout snapshot",
+      "source_html": {
+        "mime": "text/html; charset=UTF-8",
+        "content_base64": "PG1haW4+PGgxPkxheW91dCBzbmFwc2hvdDwvaDE+PC9tYWluPgo=",
+        "sha256": "eeea7fe33ef82bdac3dec34108780aead3980a162356b94a58c2b23d5c41fa55"
+      },
+      "layout": {
+        "profile": "geometry-layout-v2",
+        "ast": {
+          "version": 2,
+          "constraints": {
+            "container_max_width_px": 1200,
+            "content_max_width_px": 720,
+            "responsive": {
+              "compact_max_px": 639.98,
+              "medium_min_px": 640,
+              "wide_min_px": 1024
+            },
+            "validation_viewports_px": [390, 768, 1440],
+            "minimum_action_height_px": 44,
+            "mobile": {
+              "reflow": "single-column",
+              "preserve_source_order": true
+            }
+          },
+          "tokens": {
+            "space": {"md": "16px"},
+            "size": {"body": "16px", "action-min": "44px"},
+            "container": {"site": "1200px", "content": "720px", "medium": "640px", "wide": "1024px"}
+          },
+          "rules": [
+            {
+              "id": "page-flow",
+              "layer": "global",
+              "target": {"role": "Page"},
+              "style": {"layout": {"flow": "stack", "width": "container"}}
+            }
+          ]
+        },
+        "css": "/* Generated from Layout AST v2. Do not edit this CSS directly. */\n@layer mh-layout, mh-skin, mh-decor, mh-motion;\n@layer mh-layout.base {\n  :root {\n    --mh-container-content: 720px;\n    --mh-container-medium: 640px;\n    --mh-container-site: 1200px;\n    --mh-container-wide: 1024px;\n    --mh-size-action-min: 44px;\n    --mh-size-body: 16px;\n    --mh-space-md: 16px;\n  }\n  \n  *, *::before, *::after { box-sizing: border-box; }\n  html, body { margin: 0; min-inline-size: 0; }\n  figure { margin: 0; min-inline-size: 0; }\n  img, svg, video, canvas, iframe { display: block; max-inline-size: 100%; block-size: auto; }\n  input, textarea, select, button { font: inherit; }\n  [data-mh-design-container] { container-type: inline-size; min-inline-size: 0; }\n  body { font-family: ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", \"Hiragino Sans\", sans-serif; line-height: 1.6; }\n}\n\n@layer mh-layout.global {\n  /* page-flow */\n  [data-mh-role=\"Page\"] {\n    display: flex;\n    flex-direction: column;\n    flex-wrap: nowrap;\n    width: min(100%, var(--mh-container-site, 72rem));\n    margin-inline: auto;\n  }\n}\n",
+        "ast_digest": "7a3b1466c7c3db02b425188ab597f385845b74dcade245ce34d3eb2383604e75",
+        "css_digest": "10ad47eabcdbc599670b7a14b08f4db2a59fb9e2ea6350eb4df5b3678166b4a5",
+        "compiler": "yutoseta/magic-html-layout-ast",
+        "compiler_version": "2.0"
+      }
+    }
+  ],
+  "validation": {
+    "status": "passed",
+    "validator": "magic-html-preview-service",
+    "validator_version": "1.0.0",
+    "subject": {
+      "candidate_snapshot_id": "ls_81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d",
+      "candidate_snapshot_digest": "81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d"
+    },
+    "pages": [
+      {
+        "page_key": "home",
+        "route": "/",
+        "path": "page-home.html",
+        "viewports": [
+          {
+            "width_px": 390,
+            "height_px": 844,
+            "breakpoint": "compact",
+            "breakpoint_outcome": "passed",
+            "geometry_outcome": "passed",
+            "measurements": {
+              "container_width_px": 390,
+              "content_width_px": 358,
+              "horizontal_overflow_px": 0,
+              "minimum_action_height_px": 44,
+              "overlap_count": 0,
+              "clipped_content_count": 0,
+              "zero_dimension_count": 0,
+              "responsive_violation_count": 0,
+              "image_aspect_violation_count": 0,
+              "checks": {
+                "container_width_within_limit": true,
+                "content_width_within_limit": true,
+                "no_horizontal_overflow": true,
+                "minimum_action_height_met": true,
+                "source_order_preserved": true,
+                "no_overlap": true,
+                "no_clipped_content": true,
+                "no_zero_dimensions": true,
+                "responsive_behavior_matches": true,
+                "image_aspect_preserved": true
+              }
+            },
+            "issues": []
+          },
+          {
+            "width_px": 768,
+            "height_px": 1024,
+            "breakpoint": "medium",
+            "breakpoint_outcome": "passed",
+            "geometry_outcome": "passed",
+            "measurements": {
+              "container_width_px": 768,
+              "content_width_px": 720,
+              "horizontal_overflow_px": 0,
+              "minimum_action_height_px": 44,
+              "overlap_count": 0,
+              "clipped_content_count": 0,
+              "zero_dimension_count": 0,
+              "responsive_violation_count": 0,
+              "image_aspect_violation_count": 0,
+              "checks": {
+                "container_width_within_limit": true,
+                "content_width_within_limit": true,
+                "no_horizontal_overflow": true,
+                "minimum_action_height_met": true,
+                "source_order_preserved": true,
+                "no_overlap": true,
+                "no_clipped_content": true,
+                "no_zero_dimensions": true,
+                "responsive_behavior_matches": true,
+                "image_aspect_preserved": true
+              }
+            },
+            "issues": []
+          },
+          {
+            "width_px": 1440,
+            "height_px": 900,
+            "breakpoint": "wide",
+            "breakpoint_outcome": "passed",
+            "geometry_outcome": "passed",
+            "measurements": {
+              "container_width_px": 1200,
+              "content_width_px": 720,
+              "horizontal_overflow_px": 0,
+              "minimum_action_height_px": 44,
+              "overlap_count": 0,
+              "clipped_content_count": 0,
+              "zero_dimension_count": 0,
+              "responsive_violation_count": 0,
+              "image_aspect_violation_count": 0,
+              "checks": {
+                "container_width_within_limit": true,
+                "content_width_within_limit": true,
+                "no_horizontal_overflow": true,
+                "minimum_action_height_met": true,
+                "source_order_preserved": true,
+                "no_overlap": true,
+                "no_clipped_content": true,
+                "no_zero_dimensions": true,
+                "responsive_behavior_matches": true,
+                "image_aspect_preserved": true
+              }
+            },
+            "issues": []
+          }
+        ]
+      }
+    ]
+  },
+  "lineage": {
+    "parent_snapshot_id": "ls_81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d",
+    "parent_snapshot_digest": "81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d",
+    "delta": {
+      "profile": "layout-snapshot-delta-v1",
+      "change_id": "attach-browser-validation",
+      "reason": "Attach passed browser geometry validation.",
+      "operations": [
+        {
+          "sequence": 1,
+          "operation": "attach_validation",
+          "target": {
+            "kind": "snapshot",
+            "page_key": null
+          },
+          "before_digest": "81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d",
+          "after_digest": "b828574dd5c3360b32277410fb5ef709b666ca5848c463417f93f096d3fd1208",
+          "summary": "Attach passed browser geometry validation."
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/styler/approved-layout.json",
+  "title": "Legacy Approved Wireframe Layout for Styler 1.1/1.2 Compatibility",
+  "description": "Legacy approved-wireframe-layout-v1 compatibility artifact consumed by Styler contracts 1.1/1.2. It is not the authoritative Layout Snapshot carrying geometry-only Layout AST v2 and must not be used as the Styler 1.3 source of truth; Wireframe review presentation CSS remains excluded.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["page_key", "path", "profile", "status", "ast", "css", "ast_digest", "css_digest", "source_html_digest", "compiler", "compiler_version", "responsive"],
+  "properties": {
+    "page_key": { "type": "string", "minLength": 1, "maxLength": 255 },
+    "path": { "type": "string", "minLength": 1, "maxLength": 255 },
+    "profile": { "const": "approved-wireframe-layout-v1" },
+    "status": { "const": "frozen" },
+    "ast": {
+      "type": "object",
+      "minProperties": 1,
+      "description": "Magic HTML Layout AST validated by the named compiler package."
+    },
+    "css": { "type": "string", "minLength": 1, "maxLength": 2000000 },
+    "ast_digest": { "$ref": "#/$defs/digest" },
+    "css_digest": { "$ref": "#/$defs/digest" },
+    "source_html_digest": { "$ref": "#/$defs/digest" },
+    "compiler": { "const": "yutoseta/magic-html-layout-ast" },
+    "compiler_version": { "type": "string", "minLength": 1, "maxLength": 20 },
+    "responsive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compact_max_px", "medium_min_px", "wide_min_px"],
+      "properties": {
+        "compact_max_px": { "type": "number", "minimum": 320, "maximum": 9999 },
+        "medium_min_px": { "type": "integer", "minimum": 320, "maximum": 10000 },
+        "wide_min_px": { "type": "integer", "minimum": 320, "maximum": 10000 }
+      }
+    }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

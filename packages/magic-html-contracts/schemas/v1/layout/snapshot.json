@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/snapshot.json",
+  "title": "Site-level Layout Snapshot",
+  "description": "A content-addressed Layout Snapshot 1.0 for every page in one site. It contains only source HTML and geometry-only Layout AST v2/CSS; Wireframe review presentation, color, decoration, and motion are excluded. snapshot_digest is SHA-256 lowercase hex of the canonical root payload after removing snapshot_id and snapshot_digest: recursively sort object keys in bytewise ascending order, preserve array order, then JSON encode with unescaped Unicode and slashes while preserving zero fractions. snapshot_id is exactly 'ls_' plus snapshot_digest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "profile", "snapshot_id", "snapshot_digest", "status", "source_structure_digest", "layout_ast_version", "constraints", "pages", "validation", "lineage"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "profile": {"const": "layout-snapshot-v1"},
+    "snapshot_id": {"$ref": "#/$defs/snapshotId"},
+    "snapshot_digest": {"$ref": "#/$defs/digest"},
+    "status": {"enum": ["candidate", "frozen"]},
+    "source_structure_digest": {"$ref": "#/$defs/digest"},
+    "layout_ast_version": {"const": 2},
+    "constraints": {"$ref": "#/$defs/constraints"},
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/page"}
+    },
+    "validation": {"$ref": "validation-result.json"},
+    "lineage": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/lineage"}
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "candidate"}}, "required": ["status"]},
+      "then": {"properties": {"validation": {"properties": {"status": {"const": "pending"}}, "required": ["status"]}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "frozen"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "validation": {"properties": {"status": {"const": "passed"}}, "required": ["status"]},
+          "lineage": {
+            "type": "object",
+            "properties": {
+              "delta": {
+                "type": "object",
+                "properties": {
+                  "operations": {
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "prefixItems": [
+                      {
+                        "properties": {
+                          "operation": {"const": "attach_validation"},
+                          "target": {"properties": {"kind": {"const": "snapshot"}, "page_key": {"type": "null"}}}
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "snapshotId": {"type": "string", "pattern": "^ls_[a-f0-9]{64}$"},
+    "pageKey": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"},
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["container_max_width_px", "content_max_width_px", "responsive", "validation_viewports_px", "minimum_action_height_px", "mobile"],
+      "properties": {
+        "container_max_width_px": {"type": "integer", "minimum": 320, "maximum": 3840},
+        "content_max_width_px": {"type": "integer", "minimum": 240, "maximum": 3840},
+        "responsive": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["compact_max_px", "medium_min_px", "wide_min_px"],
+          "properties": {
+            "compact_max_px": {"type": "number", "minimum": 390, "maximum": 767.98},
+            "medium_min_px": {"type": "integer", "minimum": 391, "maximum": 768},
+            "wide_min_px": {"type": "integer", "minimum": 769, "maximum": 1440}
+          }
+        },
+        "validation_viewports_px": {
+          "type": "array",
+          "const": [390, 768, 1440],
+          "minItems": 3,
+          "maxItems": 10,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 320, "maximum": 3840},
+          "allOf": [
+            {"contains": {"const": 390}, "minContains": 1, "maxContains": 1},
+            {"contains": {"const": 768}, "minContains": 1, "maxContains": 1},
+            {"contains": {"const": 1440}, "minContains": 1, "maxContains": 1}
+          ]
+        },
+        "minimum_action_height_px": {"type": "integer", "minimum": 44, "maximum": 256},
+        "mobile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reflow", "preserve_source_order"],
+          "properties": {
+            "reflow": {"const": "single-column"},
+            "preserve_source_order": {"const": true}
+          }
+        }
+      }
+    },
+    "sourceHtml": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mime", "content_base64", "sha256"],
+      "properties": {
+        "mime": {"const": "text/html; charset=UTF-8"},
+        "content_base64": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 2666668,
+          "contentEncoding": "base64",
+          "contentMediaType": "text/html"
+        },
+        "sha256": {"$ref": "#/$defs/digest", "description": "SHA-256 lowercase hex of the exact decoded content_base64 bytes."}
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "ast", "css", "ast_digest", "css_digest", "compiler", "compiler_version"],
+      "properties": {
+        "profile": {"const": "geometry-layout-v2"},
+        "ast": {
+          "type": "object",
+          "minProperties": 3,
+          "required": ["version", "constraints", "rules"],
+          "properties": {
+            "version": {"const": 2},
+            "constraints": {"type": "object"},
+            "rules": {"type": "array", "minItems": 1, "maxItems": 400}
+          },
+          "description": "Generic embedding of a geometry-only Layout AST v2. The named compiler package owns full AST validation; its constraints must exactly equal the snapshot root constraints."
+        },
+        "css": {"type": "string", "minLength": 1, "maxLength": 2000000, "description": "Geometry-only mh-layout CSS compiled from ast; review CSS, paint, decoration, and motion are excluded."},
+        "ast_digest": {"$ref": "#/$defs/digest", "description": "SHA-256 lowercase hex of ast after recursively sorting object keys bytewise and preserving array order during canonical JSON encoding."},
+        "css_digest": {"$ref": "#/$defs/digest", "description": "SHA-256 lowercase hex of the exact UTF-8 css bytes."},
+        "compiler": {"const": "yutoseta/magic-html-layout-ast"},
+        "compiler_version": {"const": "2.0"}
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["page_key", "route", "path", "title", "source_html", "layout"],
+      "properties": {
+        "page_key": {"$ref": "#/$defs/pageKey"},
+        "route": {"type": "string", "pattern": "^/(?:[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*)?$", "maxLength": 200},
+        "path": {"type": "string", "pattern": "^(?:[a-z0-9][a-z0-9-]*/)*[a-z0-9][a-z0-9-]*\\.html$", "maxLength": 200},
+        "title": {"type": "string", "minLength": 1, "maxLength": 200},
+        "source_html": {"$ref": "#/$defs/sourceHtml"},
+        "layout": {"$ref": "#/$defs/layout"}
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["parent_snapshot_id", "parent_snapshot_digest", "delta"],
+      "properties": {
+        "parent_snapshot_id": {"$ref": "#/$defs/snapshotId"},
+        "parent_snapshot_digest": {"$ref": "#/$defs/digest"},
+        "delta": {"$ref": "delta.json"}
+      }
+    }
+  }
+}

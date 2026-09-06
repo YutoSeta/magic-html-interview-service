@@ -1,0 +1,8 @@
+{
+  "contract_version": "1.0",
+  "base_revision": 3,
+  "idempotency_key": "must-be-an-http-header",
+  "operations": [
+    {"op": "remove", "target": "/children/0"}
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/delta.json",
+  "title": "Layout Snapshot finite delta",
+  "description": "A bounded and auditable summary of the geometry inputs changed relative to a parent Layout Snapshot. A finite-patch delta binds one exact non-empty Layout patch plan, derives change_id as 'layout-patch-' plus the canonical SHA-256 of that plan, and records one ordered digest-bound operation per issue. No arbitrary patch language is accepted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "change_id", "reason", "operations"],
+  "properties": {
+    "profile": {"const": "layout-snapshot-delta-v1"},
+    "change_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "reason": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "patch_plan": {
+      "description": "The exact Layout visual-feedback plan represented by operations in the same order. Required only for an apply_finite_layout_patch-only delta.",
+      "allOf": [
+        {"$ref": "../visual-feedback/patch-plan.json"},
+        {
+          "properties": {
+            "stage": {"const": "layout"},
+            "issues": {"minItems": 1}
+          }
+        }
+      ]
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/operation"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "operations": {
+            "contains": {
+              "properties": {"operation": {"const": "apply_finite_layout_patch"}},
+              "required": ["operation"]
+            }
+          }
+        },
+        "required": ["operations"]
+      },
+      "then": {
+        "required": ["patch_plan"],
+        "properties": {
+          "change_id": {"pattern": "^layout-patch-[a-f0-9]{64}$"},
+          "operations": {
+            "items": {
+              "properties": {"operation": {"const": "apply_finite_layout_patch"}},
+              "required": ["operation"]
+            }
+          }
+        }
+      },
+      "else": {"not": {"required": ["patch_plan"]}}
+    }
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "nullableDigest": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/digest"}
+      ]
+    },
+    "pageKey": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "page_key"],
+      "properties": {
+        "kind": {"enum": ["constraints", "page", "snapshot"]},
+        "page_key": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/pageKey"}
+          ]
+        }
+      },
+      "oneOf": [
+        {"properties": {"kind": {"const": "constraints"}, "page_key": {"type": "null"}}},
+        {"properties": {"kind": {"const": "page"}, "page_key": {"$ref": "#/$defs/pageKey"}}},
+        {"properties": {"kind": {"const": "snapshot"}, "page_key": {"type": "null"}}}
+      ]
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "operation", "target", "before_digest", "after_digest", "summary"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1, "maximum": 100},
+        "operation": {"enum": ["add_page", "remove_page", "replace_page_source", "replace_page_layout", "replace_constraints", "attach_validation", "apply_finite_layout_patch"]},
+        "target": {"$ref": "#/$defs/target"},
+        "before_digest": {"$ref": "#/$defs/nullableDigest"},
+        "after_digest": {"$ref": "#/$defs/nullableDigest"},
+        "summary": {"type": "string", "minLength": 1, "maxLength": 500},
+        "finite_patch": {
+          "description": "The exact visual-feedback issue applied to the AST identified by before_digest. Present only for apply_finite_layout_patch.",
+          "allOf": [
+            {"$ref": "../visual-feedback/patch-plan.json#/$defs/issue"},
+            {
+              "properties": {
+                "problem": {"$ref": "../visual-feedback/patch-plan.json#/$defs/layoutProblem"},
+                "operation": {"$ref": "../visual-feedback/patch-plan.json#/$defs/layoutOperation"}
+              }
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"operation": {"const": "apply_finite_layout_patch"}},
+            "required": ["operation"]
+          },
+          "then": {"required": ["finite_patch"]},
+          "else": {"not": {"required": ["finite_patch"]}}
+        }
+      ],
+      "oneOf": [
+        {
+          "properties": {
+            "operation": {"const": "add_page"},
+            "target": {"properties": {"kind": {"const": "page"}, "page_key": {"$ref": "#/$defs/pageKey"}}},
+            "before_digest": {"type": "null"},
+            "after_digest": {"$ref": "#/$defs/digest"}
+          }
+        },
+        {
+          "properties": {
+            "operation": {"const": "remove_page"},
+            "target": {"properties": {"kind": {"const": "page"}, "page_key": {"$ref": "#/$defs/pageKey"}}},
+            "before_digest": {"$ref": "#/$defs/digest"},
+            "after_digest": {"type": "null"}
+          }
+        },
+        {
+          "properties": {
+            "operation": {"enum": ["replace_page_source", "replace_page_layout"]},
+            "target": {"properties": {"kind": {"const": "page"}, "page_key": {"$ref": "#/$defs/pageKey"}}},
+            "before_digest": {"$ref": "#/$defs/digest"},
+            "after_digest": {"$ref": "#/$defs/digest"}
+          }
+        },
+        {
+          "properties": {
+            "operation": {"const": "replace_constraints"},
+            "target": {"properties": {"kind": {"const": "constraints"}, "page_key": {"type": "null"}}},
+            "before_digest": {"$ref": "#/$defs/digest"},
+            "after_digest": {"$ref": "#/$defs/digest"}
+          }
+        },
+        {
+          "properties": {
+            "operation": {"const": "attach_validation"},
+            "target": {"properties": {"kind": {"const": "snapshot"}, "page_key": {"type": "null"}}},
+            "before_digest": {"$ref": "#/$defs/digest", "description": "The candidate snapshot digest."},
+            "after_digest": {"$ref": "#/$defs/digest", "description": "The canonical validation-result digest."}
+          }
+        },
+        {
+          "properties": {
+            "operation": {"const": "apply_finite_layout_patch"},
+            "before_digest": {"$ref": "#/$defs/digest", "description": "For a page target, the selected page Layout AST digest immediately before this operation; for a constraints target, the root constraints digest immediately before it."},
+            "after_digest": {"$ref": "#/$defs/digest", "description": "For a page target, the selected page Layout AST digest immediately after this operation; for a constraints target, the root constraints digest immediately after it."}
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "finite_patch": {
+                    "properties": {"target_id": {"const": "$constraints"}},
+                    "required": ["target_id"]
+                  }
+                },
+                "required": ["finite_patch"]
+              },
+              "then": {
+                "properties": {
+                  "target": {"properties": {"kind": {"const": "constraints"}, "page_key": {"type": "null"}}},
+                  "finite_patch": {
+                    "properties": {
+                      "operation": {
+                        "properties": {
+                          "type": {
+                            "enum": ["set_container_max_width", "set_content_max_width", "set_minimum_action_height"]
+                          }
+                        },
+                        "required": ["type"]
+                      }
+                    }
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "target": {"properties": {"kind": {"const": "page"}, "page_key": {"$ref": "#/$defs/pageKey"}}},
+                  "finite_patch": {
+                    "properties": {
+                      "operation": {
+                        "not": {
+                          "properties": {
+                            "type": {
+                              "enum": ["set_container_max_width", "set_content_max_width", "set_minimum_action_height"]
+                            }
+                          },
+                          "required": ["type"]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

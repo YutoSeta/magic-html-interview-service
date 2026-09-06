@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/design-context/design-canvas-request.json",
+  "title": "Generate Design Canvas Request",
+  "description": "Creates one first-view design comp, not a style guide or component inventory. viewport picks the screen (desktop by default, or a portrait mobile first view) and framing picks what the first view contains (a site top page, or a landing page with a CV button and a fixed CV bar). canvas_brief, when supplied, is the text the image is grounded in instead of the raw interview text. An optional digest-bound wireframe or page screenshot (composition_reference) can ground hierarchy and composition; an optional earlier canvas of the other viewport (style_reference) keeps palette, type and composition consistent across the pair.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "interview_text", "design_dna"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "interview_text": { "type": "string", "minLength": 1, "maxLength": 30000 },
+    "design_dna": { "type": "object", "minProperties": 1, "maxProperties": 30 },
+    "canvas_brief": { "type": "string", "minLength": 1, "maxLength": 20000 },
+    "viewport": { "$ref": "./common.json#/$defs/canvasViewport" },
+    "framing": { "$ref": "./common.json#/$defs/canvasFraming" },
+    "size": { "enum": ["1024x1024", "1536x1024", "1024x1536"], "description": "Defaults to 1024x1536 when viewport is omitted or mobile, and to 1536x1024 for a desktop viewport that is requested explicitly." },
+    "composition_reference": { "$ref": "./common.json#/$defs/canvasReference" },
+    "style_reference": { "$ref": "./common.json#/$defs/canvasReference" },
+    "execution_profile": { "$ref": "./common.json#/$defs/executionProfile" }
+  }
+}

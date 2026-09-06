@@ -1,0 +1,75 @@
+{
+  "contract_version": "1.0",
+  "contract_kind": "magic_html_resource",
+  "status": "operational",
+  "sources": [
+    {
+      "source_id": "html:inline",
+      "kind": "html",
+      "locator": "inline",
+      "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "digest_scope": "canonical_dom"
+    }
+  ],
+  "resources": [
+    {
+      "resource_key": "content:home",
+      "kind": "content",
+      "name": "home",
+      "provenance": [
+        {"source_id": "html:inline", "pointer_kind": "semantic", "pointer": "resource[content:home]", "attribute": "m-content"}
+      ],
+      "fields": [
+        {
+          "path": "title",
+          "value_type": "string",
+          "input": null,
+          "bindings": [
+            {
+              "kind": "text",
+              "attribute": null,
+              "provenance": [
+                {"source_id": "html:inline", "pointer_kind": "semantic", "pointer": "resource[content:home]/field[title]/binding[text]", "attribute": "m-field"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:inline", "pointer_kind": "semantic", "pointer": "resource[content:home]/field[title]", "attribute": "m-field"}
+          ]
+        }
+      ],
+      "item": null,
+      "capabilities": [
+        {
+          "name": "display",
+          "provenance": [
+            {"source_id": "html:inline", "pointer_kind": "semantic", "pointer": "resource[content:home]", "attribute": "m-content"}
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "content.home.read",
+          "purpose": "read",
+          "target": "/api/contents/home",
+          "http_method": "GET",
+          "confirmation": "not_required",
+          "provenance": [
+            {"source_id": "html:inline", "pointer_kind": "semantic", "pointer": "resource[content:home]", "attribute": "m-source"}
+          ]
+        }
+      ],
+      "policies": {
+        "authentication": {"status": "unresolved", "reference": null, "provenance": []},
+        "authorization": {"status": "unresolved", "reference": null, "provenance": []},
+        "tenant_scope": {"status": "unresolved", "reference": null, "provenance": []},
+        "storage": {"status": "unresolved", "reference": null, "provenance": []},
+        "validation": {"status": "unresolved", "reference": null, "provenance": []},
+        "audit": {"status": "unresolved", "reference": null, "provenance": []},
+        "write_semantics": {"status": "unresolved", "reference": null, "provenance": []},
+        "concurrency": {"status": "unresolved", "reference": null, "provenance": []}
+      }
+    }
+  ],
+  "diagnostics": []
+}

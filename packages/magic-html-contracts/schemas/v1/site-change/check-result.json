@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/check-result.json",
+  "title": "Site Change fixed-policy check result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "status", "summary"],
+  "properties": {
+    "name": {"enum": ["workspace_boundary", "site_content_policy", "credential_scan", "repository_limits"]},
+    "status": {"enum": ["passed", "failed"]},
+    "summary": {"type": ["string", "null"], "maxLength": 500, "description": "A bounded credential-redacted summary. Raw commands, environment values, access tokens, and provider payloads are forbidden."}
+  }
+}

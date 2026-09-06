@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/presentation/font-asset-set.json",
+  "title": "Magic HTML Licensed Font Asset Set",
+  "description": "Closed provenance and license metadata for self-hosted Google Fonts assets. This document records an immutable upstream revision, license evidence, transformation history, and the font asset references it governs; it never carries credentials, remote fetch instructions, or font bytes.",
+  "type": "object",
+  "required": ["contract_version", "set_id", "provider", "family", "upstream", "license", "transformation", "asset_refs"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "set_id": {"$ref": "#/$defs/identifier"},
+    "provider": {"const": "google-fonts"},
+    "family": {"$ref": "#/$defs/fontFamily"},
+    "upstream": {"$ref": "#/$defs/upstream"},
+    "license": {"$ref": "#/$defs/license"},
+    "transformation": {"$ref": "#/$defs/transformation"},
+    "asset_refs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/identifier"}
+    }
+  },
+  "$defs": {
+    "identifier": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,99}$"},
+    "fontFamily": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9 ._-]{0,99}$"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "upstream": {
+      "type": "object",
+      "required": ["catalog", "revision", "family_path", "version", "source_digest"],
+      "additionalProperties": false,
+      "properties": {
+        "catalog": {"const": "google/fonts"},
+        "revision": {"type": "string", "pattern": "^[a-f0-9]{40}$"},
+        "family_path": {"type": "string", "pattern": "^(?:ofl|apache|ufl)/[a-z0-9]+$"},
+        "version": {"type": "string", "minLength": 1, "maxLength": 100},
+        "source_digest": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "license": {
+      "type": "object",
+      "required": ["spdx", "copyright_notice", "license_text_path", "license_text_sha256", "reserved_font_names"],
+      "additionalProperties": false,
+      "properties": {
+        "spdx": {"enum": ["OFL-1.1", "Apache-2.0", "Ubuntu-font-1.0"]},
+        "copyright_notice": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "license_text_path": {"type": "string", "pattern": "^licenses/(?:[A-Za-z0-9._-]+/)*[A-Za-z0-9][A-Za-z0-9._-]{0,199}$", "maxLength": 1000},
+        "license_text_sha256": {"$ref": "#/$defs/sha256"},
+        "reserved_font_names": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/fontFamily"}
+        }
+      }
+    },
+    "transformation": {
+      "type": "object",
+      "required": ["kind", "metadata_preserved", "renamed_family"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["none", "woff2-compression", "subset"]},
+        "metadata_preserved": {"type": "boolean"},
+        "renamed_family": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/fontFamily"}
+          ]
+        }
+      }
+    }
+  }
+}

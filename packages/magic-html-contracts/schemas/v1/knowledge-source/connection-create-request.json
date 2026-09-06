@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge-source/connection-create-request.json",
+  "title": "Create Knowledge source connection",
+  "type": "object",
+  "required": ["contract_version", "name", "driver", "configuration", "credentials"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "driver": {"enum": ["google_drive", "rss", "wordpress", "storage", "line_works"]},
+    "configuration": {"$ref": "configuration.json"},
+    "credentials": {"$ref": "credentials.json"},
+    "active": {"type": "boolean", "default": true}
+  }
+}

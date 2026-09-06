@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/media-artifact-response.json",
+  "title": "Private Channel media artifact response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["data"],
+  "properties": {"data": {"$ref": "media-artifact.json"}}
+}

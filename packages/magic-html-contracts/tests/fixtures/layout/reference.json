@@ -1,0 +1,9 @@
+{
+  "profile": "layout-snapshot-reference-v1",
+  "snapshot_id": "ls_68577583df4a60182630fd1d1c55eb86436c164ca7f23164172814176d5ffc46",
+  "snapshot_digest": "68577583df4a60182630fd1d1c55eb86436c164ca7f23164172814176d5ffc46",
+  "page_key": "home",
+  "source_html_digest": "eeea7fe33ef82bdac3dec34108780aead3980a162356b94a58c2b23d5c41fa55",
+  "layout_ast_digest": "7a3b1466c7c3db02b425188ab597f385845b74dcade245ce34d3eb2383604e75",
+  "layout_css_digest": "10ad47eabcdbc599670b7a14b08f4db2a59fb9e2ea6350eb4df5b3678166b4a5"
+}

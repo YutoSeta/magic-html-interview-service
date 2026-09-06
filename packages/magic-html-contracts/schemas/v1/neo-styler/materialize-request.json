@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/neo-styler/materialize-request.json",
+  "title": "Materialize Landing Request",
+  "description": "Deterministically turns a brief and a composition into a landing Site AST and content: site.type landing, the CV from the brief, the terms and privacy pages from fixed legal templates filled with the business's name, address, contact and purposes (never written by a model), footer links to them, and the contact form. No model call.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "brief", "composition"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "brief": { "$ref": "./common.json#/$defs/brief" },
+    "composition": { "$ref": "./composition.json" }
+  }
+}

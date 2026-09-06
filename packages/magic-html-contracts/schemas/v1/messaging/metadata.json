@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/metadata.json",
+  "title": "Messaging metadata",
+  "description": "At most 20 provider-independent string or null values. Objects are conventional; JSON lists are retained for exact service compatibility.",
+  "anyOf": [
+    {"type": "object", "maxProperties": 20, "additionalProperties": {"type": ["string", "null"], "maxLength": 500}},
+    {"type": "array", "maxItems": 20, "items": {"type": ["string", "null"], "maxLength": 500}}
+  ]
+}

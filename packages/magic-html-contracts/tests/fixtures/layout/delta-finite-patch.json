@@ -1,0 +1,83 @@
+{
+  "profile": "layout-snapshot-delta-v1",
+  "change_id": "layout-patch-23e7c6b6235e473ce1cd9281dfce655ec4c12857b7b2e1dea198e96fbd2a5465",
+  "reason": "Apply bounded geometry corrections reported by Layout-only visual review.",
+  "patch_plan": {
+    "contract_version": "1.0",
+    "stage": "layout",
+    "base_ast_digest": "7a3b1466c7c3db02b425188ab597f385845b74dcade245ce34d3eb2383604e75",
+    "issues": [
+      {
+        "target_id": "page-flow",
+        "viewport": {"min_width": 1024},
+        "problem": "spacing_too_tight",
+        "operation": {"type": "set_gap", "value": "md"}
+      },
+      {
+        "target_id": "page-flow",
+        "viewport": {"min_width": 768, "max_width": 768},
+        "problem": "misalignment",
+        "operation": {"type": "set_alignment", "value": "center"}
+      },
+      {
+        "target_id": "$constraints",
+        "viewport": {"min_width": 320},
+        "problem": "action_too_small",
+        "operation": {"type": "set_minimum_action_height", "value": 48}
+      }
+    ]
+  },
+  "operations": [
+    {
+      "sequence": 1,
+      "operation": "apply_finite_layout_patch",
+      "target": {
+        "kind": "page",
+        "page_key": "home"
+      },
+      "before_digest": "7a3b1466c7c3db02b425188ab597f385845b74dcade245ce34d3eb2383604e75",
+      "after_digest": "304a41cbf50351507eb5d10a84b6338e1b0bbaeafd6f6c8b06968bf6b7019500",
+      "summary": "Increase the wide page-flow gap using an existing Layout token.",
+      "finite_patch": {
+        "target_id": "page-flow",
+        "viewport": {"min_width": 1024},
+        "problem": "spacing_too_tight",
+        "operation": {"type": "set_gap", "value": "md"}
+      }
+    },
+    {
+      "sequence": 2,
+      "operation": "apply_finite_layout_patch",
+      "target": {
+        "kind": "page",
+        "page_key": "home"
+      },
+      "before_digest": "304a41cbf50351507eb5d10a84b6338e1b0bbaeafd6f6c8b06968bf6b7019500",
+      "after_digest": "5abba4a8642580f655fd12faaf2f6601cff28d911b3aa2feb9008624729e5a2b",
+      "summary": "Align the same page-flow rule at the medium validation width.",
+      "finite_patch": {
+        "target_id": "page-flow",
+        "viewport": {"min_width": 768, "max_width": 768},
+        "problem": "misalignment",
+        "operation": {"type": "set_alignment", "value": "center"}
+      }
+    },
+    {
+      "sequence": 3,
+      "operation": "apply_finite_layout_patch",
+      "target": {
+        "kind": "constraints",
+        "page_key": null
+      },
+      "before_digest": "310446477f410760b90c97ae52cd706658b42c76bc75bdf217c039e70f084a07",
+      "after_digest": "ab74110bf322f5c4da553127369568e2eff1e58c1fa8fd1cfce7b3c7492fba35",
+      "summary": "Raise the site-wide minimum action height after measured browser feedback.",
+      "finite_patch": {
+        "target_id": "$constraints",
+        "viewport": {"min_width": 320},
+        "problem": "action_too_small",
+        "operation": {"type": "set_minimum_action_height", "value": 48}
+      }
+    }
+  ]
+}

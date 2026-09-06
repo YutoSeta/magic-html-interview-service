@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/channel.json",
+  "title": "Messaging channel",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "tenant_id", "provider", "name", "external_channel_id", "active", "credentials_configured", "metadata", "created_at", "updated_at"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "format": "uuid"},
+    "provider": {"enum": ["local", "slack"]},
+    "name": {"type": "string", "minLength": 1, "maxLength": 120},
+    "external_channel_id": {"type": ["string", "null"], "minLength": 1, "maxLength": 191},
+    "active": {"type": "boolean"},
+    "credentials_configured": {"const": true},
+    "metadata": {"$ref": "metadata.json"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

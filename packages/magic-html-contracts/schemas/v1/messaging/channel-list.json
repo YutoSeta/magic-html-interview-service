@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/channel-list.json",
+  "title": "Messaging channel list",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["data", "links", "meta"],
+  "properties": {
+    "data": {"type": "array", "maxItems": 50, "items": {"$ref": "channel.json"}},
+    "links": {"$ref": "pagination-links.json"},
+    "meta": {"$ref": "pagination-meta.json"}
+  }
+}

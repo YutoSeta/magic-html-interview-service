@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/publication-list.json",
+  "title": "Channel publication list",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["data", "meta"],
+  "properties": {
+    "data": {"type": "array", "maxItems": 100, "items": {"$ref": "publication.json"}},
+    "meta": {"$ref": "pagination-meta.json"}
+  }
+}

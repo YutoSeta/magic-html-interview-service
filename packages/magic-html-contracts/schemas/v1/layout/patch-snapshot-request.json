@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/patch-snapshot-request.json",
+  "title": "Patch Layout Snapshot candidate request",
+  "description": "Applies one non-empty, digest-bound Layout visual-feedback patch plan to one page of the candidate snapshot identified by the route. The service emits a new immutable candidate; it never mutates the source snapshot.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "page_key", "patch_plan"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "page_key": {"$ref": "snapshot.json#/$defs/pageKey"},
+    "patch_plan": {
+      "allOf": [
+        {"$ref": "../visual-feedback/patch-plan.json"},
+        {
+          "properties": {
+            "stage": {"const": "layout"},
+            "issues": {"minItems": 1}
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/restore-request.json",
+  "title": "Append-only Composer AST restore request",
+  "description": "Copies restore_revision into a new head revision. It never overwrites, deletes, or rewinds history. Idempotency-Key and a strong If-Match equal to base_revision are required HTTP headers and intentionally do not appear in this body.",
+  "type": "object",
+  "required": ["contract_version", "base_revision", "restore_revision"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "base_revision": {"type": "integer", "minimum": 0},
+    "restore_revision": {"type": "integer", "minimum": 0}
+  }
+}

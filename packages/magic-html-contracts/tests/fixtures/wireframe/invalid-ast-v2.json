@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "locale": "ja",
+  "pages": [
+    {
+      "key": "home",
+      "path": "/",
+      "title": "Invalid wireframe",
+      "root": {
+        "type": "Region",
+        "id": "document",
+        "semantic": "document",
+        "layout": "stack",
+        "journey_stage": "none",
+        "emphasis": "neutral",
+        "children": [
+          {
+            "type": "Region",
+            "id": "main",
+            "semantic": "main",
+            "layout": "stack",
+            "journey_stage": "none",
+            "emphasis": "neutral",
+            "children": [
+              {
+                "type": "Region",
+                "id": "only-section",
+                "semantic": "section",
+                "layout": "stack",
+                "journey_stage": "attention",
+                "emphasis": "primary",
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "title",
+                    "role": "heading-1",
+                    "content": "Invalid"
+                  },
+                  {
+                    "type": "Input",
+                    "id": "orphan-input",
+                    "input_type": "text",
+                    "label": "Orphan input",
+                    "name": "orphan",
+                    "placeholder": null,
+                    "required": false
+                  },
+                  {
+                    "type": "Link",
+                    "id": "external-link",
+                    "label": "External",
+                    "href": "https://example.com",
+                    "emphasis": "plain"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

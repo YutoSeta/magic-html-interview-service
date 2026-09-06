@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/preview/layout-validation-result.json",
+  "title": "Preview page Layout validation result",
+  "description": "Candidate-bound real-browser result for one Layout Snapshot page. Contract 1.0 retains legacy geometry, 1.1 adds deterministic acceptance coverage, and 1.2 adds explicit provider provenance plus a short-lived HMAC receipt for Styler review.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "validation_subject", "page_validation"],
+  "properties": {
+    "contract_version": {"enum": ["1.0", "1.1", "1.2"]},
+    "measurement_profile": {"const": "magic-html-layout-measurement-v1"},
+    "validation_subject": {"$ref": "../layout/validation-result.json#/$defs/candidateSubject"},
+    "page_validation": {"$ref": "../layout/validation-result.json#/$defs/pageResult"},
+    "acceptance_evidence": {"$ref": "#/$defs/acceptanceEvidence"},
+    "issued_at": {"type": "integer", "minimum": 0},
+    "expires_at": {"type": "integer", "minimum": 1},
+    "measurement_digest": {"$ref": "#/$defs/digest"},
+    "measurement_receipt": {"type": "string", "minLength": 16, "maxLength": 524288, "pattern": "^v1\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"contract_version": {"const": "1.0"}}, "required": ["contract_version"]},
+      "then": {"not": {"anyOf": [{"required": ["acceptance_evidence"]}, {"required": ["measurement_profile"]}, {"required": ["issued_at"]}, {"required": ["expires_at"]}, {"required": ["measurement_digest"]}, {"required": ["measurement_receipt"]}]}}
+    },
+    {
+      "if": {"properties": {"contract_version": {"const": "1.1"}}, "required": ["contract_version"]},
+      "then": {
+        "required": ["acceptance_evidence"],
+        "properties": {"acceptance_evidence": {"not": {"required": ["provider"]}}},
+        "not": {"anyOf": [{"required": ["measurement_profile"]}, {"required": ["issued_at"]}, {"required": ["expires_at"]}, {"required": ["measurement_digest"]}, {"required": ["measurement_receipt"]}]}
+      }
+    },
+    {
+      "if": {"properties": {"contract_version": {"const": "1.2"}}, "required": ["contract_version"]},
+      "then": {
+        "required": ["measurement_profile", "acceptance_evidence", "issued_at", "expires_at", "measurement_digest", "measurement_receipt"],
+        "properties": {"acceptance_evidence": {"required": ["provider"]}}
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "outcome": {"enum": ["passed", "failed", "not_applicable", "insufficient_evidence"]},
+    "counter": {"type": "integer", "minimum": 0, "maximum": 10000},
+    "nullableMetric": {"oneOf": [{"type": "null"}, {"type": "number", "minimum": 0, "maximum": 32768}]},
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section_spacing_min_px", "section_spacing_max_px", "body_line_length_min_ch", "body_line_length_max_ch", "grid_column_min_width_px", "column_ratio_max", "form_control_min_width_px", "form_control_min_height_px", "breakpoint_dimension_change_ratio_max"],
+      "properties": {
+        "section_spacing_min_px": {"const": 16},
+        "section_spacing_max_px": {"const": 512},
+        "body_line_length_min_ch": {"const": 18},
+        "body_line_length_max_ch": {"const": 90},
+        "grid_column_min_width_px": {"const": 140},
+        "column_ratio_max": {"const": 4},
+        "form_control_min_width_px": {"const": 44},
+        "form_control_min_height_px": {"type": "integer", "minimum": 44, "maximum": 256},
+        "breakpoint_dimension_change_ratio_max": {"const": 4}
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["container_width", "content_width", "horizontal_overflow", "minimum_action_height", "source_order", "overlap", "clipped_content", "zero_dimensions", "responsive_behavior", "image_aspect", "section_spacing", "body_line_length", "grid_column_width", "column_ratio", "form_control_dimensions", "fixed_header_anchor_collision"],
+      "properties": {
+        "container_width": {"$ref": "#/$defs/outcome"}, "content_width": {"$ref": "#/$defs/outcome"}, "horizontal_overflow": {"$ref": "#/$defs/outcome"}, "minimum_action_height": {"$ref": "#/$defs/outcome"},
+        "source_order": {"$ref": "#/$defs/outcome"}, "overlap": {"$ref": "#/$defs/outcome"}, "clipped_content": {"$ref": "#/$defs/outcome"}, "zero_dimensions": {"$ref": "#/$defs/outcome"},
+        "responsive_behavior": {"$ref": "#/$defs/outcome"}, "image_aspect": {"$ref": "#/$defs/outcome"}, "section_spacing": {"$ref": "#/$defs/outcome"}, "body_line_length": {"$ref": "#/$defs/outcome"},
+        "grid_column_width": {"$ref": "#/$defs/outcome"}, "column_ratio": {"$ref": "#/$defs/outcome"}, "form_control_dimensions": {"$ref": "#/$defs/outcome"}, "fixed_header_anchor_collision": {"$ref": "#/$defs/outcome"}
+      }
+    },
+    "samples": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["containers", "content_blocks", "actions", "source_order_groups", "sibling_pairs", "layout_nodes", "layout_node_candidates", "responsive_expectations", "images", "image_aspects", "sections", "section_spacings", "body_text_blocks", "body_line_lengths", "grids", "grid_columns", "multi_column_grids", "column_ratios", "form_controls", "fixed_headers", "local_anchor_references", "anchor_targets"],
+      "properties": {
+        "containers": {"$ref": "#/$defs/counter"}, "content_blocks": {"$ref": "#/$defs/counter"}, "actions": {"$ref": "#/$defs/counter"}, "source_order_groups": {"$ref": "#/$defs/counter"},
+        "sibling_pairs": {"$ref": "#/$defs/counter"}, "layout_nodes": {"$ref": "#/$defs/counter"}, "layout_node_candidates": {"$ref": "#/$defs/counter"}, "responsive_expectations": {"$ref": "#/$defs/counter"},
+        "images": {"$ref": "#/$defs/counter"}, "image_aspects": {"$ref": "#/$defs/counter"}, "sections": {"$ref": "#/$defs/counter"}, "section_spacings": {"$ref": "#/$defs/counter"},
+        "body_text_blocks": {"$ref": "#/$defs/counter"}, "body_line_lengths": {"$ref": "#/$defs/counter"}, "grids": {"$ref": "#/$defs/counter"}, "grid_columns": {"$ref": "#/$defs/counter"},
+        "multi_column_grids": {"$ref": "#/$defs/counter"}, "column_ratios": {"$ref": "#/$defs/counter"}, "form_controls": {"$ref": "#/$defs/counter"}, "fixed_headers": {"$ref": "#/$defs/counter"},
+        "local_anchor_references": {"$ref": "#/$defs/counter"}, "anchor_targets": {"$ref": "#/$defs/counter"}
+      }
+    },
+    "violations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["container_width", "content_width", "horizontal_overflow", "minimum_action_height", "source_order", "overlap", "clipped_content", "zero_dimensions", "responsive_behavior", "image_aspect", "section_spacing", "body_line_length", "grid_column_width", "column_ratio", "form_control_dimensions", "fixed_header_anchor_collision"],
+      "properties": {
+        "container_width": {"$ref": "#/$defs/counter"}, "content_width": {"$ref": "#/$defs/counter"}, "horizontal_overflow": {"$ref": "#/$defs/counter"}, "minimum_action_height": {"$ref": "#/$defs/counter"},
+        "source_order": {"$ref": "#/$defs/counter"}, "overlap": {"$ref": "#/$defs/counter"}, "clipped_content": {"$ref": "#/$defs/counter"}, "zero_dimensions": {"$ref": "#/$defs/counter"},
+        "responsive_behavior": {"$ref": "#/$defs/counter"}, "image_aspect": {"$ref": "#/$defs/counter"}, "section_spacing": {"$ref": "#/$defs/counter"}, "body_line_length": {"$ref": "#/$defs/counter"},
+        "grid_column_width": {"$ref": "#/$defs/counter"}, "column_ratio": {"$ref": "#/$defs/counter"}, "form_control_dimensions": {"$ref": "#/$defs/counter"}, "fixed_header_anchor_collision": {"$ref": "#/$defs/counter"}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section_spacing_min_px", "section_spacing_max_px", "body_line_length_min_ch", "body_line_length_max_ch", "grid_column_min_width_px", "grid_column_max_width_px", "column_ratio_min", "column_ratio_max", "form_control_min_width_px", "form_control_min_height_px", "fixed_header_max_bottom_px", "anchor_min_scroll_margin_px"],
+      "properties": {
+        "section_spacing_min_px": {"$ref": "#/$defs/nullableMetric"}, "section_spacing_max_px": {"$ref": "#/$defs/nullableMetric"}, "body_line_length_min_ch": {"$ref": "#/$defs/nullableMetric"}, "body_line_length_max_ch": {"$ref": "#/$defs/nullableMetric"},
+        "grid_column_min_width_px": {"$ref": "#/$defs/nullableMetric"}, "grid_column_max_width_px": {"$ref": "#/$defs/nullableMetric"}, "column_ratio_min": {"$ref": "#/$defs/nullableMetric"}, "column_ratio_max": {"$ref": "#/$defs/nullableMetric"},
+        "form_control_min_width_px": {"$ref": "#/$defs/nullableMetric"}, "form_control_min_height_px": {"$ref": "#/$defs/nullableMetric"}, "fixed_header_max_bottom_px": {"$ref": "#/$defs/nullableMetric"}, "anchor_min_scroll_margin_px": {"$ref": "#/$defs/nullableMetric"}
+      }
+    },
+    "viewportSignal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width_px", "coverage", "samples", "violations", "metrics"],
+      "properties": {"width_px": {"type": "integer"}, "coverage": {"$ref": "#/$defs/coverage"}, "samples": {"$ref": "#/$defs/samples"}, "violations": {"$ref": "#/$defs/violations"}, "metrics": {"$ref": "#/$defs/metrics"}}
+    },
+    "viewportSignals": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": false,
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/viewportSignal"}, {"properties": {"width_px": {"const": 390}}}]},
+        {"allOf": [{"$ref": "#/$defs/viewportSignal"}, {"properties": {"width_px": {"const": 768}}}]},
+        {"allOf": [{"$ref": "#/$defs/viewportSignal"}, {"properties": {"width_px": {"const": 1440}}}]}
+      ]
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["breakpoint", "boundary_px", "before_width_px", "after_width_px", "outcome", "compared_node_count", "missing_node_count", "overflow_violation_count", "zero_dimension_count", "responsive_violation_count", "max_dimension_change_ratio", "document_height_change_ratio", "evidence_truncated"],
+      "properties": {
+        "breakpoint": {"enum": ["medium", "wide"]}, "boundary_px": {"type": "number", "minimum": 391, "maximum": 1440}, "before_width_px": {"type": "integer", "minimum": 320, "maximum": 3840}, "after_width_px": {"type": "integer", "minimum": 320, "maximum": 3840},
+        "outcome": {"$ref": "#/$defs/outcome"}, "compared_node_count": {"$ref": "#/$defs/counter"}, "missing_node_count": {"$ref": "#/$defs/counter"}, "overflow_violation_count": {"$ref": "#/$defs/counter"},
+        "zero_dimension_count": {"$ref": "#/$defs/counter"}, "responsive_violation_count": {"$ref": "#/$defs/counter"}, "max_dimension_change_ratio": {"oneOf": [{"type": "null"}, {"type": "number", "minimum": 0, "maximum": 100}]},
+        "document_height_change_ratio": {"type": "number", "minimum": 0, "maximum": 100}, "evidence_truncated": {"type": "boolean"}
+      }
+    },
+    "breakpointContinuity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "boundaries"],
+      "properties": {
+        "outcome": {"$ref": "#/$defs/outcome"},
+        "boundaries": {
+          "type": "array", "minItems": 2, "maxItems": 2, "items": false,
+          "prefixItems": [
+            {"allOf": [{"$ref": "#/$defs/boundary"}, {"properties": {"breakpoint": {"const": "medium"}}}]},
+            {"allOf": [{"$ref": "#/$defs/boundary"}, {"properties": {"breakpoint": {"const": "wide"}}}]}
+          ]
+        }
+      }
+    },
+    "acceptanceEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["measurement_protocol", "automation_driver", "standalone_approval", "policy", "viewport_signals", "breakpoint_continuity"],
+      "properties": {
+        "measurement_protocol": {"const": "chromium-devtools-protocol"},
+        "automation_driver": {"const": "puppeteer"},
+        "provider": {"enum": ["local_puppeteer", "cloudflare_browser_run_cdp"]},
+        "standalone_approval": {"const": false},
+        "policy": {"$ref": "#/$defs/policy"},
+        "viewport_signals": {"$ref": "#/$defs/viewportSignals"},
+        "breakpoint_continuity": {"$ref": "#/$defs/breakpointContinuity"}
+      }
+    }
+  }
+}

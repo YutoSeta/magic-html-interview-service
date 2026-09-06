@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/neo-styler/site-ast.json",
+  "title": "Neo Styler Site AST",
+  "description": "The structure of a site, without any of its words: pages, collections, navigation placement and the top page's digest. Header, hamburger, footer, breadcrumb, sub-hero, CTA band, sitemap, related items and every internal link are computed from this deterministically. site.type landing is one selling page plus the legal pages it links to: no collections, sitemap, 404, breadcrumb, sub-hero or CTA band; a logo-and-CV-button header and a fixed CV bar instead.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "site"],
+  "properties": {
+    "version": { "const": 1 },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "type": { "enum": ["site", "landing"], "default": "site" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100, "description": "Also the logo text." },
+        "short_name": { "type": "string", "maxLength": 40 },
+        "description": { "type": "string", "maxLength": 500 },
+        "copyright": { "type": "string", "maxLength": 200 },
+        "top_label": { "type": "string", "maxLength": 40, "default": "トップ" },
+        "menu_label": { "type": "string", "maxLength": 40 },
+        "menu_close_label": { "type": "string", "maxLength": 40 },
+        "sitemap_label": { "type": "string", "maxLength": 40 },
+        "show_cta": { "type": "boolean", "default": true, "description": "Whether sub pages carry the CTA band (site only)." },
+        "cv": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["label"],
+          "description": "Landing only: the conversion. label is the header button and CV bar text; href is the form's anchor; text is the optional line beside the CV bar button.",
+          "properties": {
+            "label": { "type": "string", "minLength": 1, "maxLength": 40 },
+            "href": { "type": "string", "pattern": "^#[a-z][a-z0-9-]*$", "default": "#contact" },
+            "text": { "type": "string", "maxLength": 80 }
+          }
+        }
+      }
+    },
+    "home": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cta": { "$ref": "#/$defs/pathRef", "description": "The hero's primary button: a page path (site) or the form anchor (landing)." },
+        "sub_cta": { "$ref": "#/$defs/pathRef", "description": "The hero's secondary button: a page path or an in-page anchor (#<section key>)." }
+      }
+    },
+    "pages": { "type": "array", "maxItems": 40, "items": { "$ref": "#/$defs/page" } },
+    "collections": { "type": "array", "maxItems": 10, "items": { "$ref": "#/$defs/collection" } }
+  },
+  "$defs": {
+    "pathRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": { "path": { "type": "string", "pattern": "^(/[a-z0-9][a-z0-9/-]*|#[a-z][a-z0-9-]*)$", "maxLength": 120 } }
+    },
+    "nav": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "show_in_header": { "type": "boolean", "default": false },
+        "header_priority": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "cta": { "type": "boolean", "default": false, "description": "This entry is the header's CTA button (kept even when the header is full)." },
+        "show_in_footer": { "type": "boolean", "default": false },
+        "footer_group": { "type": "string", "maxLength": 40 },
+        "footer_priority": { "type": "integer", "minimum": 0, "maximum": 1000 }
+      }
+    },
+    "top": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "show_top": { "type": "boolean", "default": false },
+        "top_priority": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "widget": { "enum": ["summary_nav", "collection_summary", "cta"] },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 12, "description": "collection_summary: how many items the top page shows." }
+      }
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "slug", "title"],
+      "properties": {
+        "key": { "$ref": "./common.json#/$defs/key" },
+        "slug": { "$ref": "./common.json#/$defs/slug", "description": "The page lives at /<slug>." },
+        "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "header_en": { "type": "string", "maxLength": 40, "description": "The sub-hero kicker." },
+        "purpose": { "type": "string", "maxLength": 500, "description": "Why the page exists; read by the model, never shown." },
+        "parent": { "$ref": "./common.json#/$defs/key", "description": "Breadcrumb and sitemap parent only; the URL stays one segment." },
+        "hide_cta": { "type": "boolean", "default": false },
+        "nav": { "$ref": "#/$defs/nav" },
+        "top": { "$ref": "#/$defs/top" }
+      }
+    },
+    "collection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "title", "items"],
+      "description": "Repeating content: the list at /<key>/list and each item at /<key>/<id>. Only the first item is authored by the model; the rest are expanded from it, so every item must have the same fields.",
+      "properties": {
+        "key": { "$ref": "./common.json#/$defs/key" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "label_en": { "type": "string", "maxLength": 40 },
+        "purpose": { "type": "string", "maxLength": 500 },
+        "per_page": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "order_by": { "type": "array", "minItems": 2, "maxItems": 2, "prefixItems": [ { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }, { "enum": ["asc", "desc"] } ], "items": false },
+        "list_style": { "enum": ["cards", "rows"], "default": "cards" },
+        "hide_cta": { "type": "boolean", "default": false },
+        "nav": { "$ref": "#/$defs/nav" },
+        "top": { "$ref": "#/$defs/top" },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "required": ["id", "title"],
+            "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+            "properties": {
+              "id": { "type": "integer", "minimum": 1 },
+              "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+              "date": { "type": "string", "maxLength": 20 }
+            },
+            "additionalProperties": { "type": "string", "maxLength": 200 },
+            "maxProperties": 12
+          }
+        }
+      }
+    }
+  }
+}

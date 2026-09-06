@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/freeze-snapshot-result.json",
+  "title": "Frozen Layout Snapshot result",
+  "description": "The shared Layout Snapshot resource envelope constrained to the new frozen/passed snapshot produced from its candidate parent.",
+  "allOf": [
+    {"$ref": "create-snapshot-result.json"},
+    {
+      "type": "object",
+      "properties": {
+        "layout_snapshot": {
+          "allOf": [
+            {"$ref": "snapshot.json"},
+            {"properties": {"status": {"const": "frozen"}}}
+          ]
+        }
+      }
+    }
+  ]
+}

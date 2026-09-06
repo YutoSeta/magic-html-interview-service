@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/mutation-request.json",
+  "title": "Confirmed Measurement mutation request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "operation", "resource", "expected_version", "payload", "confirmation"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "operation": {"enum": ["gtm.update_tag", "gtm.publish_version", "gbp.update_location", "gbp.reply_review"]},
+    "resource": {"type": "string", "maxLength": 500, "pattern": "^[A-Za-z0-9_/-]+$"},
+    "expected_version": {"type": "string", "maxLength": 128, "pattern": "^[A-Za-z0-9_-]+$"},
+    "payload": {"type": "object", "maxProperties": 50},
+    "confirmation": {"$ref": "mutation-confirmation.json"}
+  },
+  "allOf": [
+    {"if": {"properties": {"operation": {"const": "gtm.update_tag"}}, "required": ["operation"]}, "then": {"properties": {"payload": {"$ref": "#/$defs/gtm_tag_payload"}}}},
+    {"if": {"properties": {"operation": {"const": "gtm.publish_version"}}, "required": ["operation"]}, "then": {"properties": {"payload": {"type": "object", "maxProperties": 0, "additionalProperties": false}}}},
+    {"if": {"properties": {"operation": {"const": "gbp.update_location"}}, "required": ["operation"]}, "then": {"properties": {"payload": {"$ref": "#/$defs/gbp_location_payload"}}}},
+    {"if": {"properties": {"operation": {"const": "gbp.reply_review"}}, "required": ["operation"]}, "then": {"properties": {"payload": {"$ref": "#/$defs/gbp_review_reply_payload"}}}}
+  ],
+  "$defs": {
+    "gtm_tag_payload": {
+      "type": "object", "minProperties": 1, "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "\\S"},
+        "type": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[A-Za-z0-9_-]+$"},
+        "parameter": {"$ref": "#/$defs/gtm_parameter_list_0"},
+        "firingTriggerId": {"$ref": "#/$defs/gtm_trigger_ids"},
+        "blockingTriggerId": {"$ref": "#/$defs/gtm_trigger_ids"},
+        "paused": {"type": "boolean"}
+      }
+    },
+    "gtm_trigger_ids": {"type": "array", "maxItems": 100, "items": {"type": "string", "maxLength": 32, "pattern": "^[0-9]+$"}},
+    "gtm_parameter_list_0": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/gtm_parameter_0"}},
+    "gtm_parameter_list_1": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/gtm_parameter_1"}},
+    "gtm_parameter_list_2": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/gtm_parameter_2"}},
+    "gtm_parameter_list_3": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/gtm_parameter_3"}},
+    "gtm_parameter_list_4": {"type": "array", "maxItems": 100, "items": {"$ref": "#/$defs/gtm_parameter_4"}},
+    "gtm_parameter_0": {"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"$ref": "#/$defs/gtm_parameter_type"}, "key": {"$ref": "#/$defs/gtm_parameter_key"}, "value": {"$ref": "#/$defs/gtm_parameter_value"}, "list": {"$ref": "#/$defs/gtm_parameter_list_1"}, "map": {"$ref": "#/$defs/gtm_parameter_list_1"}}},
+    "gtm_parameter_1": {"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"$ref": "#/$defs/gtm_parameter_type"}, "key": {"$ref": "#/$defs/gtm_parameter_key"}, "value": {"$ref": "#/$defs/gtm_parameter_value"}, "list": {"$ref": "#/$defs/gtm_parameter_list_2"}, "map": {"$ref": "#/$defs/gtm_parameter_list_2"}}},
+    "gtm_parameter_2": {"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"$ref": "#/$defs/gtm_parameter_type"}, "key": {"$ref": "#/$defs/gtm_parameter_key"}, "value": {"$ref": "#/$defs/gtm_parameter_value"}, "list": {"$ref": "#/$defs/gtm_parameter_list_3"}, "map": {"$ref": "#/$defs/gtm_parameter_list_3"}}},
+    "gtm_parameter_3": {"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"$ref": "#/$defs/gtm_parameter_type"}, "key": {"$ref": "#/$defs/gtm_parameter_key"}, "value": {"$ref": "#/$defs/gtm_parameter_value"}, "list": {"$ref": "#/$defs/gtm_parameter_list_4"}, "map": {"$ref": "#/$defs/gtm_parameter_list_4"}}},
+    "gtm_parameter_4": {"type": "object", "additionalProperties": false, "required": ["type"], "properties": {"type": {"$ref": "#/$defs/gtm_parameter_type"}, "key": {"$ref": "#/$defs/gtm_parameter_key"}, "value": {"$ref": "#/$defs/gtm_parameter_value"}}},
+    "gtm_parameter_type": {"type": "string", "minLength": 1, "maxLength": 50, "pattern": "^[A-Za-z0-9_-]+$"},
+    "gtm_parameter_key": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "\\S"},
+    "gtm_parameter_value": {"type": "string", "maxLength": 4096},
+    "gbp_location_payload": {
+      "type": "object", "minProperties": 1, "additionalProperties": false,
+      "properties": {
+        "title": {"type": "string", "minLength": 1, "maxLength": 255, "pattern": "\\S"},
+        "storeCode": {"type": "string", "minLength": 1, "maxLength": 100, "pattern": "^(?=.*\\S)[A-Za-z0-9_. -]+$"},
+        "websiteUri": {"type": "string", "format": "uri", "maxLength": 2048, "pattern": "^https?://"},
+        "phoneNumbers": {"$ref": "#/$defs/gbp_phone_numbers"},
+        "regularHours": {"$ref": "#/$defs/gbp_regular_hours"},
+        "profile": {"$ref": "#/$defs/gbp_profile"}
+      }
+    },
+    "gbp_phone_numbers": {"type": "object", "minProperties": 1, "additionalProperties": false, "properties": {"primaryPhone": {"type": "string", "minLength": 1, "maxLength": 32, "pattern": "^(?=.*\\S)[0-9+(). -]+$"}, "additionalPhones": {"type": "array", "maxItems": 10, "items": {"type": "string", "minLength": 1, "maxLength": 32, "pattern": "^(?=.*\\S)[0-9+(). -]+$"}}}},
+    "gbp_regular_hours": {"type": "object", "additionalProperties": false, "required": ["periods"], "properties": {"periods": {"type": "array", "minItems": 1, "maxItems": 14, "items": {"$ref": "#/$defs/gbp_regular_hours_period"}}}},
+    "gbp_regular_hours_period": {"type": "object", "additionalProperties": false, "required": ["openDay", "openTime", "closeDay", "closeTime"], "properties": {"openDay": {"$ref": "#/$defs/day"}, "openTime": {"$ref": "#/$defs/time_of_day"}, "closeDay": {"$ref": "#/$defs/day"}, "closeTime": {"$ref": "#/$defs/time_of_day"}}},
+    "day": {"enum": ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]},
+    "time_of_day": {"type": "object", "additionalProperties": false, "required": ["hours", "minutes"], "properties": {"hours": {"type": "integer", "minimum": 0, "maximum": 23}, "minutes": {"type": "integer", "minimum": 0, "maximum": 59}}},
+    "gbp_profile": {"type": "object", "additionalProperties": false, "required": ["description"], "properties": {"description": {"type": "string", "maxLength": 750}}},
+    "gbp_review_reply_payload": {"type": "object", "additionalProperties": false, "required": ["comment"], "properties": {"comment": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "\\S"}}}
+  },
+  "description": "payload JSON is limited to 65,536 encoded bytes. summary_digest is SHA-256 of canonical JSON for provider, operation, resource, expected_version, and payload only: object keys are recursively bytewise sorted, array order is preserved, and no presentation whitespace is emitted."
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/patch-result.json",
+  "title": "Deterministic visual stage patch result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "patch_id", "stage", "source_job_id", "stage_ast", "stage_css", "css", "stage_bundle", "stage_subject_ref", "patch_plan", "delta"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "patch_id": {"type": "string", "format": "uuid"},
+    "stage": {"enum": ["skin", "decor", "motion"]},
+    "source_job_id": {"type": "string", "format": "uuid"},
+    "stage_ast": {"type": "object", "minProperties": 1, "maxProperties": 1000},
+    "stage_css": {"type": "string", "minLength": 1, "maxLength": 2000000},
+    "css": {"type": "string", "minLength": 1, "maxLength": 8000000},
+    "stage_bundle": {"$ref": "../styler/stage-bundle.json"},
+    "stage_subject_ref": {"$ref": "../styler/stage-subject-reference.json"},
+    "patch_plan": {"$ref": "patch-plan.json"},
+    "delta": {"$ref": "#/$defs/delta"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"stage": {"const": "skin"}}, "required": ["stage"]},
+      "then": {"properties": {"stage_subject_ref": {"properties": {"stage": {"const": "skin"}}}}}
+    },
+    {
+      "if": {"properties": {"stage": {"const": "decor"}}, "required": ["stage"]},
+      "then": {"properties": {"stage_subject_ref": {"properties": {"stage": {"const": "decor"}}}}}
+    },
+    {
+      "if": {"properties": {"stage": {"const": "motion"}}, "required": ["stage"]},
+      "then": {"properties": {"stage_subject_ref": {"properties": {"stage": {"const": "motion"}}}}}
+    }
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_ast_digest", "result_ast_digest", "changed", "operations"],
+      "properties": {
+        "base_ast_digest": {"$ref": "#/$defs/digest"},
+        "result_ast_digest": {"$ref": "#/$defs/digest"},
+        "changed": {"type": "boolean"},
+        "operations": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/appliedOperation"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"changed": {"const": false}}, "required": ["changed"]},
+          "then": {"properties": {"operations": {"maxItems": 0}}}
+        },
+        {
+          "if": {"properties": {"changed": {"const": true}}, "required": ["changed"]},
+          "then": {"properties": {"operations": {"minItems": 1}}}
+        }
+      ]
+    },
+    "appliedOperation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "target_id", "viewport", "problem", "operation", "before_ast_digest", "after_ast_digest"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1, "maximum": 20},
+        "target_id": {"type": "string", "pattern": "^(?:\\$constraints|[a-z][a-z0-9._-]{0,199})$"},
+        "viewport": {"$ref": "patch-plan.json#/$defs/viewport"},
+        "problem": {"$ref": "patch-plan.json#/$defs/problem"},
+        "operation": {"$ref": "patch-plan.json#/$defs/operation"},
+        "before_ast_digest": {"$ref": "#/$defs/digest"},
+        "after_ast_digest": {"$ref": "#/$defs/digest"}
+      }
+    }
+  }
+}

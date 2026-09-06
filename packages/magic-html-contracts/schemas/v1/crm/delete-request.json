@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/crm/delete-request.json",
+  "title": "Delete CRM record request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["expected_version"],
+  "properties": {"expected_version": {"type": "integer", "minimum": 1}}
+}

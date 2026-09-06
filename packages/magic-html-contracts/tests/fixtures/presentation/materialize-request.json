@@ -1,0 +1,53 @@
+{
+  "contract_version": "1.0",
+  "component_ast": {
+    "contract_version": "1.0",
+    "surface_id": "home",
+    "locale": "ja-JP",
+    "components": [
+      {
+        "key": "hero",
+        "composition": "hero",
+        "variant": "split-media",
+        "design_key": "d_0123456789ab",
+        "slots": [
+          {"role": "Eyebrow", "content": {"kind": "text", "value": "Magic HTML"}},
+          {"role": "Title", "content": {"kind": "binding", "resource_key": "content:home", "path": "hero.title", "fallback": "ASTから決定論的にUIを生成"}},
+          {"role": "Text", "content": {"kind": "text", "value": "意味と見た目とデータ接続を分離します。"}},
+          {"role": "Actions", "content": {"kind": "actions", "actions": [{"label": "詳しく見る", "href": "#features", "tone": "primary", "icon_intent": "primary-action"}]}},
+          {"role": "Image", "content": {"kind": "asset", "asset_ref": "hero-image", "alt": "UI adapter preview"}}
+        ]
+      },
+      {
+        "key": "features",
+        "composition": "feature-grid",
+        "variant": "icon-grid",
+        "slots": [
+          {"role": "Title", "content": {"kind": "text", "value": "Adapter catalog"}},
+          {"role": "Items", "content": {"kind": "items", "items": [
+            {"key": "components", "title": "Components", "text": "Tailwind CSSへ投影", "icon_intent": "feature"},
+            {"key": "icons", "title": "Icons", "text": "Heroiconsへ投影", "icon_intent": "success"}
+          ]}}
+        ]
+      }
+    ]
+  },
+  "adapter_profile": {
+    "profile_id": "tailwindcss-heroicons-system-v1",
+    "component_adapter": "tailwindcss-core",
+    "utility_adapter": "tailwindcss-v4",
+    "icon_adapter": "heroicons-v2",
+    "icon_style": "outline",
+    "font_adapter": "system",
+    "font_family": "sans-ja",
+    "image_adapter": "relative-assets",
+    "catalog_locks": [
+      {"provider": "tailwindcss-core", "version": "1.0.0", "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "license_scope": "open-source"},
+      {"provider": "heroicons-v2", "version": "2.2.0", "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "license_scope": "open-source"}
+    ]
+  },
+  "assets": [
+    {"asset_ref": "hero-image", "path": "assets/images/hero.webp", "mime": "image/webp", "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
+  ],
+  "font_assets": []
+}

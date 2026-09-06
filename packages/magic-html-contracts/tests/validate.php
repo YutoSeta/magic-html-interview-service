@@ -15,6 +15,100 @@ foreach ($iterator as $file) {
 sort($jsonFiles);
 $errors = [];
 
+require __DIR__.'/validate-wireframe.php';
+require __DIR__.'/validate-layout.php';
+require __DIR__.'/validate-visual-feedback.php';
+require __DIR__.'/validate-neo-styler.php';
+
+try {
+    $designContext = json_decode((string) file_get_contents($root.'/schemas/v1/styler/design-context.json'), true, flags: JSON_THROW_ON_ERROR);
+    $designDnaRequest = json_decode((string) file_get_contents($root.'/schemas/v1/design-context/design-dna-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $canvasRequest = json_decode((string) file_get_contents($root.'/schemas/v1/design-context/design-canvas-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $assetPlanRequest = json_decode((string) file_get_contents($root.'/schemas/v1/design-context/decorative-asset-plan-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $assetGenerationRequest = json_decode((string) file_get_contents($root.'/schemas/v1/design-context/decorative-asset-generation-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $designContextCommon = json_decode((string) file_get_contents($root.'/schemas/v1/design-context/common.json'), true, flags: JSON_THROW_ON_ERROR);
+    $designContextJob = json_decode((string) file_get_contents($root.'/schemas/v1/design-context/job.json'), true, flags: JSON_THROW_ON_ERROR);
+    $pipelineRequest = json_decode((string) file_get_contents($root.'/schemas/v1/styler/pipeline-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $approvedLayout = json_decode((string) file_get_contents($root.'/schemas/v1/styler/approved-layout.json'), true, flags: JSON_THROW_ON_ERROR);
+    $wireframeMaterializeResult = json_decode((string) file_get_contents($root.'/schemas/v1/wireframe/materialize-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    $stageBundle = json_decode((string) file_get_contents($root.'/schemas/v1/styler/stage-bundle.json'), true, flags: JSON_THROW_ON_ERROR);
+    $references = $designContext['properties']['visual_references'] ?? [];
+    $reference = $references['items'] ?? [];
+    if (($pipelineRequest['properties']['design_context']['$ref'] ?? null) !== './design-context.json'
+        || ($stageBundle['properties']['design_context']['$ref'] ?? null) !== './design-context.json'
+        || ($designContext['additionalProperties'] ?? null) !== false
+        || ($references['minItems'] ?? null) !== 1
+        || ($references['maxItems'] ?? null) !== 4
+        || ($references['contains']['properties']['kind']['const'] ?? null) !== 'design-canvas'
+        || ($reference['additionalProperties'] ?? null) !== false
+        || ($reference['properties']['base64']['maxLength'] ?? null) !== 8388608
+        || ($reference['properties']['sha256']['pattern'] ?? null) !== '^[a-f0-9]{64}$'
+        || ($designDnaRequest['properties']['interview_text']['maxLength'] ?? null) !== 30000
+        || ($canvasRequest['required'] ?? null) !== ['contract_version', 'interview_text', 'design_dna']
+        || ($canvasRequest['properties']['composition_reference']['$ref'] ?? null) !== './common.json#/$defs/canvasReference'
+        || ($assetPlanRequest['properties']['max_assets']['maximum'] ?? null) !== 8
+        || ($assetPlanRequest['properties']['max_assets']['default'] ?? null) !== 8
+        || ($assetGenerationRequest['required'] ?? null) !== ['contract_version', 'canvas', 'asset_spec', 'plan_sha256']
+        || ($designContextCommon['$defs']['executionProfile']['enum'] ?? null) !== ['fast', 'balanced', 'quality']
+        || ($designContextCommon['$defs']['executionProfile']['default'] ?? null) !== 'fast'
+        || ($designDnaRequest['properties']['execution_profile']['$ref'] ?? null) !== './common.json#/$defs/executionProfile'
+        || ($canvasRequest['properties']['execution_profile']['$ref'] ?? null) !== './common.json#/$defs/executionProfile'
+        || ($assetPlanRequest['properties']['execution_profile']['$ref'] ?? null) !== './common.json#/$defs/executionProfile'
+        || ($assetGenerationRequest['properties']['execution_profile']['$ref'] ?? null) !== './common.json#/$defs/executionProfile'
+        || ($pipelineRequest['properties']['execution_profile']['enum'] ?? null) !== ['fast', 'balanced', 'quality']
+        || ($pipelineRequest['properties']['execution_profile']['default'] ?? null) !== 'fast'
+        || ($pipelineRequest['properties']['approved_layout']['$ref'] ?? null) !== './approved-layout.json'
+        || ($pipelineRequest['properties']['layout_snapshot_ref']['$ref'] ?? null) !== '../layout/reference.json'
+        || ($pipelineRequest['properties']['contract_version']['enum'] ?? null) !== ['1.1', '1.2', '1.3']
+        || ($pipelineRequest['required'] ?? null) !== ['contract_version', 'brief']
+        || ($pipelineRequest['allOf'][0]['then']['required'] ?? null) !== ['page_key', 'html', 'viewports', 'approved_layout']
+        || ($pipelineRequest['allOf'][2]['then']['required'] ?? null) !== ['layout_snapshot_ref']
+        || ($approvedLayout['properties']['status']['const'] ?? null) !== 'frozen'
+        || ($approvedLayout['properties']['source_html_digest']['$ref'] ?? null) !== '#/$defs/digest'
+        || ($wireframeMaterializeResult['properties']['handoff']['properties']['approved_layouts']['items']['$ref'] ?? null) !== '../styler/approved-layout.json'
+        || array_keys($pipelineRequest['properties']['stage_execution_profiles']['properties'] ?? []) !== ['layout', 'skin', 'decor', 'motion']
+        || ($pipelineRequest['properties']['stage_execution_profiles']['additionalProperties'] ?? null) !== false
+        || ($designContextJob['allOf'][0]['$ref'] ?? null) !== './common.json#/$defs/jobEnvelope') {
+        $errors[] = 'Design Context production and Styler consumption contracts must be separate, closed, bounded, and digest-bound.';
+    }
+
+    $directionRequest = json_decode((string) file_get_contents($root.'/schemas/v1/design-context/design-direction-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $jobResult = $designContextJob['allOf'][1]['properties']['result']['properties'] ?? [];
+    if (($directionRequest['required'] ?? null) !== ['contract_version', 'interview_text', 'design_dna']
+        || ($directionRequest['properties']['framing']['$ref'] ?? null) !== './common.json#/$defs/canvasFraming'
+        || ($directionRequest['properties']['execution_profile']['$ref'] ?? null) !== './common.json#/$defs/executionProfile'
+        || ($designContextCommon['$defs']['canvasViewport']['enum'] ?? null) !== ['desktop', 'mobile']
+        || ($designContextCommon['$defs']['canvasViewport']['default'] ?? null) !== 'desktop'
+        || ($designContextCommon['$defs']['canvasFraming']['enum'] ?? null) !== ['site-top', 'landing']
+        || ($designContextCommon['$defs']['canvasFraming']['default'] ?? null) !== 'site-top'
+        || ($designContextCommon['$defs']['prose']['required'] ?? null) !== ['text', 'sha256']
+        || ($designContextCommon['$defs']['prose']['properties']['text']['maxLength'] ?? null) !== 20000
+        || ($designContextCommon['$defs']['jobEnvelope']['properties']['operation']['enum'] ?? null) !== ['generate_design_dna', 'generate_design_direction', 'generate_canvas', 'plan_decorative_assets', 'generate_decorative_asset']
+        || ! in_array('design-direction', $designContextCommon['$defs']['artifact']['properties']['kind']['enum'] ?? [], true)
+        || ! in_array('canvas-brief', $designContextCommon['$defs']['artifact']['properties']['kind']['enum'] ?? [], true)
+        || ! in_array('text/markdown', $designContextCommon['$defs']['artifact']['properties']['mime']['enum'] ?? [], true)
+        || ($canvasRequest['properties']['viewport']['$ref'] ?? null) !== './common.json#/$defs/canvasViewport'
+        || ($canvasRequest['properties']['framing']['$ref'] ?? null) !== './common.json#/$defs/canvasFraming'
+        || ($canvasRequest['properties']['canvas_brief']['maxLength'] ?? null) !== 20000
+        || ($canvasRequest['properties']['style_reference']['$ref'] ?? null) !== './common.json#/$defs/canvasReference'
+        || isset($canvasRequest['properties']['size']['default'])
+        || ($jobResult['direction']['$ref'] ?? null) !== './common.json#/$defs/prose'
+        || ($jobResult['canvas_brief']['$ref'] ?? null) !== './common.json#/$defs/prose'
+        || ($jobResult['viewport']['$ref'] ?? null) !== './common.json#/$defs/canvasViewport'
+        || ($jobResult['framing']['$ref'] ?? null) !== './common.json#/$defs/canvasFraming') {
+        $errors[] = 'Design Context must render DNA as direction prose and a canvas brief, and a canvas must declare its viewport and framing, with an optional style reference to pair a mobile and a desktop canvas.';
+    }
+
+    if (($wireframeMaterializeResult['title'] ?? null) !== 'Legacy Wireframe Materialize Result 1.1 Compatibility Artifact'
+        || ($wireframeMaterializeResult['description'] ?? null) !== 'Legacy compatibility artifact for Wireframe materialize contract 1.1 and Styler 1.1/1.2 consumers. Its approved-wireframe-layout-v1 AST/CSS handoff is not the authoritative Layout Snapshot carrying geometry-only Layout AST v2 and must not be used as the Styler 1.3 source of truth.'
+        || ($approvedLayout['title'] ?? null) !== 'Legacy Approved Wireframe Layout for Styler 1.1/1.2 Compatibility'
+        || ($approvedLayout['description'] ?? null) !== 'Legacy approved-wireframe-layout-v1 compatibility artifact consumed by Styler contracts 1.1/1.2. It is not the authoritative Layout Snapshot carrying geometry-only Layout AST v2 and must not be used as the Styler 1.3 source of truth; Wireframe review presentation CSS remains excluded.') {
+        $errors[] = 'Legacy Wireframe materialize and approved-layout schemas must identify themselves as 1.1/1.2 compatibility artifacts rather than authoritative Layout AST v2-backed Layout Snapshots or Styler 1.3 sources of truth.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Styler design context contracts: %s', $exception->getMessage());
+}
+
 foreach (['tier0', 'tier1', 'tier2', 'tier3'] as $tierName) {
     try {
         $openApi = json_decode((string) file_get_contents($root.'/openapi/'.$tierName.'.json'), true, flags: JSON_THROW_ON_ERROR);
@@ -46,7 +140,8 @@ foreach ($jsonFiles as $path) {
         }
 
         if (isset($value['$ref']) && is_string($value['$ref']) && ! str_starts_with($value['$ref'], '#') && ! preg_match('~^https?://~', $value['$ref'])) {
-            $target = realpath(dirname($path).DIRECTORY_SEPARATOR.$value['$ref']);
+            $referencePath = explode('#', $value['$ref'], 2)[0];
+            $target = realpath(dirname($path).DIRECTORY_SEPARATOR.$referencePath);
             if ($target === false || ! is_file($target)) {
                 $errors[] = sprintf('%s: missing local $ref %s', $path, $value['$ref']);
             }
@@ -62,6 +157,7 @@ foreach ($jsonFiles as $path) {
 
 try {
     $manifestSchema = json_decode((string) file_get_contents($root.'/schemas/v1/static-build/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
+    $requestSchema = json_decode((string) file_get_contents($root.'/schemas/v1/static-build/request.json'), true, flags: JSON_THROW_ON_ERROR);
     $expectedDigestDescription = 'SHA-256 lowercase hex of the bytes formed by sorting files by path in bytewise ascending order and concatenating, for each file, path + NUL + lowercase sha256 + NUL.';
     if (($manifestSchema['properties']['digest']['description'] ?? null) !== $expectedDigestDescription) {
         $errors[] = 'Static Builder manifest digest must document the canonical bytewise algorithm.';
@@ -80,8 +176,78 @@ try {
     if (hash('sha256', $digestBytes) !== '3a2a37894bb540f5ba9d1fb093724a2a201d8410097efe6001f6643a38f8cb7e') {
         $errors[] = 'Static Builder manifest canonical digest fixture does not match the Builder and Deploy algorithm.';
     }
+    $assetBinding = $requestSchema['properties']['snapshot']['properties']['asset_bindings'] ?? null;
+    if (($assetBinding['maxItems'] ?? null) !== 500
+        || ($assetBinding['items']['required'] ?? null) !== ['id', 'kind', 'page_path', 'target_element_id', 'asset_path']
+        || ($assetBinding['items']['properties']['kind']['const'] ?? null) !== 'decorative_background'
+        || ($assetBinding['items']['properties']['fit']['enum'] ?? null) !== ['cover', 'contain', 'auto']
+        || ($assetBinding['items']['additionalProperties'] ?? null) !== false) {
+        $errors[] = 'Static Builder asset bindings must remain finite, decorative-background-only, and closed to arbitrary HTML or CSS.';
+    }
 } catch (JsonException $exception) {
-    $errors[] = sprintf('Unable to inspect Static Builder manifest digest schema: %s', $exception->getMessage());
+    $errors[] = sprintf('Unable to inspect Static Builder schemas: %s', $exception->getMessage());
+}
+
+try {
+    $siteComposerSnapshot = json_decode((string) file_get_contents($root.'/schemas/v1/site-composer/snapshot.json'), true, flags: JSON_THROW_ON_ERROR);
+    $stylerPipelineResult = json_decode((string) file_get_contents($root.'/schemas/v1/styler/pipeline-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    $stagedSnapshotJson = (string) file_get_contents($root.'/tests/fixtures/site-composer/staged-pipeline-snapshot.json');
+    $stagedSnapshot = json_decode($stagedSnapshotJson, true, flags: JSON_THROW_ON_ERROR);
+    $stagedSnapshotObject = json_decode($stagedSnapshotJson, false, flags: JSON_THROW_ON_ERROR);
+
+    $pageSchema = $siteComposerSnapshot['properties']['pages']['items'] ?? [];
+    $designAstSchema = $pageSchema['properties']['design_ast'] ?? [];
+    $expectedDesignAstVariants = [
+        ['$ref' => '../design/design-ast.json'],
+        ['$ref' => '../styler/pipeline-result.json#/properties/design_ast'],
+    ];
+    if (($designAstSchema['oneOf'] ?? null) !== $expectedDesignAstVariants
+        || in_array('styling_diagnostics', $pageSchema['required'] ?? [], true)) {
+        $errors[] = 'Site Composer snapshots must accept legacy Design AST v1 and staged Design AST v2 without requiring diagnostics on legacy pages.';
+    }
+    if (($pageSchema['properties']['styling_diagnostics']['$ref'] ?? null) !== '../styler/pipeline-result.json#/properties/diagnostics') {
+        $errors[] = 'Site Composer snapshot styling diagnostics must reuse the Styler pipeline diagnostics contract.';
+    }
+
+    $matchesClosedObject = static function (array $instance, array $schema): bool {
+        $instanceProperties = array_keys($instance);
+        $missingProperties = array_diff($schema['required'] ?? [], $instanceProperties);
+        $unknownProperties = ($schema['additionalProperties'] ?? null) === false
+            ? array_diff($instanceProperties, array_keys($schema['properties'] ?? []))
+            : [];
+
+        return $missingProperties === [] && $unknownProperties === [];
+    };
+    $fixturePage = $stagedSnapshot['pages'][0] ?? null;
+    $fixtureDesignAst = is_array($fixturePage) ? ($fixturePage['design_ast'] ?? null) : null;
+    $fixtureStages = is_array($fixtureDesignAst) ? ($fixtureDesignAst['stages'] ?? null) : null;
+    $pipelineDesignAst = $stylerPipelineResult['properties']['design_ast'] ?? [];
+    $pipelineStages = $pipelineDesignAst['properties']['stages'] ?? [];
+    $contextDigestPattern = $pipelineDesignAst['properties']['context_digest']['pattern'] ?? null;
+    $fixtureContextDigest = is_array($fixtureDesignAst) ? ($fixtureDesignAst['context_digest'] ?? null) : null;
+    $fixtureDiagnostics = is_array($fixturePage) ? ($fixturePage['styling_diagnostics'] ?? null) : null;
+    $fixtureDiagnosticsObject = $stagedSnapshotObject instanceof stdClass
+        ? ($stagedSnapshotObject->pages[0]->styling_diagnostics ?? null)
+        : null;
+
+    if (! $matchesClosedObject($stagedSnapshot, $siteComposerSnapshot)
+        || ! is_array($fixturePage)
+        || ! $matchesClosedObject($fixturePage, $pageSchema)
+        || ! is_array($fixtureDesignAst)
+        || ! $matchesClosedObject($fixtureDesignAst, $pipelineDesignAst)
+        || ($fixtureDesignAst['version'] ?? null) !== 2
+        || ! is_array($fixtureStages)
+        || ! $matchesClosedObject($fixtureStages, $pipelineStages)
+        || ! is_string($fixtureContextDigest)
+        || ! is_string($contextDigestPattern)
+        || preg_match('~'.$contextDigestPattern.'~D', $fixtureContextDigest) !== 1
+        || ! is_array($fixtureDiagnostics)
+        || ! $fixtureDiagnosticsObject instanceof stdClass
+        || ($fixtureDiagnostics['recipe_id'] ?? null) !== 'styler-pipeline-v1') {
+        $errors[] = 'Site Composer staged pipeline fixture must satisfy the closed snapshot and Design AST v2 shapes while retaining object diagnostics.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Site Composer staged snapshot contracts: %s', $exception->getMessage());
 }
 
 $approvalDocuments = [
@@ -265,11 +431,142 @@ try {
     if (isset($inspection['parameters'])) {
         $errors[] = 'Synchronous side-effect-free Site Edit target inspection must not require an Idempotency-Key.';
     }
-    if (($tier1['info']['version'] ?? null) !== '1.10.0') {
-        $errors[] = 'Tier 1 OpenAPI version must include replay-safe Interview writes and the tenant-scoped Knowledge inventory.';
+    if (($tier1['info']['version'] ?? null) !== '1.21.0') {
+        $errors[] = 'Tier 1 OpenAPI version must include Design Context, Neo Styler, immutable Layout Snapshot and finite visual-feedback operations while retaining the existing domain inventory.';
     }
 } catch (JsonException $exception) {
     $errors[] = sprintf('Unable to inspect Tier 1 Site Edit target inventory: %s', $exception->getMessage());
+}
+
+$templateDocuments = [
+    'schemas/v1/template/bind-request.json',
+    'schemas/v1/template/bind-result.json',
+    'schemas/v1/template/field.json',
+    'schemas/v1/template/inspect-request.json',
+    'schemas/v1/template/inspect-result.json',
+    'schemas/v1/template/manifest.json',
+    'schemas/v1/template/markdown-request.json',
+    'schemas/v1/template/markdown-result.json',
+    'schemas/v1/template/template-result.json',
+    'schemas/v1/template/upsert-request.json',
+];
+
+$intakeDocuments = [
+    'schemas/v1/interview/intake-session-request.json',
+    'schemas/v1/interview/intake-session-result.json',
+    'schemas/v1/interview/intake-session-status.json',
+    'schemas/v1/interview/intake-template-request.json',
+    'schemas/v1/interview/intake-template-result.json',
+];
+
+foreach ([...$templateDocuments, ...$intakeDocuments] as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Template or generic Intake contract document %s', $relativePath);
+    }
+}
+
+try {
+    $field = json_decode((string) file_get_contents($root.'/schemas/v1/template/field.json'), true, flags: JSON_THROW_ON_ERROR);
+    $manifest = json_decode((string) file_get_contents($root.'/schemas/v1/template/manifest.json'), true, flags: JSON_THROW_ON_ERROR);
+    $templateResult = json_decode((string) file_get_contents($root.'/schemas/v1/template/template-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    $bindRequest = json_decode((string) file_get_contents($root.'/schemas/v1/template/bind-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $bindResult = json_decode((string) file_get_contents($root.'/schemas/v1/template/bind-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    $markdownResult = json_decode((string) file_get_contents($root.'/schemas/v1/template/markdown-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    $intakeTemplateRequest = json_decode((string) file_get_contents($root.'/schemas/v1/interview/intake-template-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $intakeSessionStatus = json_decode((string) file_get_contents($root.'/schemas/v1/interview/intake-session-status.json'), true, flags: JSON_THROW_ON_ERROR);
+
+    if (($field['additionalProperties'] ?? null) !== false
+        || ($field['required'] ?? null) !== ['path', 'label', 'question', 'type', 'required']
+        || ($field['properties']['path']['pattern'] ?? null) !== '^[A-Za-z][A-Za-z0-9_-]*(\\.[A-Za-z][A-Za-z0-9_-]*)*$') {
+        $errors[] = 'Template fields must be closed and use the canonical bounded dot-path identifier.';
+    }
+    if (($field['properties']['type']['enum'] ?? null) !== ['string', 'text', 'number', 'integer', 'boolean', 'array', 'email', 'url']
+        || ($field['properties']['format']['enum'] ?? null) !== ['date', 'money']) {
+        $errors[] = 'Template fields must preserve the canonical normalized types and date/money semantic formats.';
+    }
+    $expectedFieldFormatVariants = [
+        ['properties' => ['type' => ['const' => 'string'], 'format' => ['const' => 'date']], 'required' => ['format']],
+        ['properties' => ['type' => ['const' => 'number'], 'format' => ['const' => 'money']], 'required' => ['format']],
+        ['not' => ['required' => ['format']]],
+    ];
+    if (($field['oneOf'] ?? null) !== $expectedFieldFormatVariants) {
+        $errors[] = 'Template field format must allow only normalized string/date, number/money, or a type without format.';
+    }
+    if (($manifest['properties']['fields']['items']['$ref'] ?? null) !== 'field.json'
+        || ($manifest['properties']['fields']['maxItems'] ?? null) !== 200
+        || ($manifest['properties']['schema']['type'] ?? null) !== 'object') {
+        $errors[] = 'Template manifests must expose at most 200 canonical fields and their generated JSON Schema.';
+    }
+    foreach (['sha256', 'manifest_sha256', 'digest'] as $digestProperty) {
+        if (($templateResult['properties'][$digestProperty]['pattern'] ?? null) !== '^[a-f0-9]{64}$') {
+            $errors[] = sprintf('Template result %s must be a lowercase SHA-256 digest.', $digestProperty);
+        }
+    }
+    if (($templateResult['properties']['version']['pattern'] ?? null) !== '^v1-[a-f0-9]{20}$'
+        || ($bindRequest['properties']['version']['pattern'] ?? null) !== '^v1-[a-f0-9]{20}$') {
+        $errors[] = 'Template storage and binding must share the pinned immutable version format.';
+    }
+    foreach ([$markdownResult, $bindResult] as $documentHandoffResult) {
+        if (($documentHandoffResult['properties']['html']['$ref'] ?? null) !== '../document/html.json') {
+            $errors[] = sprintf('Template result %s must hand off HTML through the shared isolated Document HTML contract.', $documentHandoffResult['$id'] ?? 'unknown');
+        }
+    }
+    if (($intakeTemplateRequest['additionalProperties'] ?? null) !== false
+        || ($intakeTemplateRequest['properties']['fields']['items']['$ref'] ?? null) !== '../template/field.json'
+        || ($intakeTemplateRequest['properties']['fields']['minItems'] ?? null) !== 1
+        || ($intakeTemplateRequest['properties']['fields']['maxItems'] ?? null) !== 200) {
+        $errors[] = 'Generic Intake must consume between 1 and 200 canonical Template fields.';
+    }
+    if (($intakeSessionStatus['properties']['status']['enum'] ?? null) !== ['in_progress', 'ready_for_confirmation', 'confirmed', 'closing', 'ended', 'abandoned', 'failed']) {
+        $errors[] = 'Generic Intake status must preserve the interview-engine lifecycle states.';
+    }
+
+    $tier1 = json_decode((string) file_get_contents($root.'/openapi/tier1.json'), true, flags: JSON_THROW_ON_ERROR);
+    $operations = [
+        ['/v1/template-inspections', 'post', '../schemas/v1/template/inspect-request.json', '200', '../schemas/v1/template/inspect-result.json'],
+        ['/v1/markdown-renders', 'post', '../schemas/v1/template/markdown-request.json', '200', '../schemas/v1/template/markdown-result.json'],
+        ['/v1/templates/{template}', 'put', '../schemas/v1/template/upsert-request.json', '200', '../schemas/v1/template/template-result.json'],
+        ['/v1/templates/{template}', 'get', null, '200', '../schemas/v1/template/template-result.json'],
+        ['/v1/templates/{template}/versions/{version}', 'get', null, '200', '../schemas/v1/template/template-result.json'],
+        ['/v1/templates/{template}/bindings', 'post', '../schemas/v1/template/bind-request.json', '200', '../schemas/v1/template/bind-result.json'],
+        ['/v1/intake-templates/{template}', 'put', '../schemas/v1/interview/intake-template-request.json', '201', '../schemas/v1/interview/intake-template-result.json'],
+        ['/v1/intake-templates/{template}/sessions', 'post', '../schemas/v1/interview/intake-session-request.json', '201', '../schemas/v1/interview/intake-session-result.json'],
+        ['/v1/intake-sessions/{interview}', 'get', null, '200', '../schemas/v1/interview/intake-session-status.json'],
+    ];
+    foreach ($operations as [$path, $method, $requestRef, $successStatus, $responseRef]) {
+        $operation = $tier1['paths'][$path][$method] ?? [];
+        if ($operation === []) {
+            $errors[] = sprintf('Tier 1 OpenAPI is missing Template/Intake operation %s %s.', strtoupper($method), $path);
+
+            continue;
+        }
+        if (($operation['security'][0]['serviceBearer'] ?? null) !== []) {
+            $errors[] = sprintf('Template/Intake operation %s %s must require service Bearer authentication.', strtoupper($method), $path);
+        }
+        if ($requestRef !== null && ($operation['requestBody']['content']['application/json']['schema']['$ref'] ?? null) !== $requestRef) {
+            $errors[] = sprintf('Template/Intake operation %s %s must use request schema %s.', strtoupper($method), $path, $requestRef);
+        }
+        if (($operation['responses'][$successStatus]['content']['application/json']['schema']['$ref'] ?? null) !== $responseRef) {
+            $errors[] = sprintf('Template/Intake operation %s %s response %s must use %s.', strtoupper($method), $path, $successStatus, $responseRef);
+        }
+    }
+    $sessionParameters = $tier1['paths']['/v1/intake-templates/{template}/sessions']['post']['parameters'] ?? [];
+    $idempotencyKey = array_values(array_filter(
+        $sessionParameters,
+        static fn (array $parameter): bool => ($parameter['name'] ?? null) === 'Idempotency-Key'
+    ))[0] ?? [];
+    if (($idempotencyKey['required'] ?? null) !== true
+        || ($idempotencyKey['schema']['minLength'] ?? null) !== 8
+        || ($idempotencyKey['schema']['maxLength'] ?? null) !== 200) {
+        $errors[] = 'Generic Intake session creation must require a bounded Idempotency-Key.';
+    }
+    $sessionResult = json_decode((string) file_get_contents($root.'/schemas/v1/interview/intake-session-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    if (($sessionResult['properties']['url']['format'] ?? null) !== 'uri'
+        || ($sessionResult['properties']['expires_at']['format'] ?? null) !== 'date-time') {
+        $errors[] = 'Generic Intake session creation must return a temporary URL and explicit expiry.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Template and generic Intake contracts: %s', $exception->getMessage());
 }
 
 $interviewDocuments = [
@@ -588,6 +885,16 @@ try {
         }
     }
 
+    $knowledgeDocumentDeletePath = '/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/documents/{document}';
+    $knowledgeDocumentDelete = $tier1['paths'][$knowledgeDocumentDeletePath]['delete'] ?? [];
+    if (($knowledgeDocumentDelete['security'][0]['serviceBearer'] ?? null) !== []
+        || ! in_array(['$ref' => '#/components/parameters/Tenant'], $tier1['paths'][$knowledgeDocumentDeletePath]['parameters'] ?? [], true)
+        || ! in_array(['$ref' => '#/components/parameters/KnowledgeBase'], $tier1['paths'][$knowledgeDocumentDeletePath]['parameters'] ?? [], true)
+        || ! in_array(['$ref' => '#/components/parameters/KnowledgeDocument'], $tier1['paths'][$knowledgeDocumentDeletePath]['parameters'] ?? [], true)
+        || array_map(static fn (int|string $status): string => (string) $status, array_keys($knowledgeDocumentDelete['responses'] ?? [])) !== ['204', '401', '404']) {
+        $errors[] = 'Knowledge document deletion must be service-authenticated, fully scoped, and expose only 204, 401, and 404.';
+    }
+
     $knowledgeStatuses = [
         ['/v1/tenants/{tenant}/knowledge-bases', 'post', ['201', '401', '409', '422'], '201'],
         ['/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}', 'get', ['200', '401', '404'], '200'],
@@ -611,12 +918,15 @@ try {
 
     $knowledgeBaseParameter = $tier1['components']['parameters']['KnowledgeBase'] ?? [];
     $knowledgeJobParameter = $tier1['components']['parameters']['KnowledgeIngestionJob'] ?? [];
+    $knowledgeDocumentParameter = $tier1['components']['parameters']['KnowledgeDocument'] ?? [];
     $knowledgeIdempotencyKey = $tier1['components']['parameters']['KnowledgeIdempotencyKey'] ?? [];
     if (($knowledgeBaseParameter['required'] ?? null) !== true
         || ($knowledgeBaseParameter['schema']['format'] ?? null) !== 'uuid'
         || ($knowledgeJobParameter['required'] ?? null) !== true
-        || ($knowledgeJobParameter['schema']['format'] ?? null) !== 'uuid') {
-        $errors[] = 'Knowledge base and ingestion job path parameters must be required UUIDs.';
+        || ($knowledgeJobParameter['schema']['format'] ?? null) !== 'uuid'
+        || ($knowledgeDocumentParameter['required'] ?? null) !== true
+        || ($knowledgeDocumentParameter['schema']['format'] ?? null) !== 'uuid') {
+        $errors[] = 'Knowledge base, ingestion job, and document path parameters must be required UUIDs.';
     }
     if (($knowledgeIdempotencyKey['required'] ?? null) !== true
         || ($knowledgeIdempotencyKey['schema']['minLength'] ?? null) !== 8
@@ -627,6 +937,23 @@ try {
     sort($problemStatuses);
     if ($problemStatuses !== [401, 404, 409, 413, 415, 422, 503]) {
         $errors[] = 'Knowledge Problem statuses must exactly cover the documented authentication, scope, conflict, upload, validation, and availability failures.';
+    }
+    $expectedKnowledgeProblemTypes = [
+        'unauthorized',
+        'validation_failed',
+        'idempotency_conflict',
+        'idempotency_in_progress',
+        'knowledge_base_not_found',
+        'ingestion_job_not_found',
+        'knowledge_document_not_found',
+        'unsupported_media_type',
+        'payload_too_large',
+        'index_not_ready',
+        'retrieval_failed',
+        'answer_generation_failed',
+    ];
+    if (($knowledgeProblem['properties']['type']['enum'] ?? null) !== $expectedKnowledgeProblemTypes) {
+        $errors[] = 'Knowledge Problem types must exactly cover authentication, validation, idempotency conflict/in-progress, scope, upload, retrieval, and answer failures.';
     }
 
     $ingestionPath = '/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/ingestion-jobs';
@@ -706,6 +1033,1294 @@ try {
     }
 } catch (JsonException $exception) {
     $errors[] = sprintf('Unable to inspect Knowledge contracts: %s', $exception->getMessage());
+}
+
+$crmDocuments = [
+    'schemas/v1/crm/company-create-request.json',
+    'schemas/v1/crm/company-list-query.json',
+    'schemas/v1/crm/company-list.json',
+    'schemas/v1/crm/company-update-request.json',
+    'schemas/v1/crm/company.json',
+    'schemas/v1/crm/custom-fields.json',
+    'schemas/v1/crm/delete-request.json',
+    'schemas/v1/crm/deletion.json',
+    'schemas/v1/crm/pagination-meta.json',
+    'schemas/v1/crm/person-create-request.json',
+    'schemas/v1/crm/person-list-query.json',
+    'schemas/v1/crm/person-list.json',
+    'schemas/v1/crm/person-update-request.json',
+    'schemas/v1/crm/person.json',
+    'schemas/v1/crm/problem.json',
+];
+
+foreach ($crmDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing CRM contract document %s', $relativePath);
+    }
+}
+
+try {
+    $crmSchemas = [];
+    foreach ($crmDocuments as $relativePath) {
+        $crmSchemas[basename($relativePath)] = json_decode((string) file_get_contents($root.'/'.$relativePath), true, flags: JSON_THROW_ON_ERROR);
+    }
+
+    foreach ($crmSchemas as $filename => $crmSchema) {
+        if ($filename === 'custom-fields.json') {
+            continue;
+        }
+        if (($crmSchema['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('CRM schema %s must reject unknown root keys.', $crmSchema['$id'] ?? $filename);
+        }
+    }
+
+    $customFields = $crmSchemas['custom-fields.json'];
+    $customMap = $customFields['anyOf'][0] ?? [];
+    $customValueTypes = $customMap['additionalProperties']['anyOf'] ?? [];
+    if (($customMap['type'] ?? null) !== 'object'
+        || ($customMap['maxProperties'] ?? null) !== 25
+        || ($customMap['propertyNames']['pattern'] ?? null) !== '^[A-Za-z][A-Za-z0-9_.-]{0,63}$'
+        || ($customFields['x-magic-html-max-encoded-characters'] ?? null) !== 20000
+        || ($customValueTypes[0]['type'] ?? null) !== 'string'
+        || ($customValueTypes[0]['maxLength'] ?? null) !== 1000
+        || array_column($customValueTypes, 'type') !== ['string', 'number', 'boolean', 'null']
+        || ($customFields['anyOf'][1] ?? null) !== ['type' => 'array', 'maxItems' => 0]) {
+        $errors[] = 'CRM custom fields must match the service bound of 25 safe scalar keys, 1,000-character strings, and 20,000 encoded characters.';
+    }
+
+    $company = $crmSchemas['company.json'];
+    $person = $crmSchemas['person.json'];
+    $companyCreate = $crmSchemas['company-create-request.json'];
+    $companyUpdate = $crmSchemas['company-update-request.json'];
+    $personCreate = $crmSchemas['person-create-request.json'];
+    $personUpdate = $crmSchemas['person-update-request.json'];
+    $deleteRequest = $crmSchemas['delete-request.json'];
+    $deletion = $crmSchemas['deletion.json'];
+    $companyQuery = $crmSchemas['company-list-query.json'];
+    $personQuery = $crmSchemas['person-list-query.json'];
+    $pagination = $crmSchemas['pagination-meta.json'];
+    $crmProblem = $crmSchemas['problem.json'];
+
+    $expectedCompanyFields = ['address', 'contract_version', 'corporate_number', 'created_at', 'custom_fields', 'email', 'id', 'industry', 'name', 'name_kana', 'notes', 'phone', 'postal_code', 'tenant_id', 'updated_at', 'version', 'website'];
+    $actualCompanyFields = array_keys($company['properties'] ?? []);
+    sort($actualCompanyFields);
+    $companyRequired = $company['required'] ?? [];
+    sort($companyRequired);
+    if ($actualCompanyFields !== $expectedCompanyFields || $companyRequired !== $expectedCompanyFields) {
+        $errors[] = 'CRM Company responses must expose and require exactly the fields emitted by CompanyResource.';
+    }
+
+    $expectedPersonFields = ['company_id', 'contract_version', 'created_at', 'custom_fields', 'department', 'email', 'id', 'mobile', 'name', 'name_kana', 'notes', 'phone', 'tenant_id', 'title', 'updated_at', 'version'];
+    $actualPersonFields = array_keys($person['properties'] ?? []);
+    sort($actualPersonFields);
+    $personRequired = $person['required'] ?? [];
+    sort($personRequired);
+    if ($actualPersonFields !== $expectedPersonFields || $personRequired !== $expectedPersonFields) {
+        $errors[] = 'CRM Person responses must expose and require exactly the fields emitted by PersonResource.';
+    }
+    if (($company['properties']['tenant_id']['pattern'] ?? null) !== '^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$'
+        || ($person['properties']['tenant_id'] ?? null) !== ($company['properties']['tenant_id'] ?? null)
+        || ($person['properties']['company_id']['type'] ?? null) !== ['string', 'null']
+        || ! str_contains((string) ($person['properties']['company_id']['description'] ?? ''), 'active company in the same tenant')) {
+        $errors[] = 'CRM resources must preserve tenant identity and the optional same-tenant active-company relationship.';
+    }
+
+    if (($companyCreate['required'] ?? null) !== ['name']
+        || ($personCreate['required'] ?? null) !== ['name']
+        || ($companyCreate['properties']['name']['maxLength'] ?? null) !== 200
+        || ($personCreate['properties']['name']['maxLength'] ?? null) !== 200
+        || ($companyCreate['properties']['corporate_number']['pattern'] ?? null) !== '^[0-9]{13}$'
+        || ($companyCreate['properties']['website']['maxLength'] ?? null) !== 2048
+        || ($personCreate['properties']['company_id']['format'] ?? null) !== 'uuid') {
+        $errors[] = 'CRM create schemas must exactly preserve required names, company identifiers, URLs, and optional same-tenant company links.';
+    }
+    foreach ([$companyCreate, $companyUpdate, $personCreate, $personUpdate] as $crmMutation) {
+        if (($crmMutation['properties']['custom_fields']['$ref'] ?? null) !== 'custom-fields.json') {
+            $errors[] = sprintf('CRM mutation %s must use the bounded custom-field definition.', $crmMutation['$id'] ?? 'unknown');
+        }
+    }
+    foreach ([$companyUpdate, $personUpdate, $deleteRequest] as $versionedRequest) {
+        if (! in_array('expected_version', $versionedRequest['required'] ?? [], true)
+            || ($versionedRequest['properties']['expected_version']['type'] ?? null) !== 'integer'
+            || ($versionedRequest['properties']['expected_version']['minimum'] ?? null) !== 1) {
+            $errors[] = sprintf('CRM update/delete schema %s must require expected_version >= 1.', $versionedRequest['$id'] ?? 'unknown');
+        }
+    }
+    if (count($companyUpdate['anyOf'] ?? []) !== 11 || count($personUpdate['anyOf'] ?? []) !== 10) {
+        $errors[] = 'CRM updates must require at least one mutable field in addition to expected_version.';
+    }
+    if (($deletion['required'] ?? null) !== ['contract_version', 'id', 'deleted']
+        || ($deletion['properties']['deleted']['const'] ?? null) !== true) {
+        $errors[] = 'CRM soft deletes must return the exact versioned deletion result.';
+    }
+
+    $expectedListQueryProperties = ['direction', 'page', 'per_page', 'q', 'sort'];
+    $companyQueryProperties = array_keys($companyQuery['properties'] ?? []);
+    sort($companyQueryProperties);
+    $personQueryProperties = array_keys($personQuery['properties'] ?? []);
+    sort($personQueryProperties);
+    if ($companyQueryProperties !== $expectedListQueryProperties
+        || $personQueryProperties !== ['company_id', 'direction', 'page', 'per_page', 'q', 'sort']
+        || ($companyQuery['properties']['sort']['enum'] ?? null) !== ['created_at', 'updated_at', 'name']
+        || ($companyQuery['properties']['sort']['default'] ?? null) !== 'created_at'
+        || ($companyQuery['properties']['direction']['enum'] ?? null) !== ['asc', 'desc']
+        || ($companyQuery['properties']['direction']['default'] ?? null) !== 'desc'
+        || ($companyQuery['properties']['per_page']['minimum'] ?? null) !== 1
+        || ($companyQuery['properties']['per_page']['maximum'] ?? null) !== 100
+        || ($companyQuery['properties']['per_page']['default'] ?? null) !== 25
+        || ($personQuery['properties']['company_id']['format'] ?? null) !== 'uuid') {
+        $errors[] = 'CRM list queries must expose exactly the implemented bounded filters, finite sorting, direction, and pagination defaults.';
+    }
+    if (($pagination['required'] ?? null) !== ['current_page', 'per_page', 'total', 'last_page']
+        || ($pagination['properties']['per_page']['maximum'] ?? null) !== 100
+        || ($crmSchemas['company-list.json']['properties']['data']['items']['$ref'] ?? null) !== 'company.json'
+        || ($crmSchemas['person-list.json']['properties']['data']['items']['$ref'] ?? null) !== 'person.json') {
+        $errors[] = 'CRM list responses must use closed pagination metadata and their exact resource definitions.';
+    }
+
+    $expectedCrmProblemTypes = ['unauthenticated', 'validation_failed', 'crm_record_not_found', 'crm_version_conflict', 'idempotency_conflict', 'idempotency_in_progress'];
+    if (($crmProblem['properties']['type']['enum'] ?? null) !== $expectedCrmProblemTypes
+        || ($crmProblem['properties']['status']['enum'] ?? null) !== [401, 404, 409, 422]
+        || ! in_array('current_version', $crmProblem['allOf'][0]['then']['required'] ?? [], true)
+        || ! in_array('errors', $crmProblem['allOf'][1]['then']['required'] ?? [], true)) {
+        $errors[] = 'CRM Problem must exactly cover authentication, validation, tenant-scoped not-found, stale version, and idempotency failures with their conditional context.';
+    }
+
+    $tier1 = json_decode((string) file_get_contents($root.'/openapi/tier1.json'), true, flags: JSON_THROW_ON_ERROR);
+    $crmOperations = [
+        ['/v1/tenants/{tenant}/crm/companies', 'get', 'listCrmCompanies', null, '200', '../schemas/v1/crm/company-list.json', ['200', '401', '422', '429']],
+        ['/v1/tenants/{tenant}/crm/companies', 'post', 'createCrmCompany', '../schemas/v1/crm/company-create-request.json', '201', '../schemas/v1/crm/company.json', ['201', '401', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/crm/companies/{company}', 'get', 'getCrmCompany', null, '200', '../schemas/v1/crm/company.json', ['200', '401', '404', '429']],
+        ['/v1/tenants/{tenant}/crm/companies/{company}', 'patch', 'updateCrmCompany', '../schemas/v1/crm/company-update-request.json', '200', '../schemas/v1/crm/company.json', ['200', '401', '404', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/crm/companies/{company}', 'delete', 'deleteCrmCompany', '../schemas/v1/crm/delete-request.json', '200', '../schemas/v1/crm/deletion.json', ['200', '401', '404', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/crm/people', 'get', 'listCrmPeople', null, '200', '../schemas/v1/crm/person-list.json', ['200', '401', '422', '429']],
+        ['/v1/tenants/{tenant}/crm/people', 'post', 'createCrmPerson', '../schemas/v1/crm/person-create-request.json', '201', '../schemas/v1/crm/person.json', ['201', '401', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/crm/people/{person}', 'get', 'getCrmPerson', null, '200', '../schemas/v1/crm/person.json', ['200', '401', '404', '429']],
+        ['/v1/tenants/{tenant}/crm/people/{person}', 'patch', 'updateCrmPerson', '../schemas/v1/crm/person-update-request.json', '200', '../schemas/v1/crm/person.json', ['200', '401', '404', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/crm/people/{person}', 'delete', 'deleteCrmPerson', '../schemas/v1/crm/delete-request.json', '200', '../schemas/v1/crm/deletion.json', ['200', '401', '404', '409', '422', '429']],
+    ];
+    foreach ($crmOperations as [$path, $method, $operationId, $requestRef, $successStatus, $responseRef, $expectedStatuses]) {
+        $operation = $tier1['paths'][$path][$method] ?? [];
+        if ($operation === []) {
+            $errors[] = sprintf('Tier 1 OpenAPI is missing CRM operation %s %s.', strtoupper($method), $path);
+
+            continue;
+        }
+        if (($operation['operationId'] ?? null) !== $operationId
+            || ($operation['security'][0]['serviceBearer'] ?? null) !== []) {
+            $errors[] = sprintf('CRM operation %s %s must have exact operationId %s and service Bearer authentication.', strtoupper($method), $path, $operationId);
+        }
+        if (! in_array(['$ref' => '#/components/parameters/Tenant'], $tier1['paths'][$path]['parameters'] ?? [], true)) {
+            $errors[] = sprintf('CRM path %s must carry the tenant path scope.', $path);
+        }
+        $actualStatuses = array_map(static fn (int|string $status): string => (string) $status, array_keys($operation['responses'] ?? []));
+        if ($actualStatuses !== $expectedStatuses) {
+            $errors[] = sprintf('CRM operation %s %s must expose exactly statuses %s.', strtoupper($method), $path, implode(', ', $expectedStatuses));
+        }
+        if (($operation['responses'][$successStatus]['content']['application/json']['schema']['$ref'] ?? null) !== $responseRef) {
+            $errors[] = sprintf('CRM operation %s %s success response must use %s.', strtoupper($method), $path, $responseRef);
+        }
+        foreach (array_intersect($expectedStatuses, ['401', '404', '409', '422']) as $problemStatus) {
+            if (($operation['responses'][$problemStatus]['$ref'] ?? null) !== '#/components/responses/CrmProblem') {
+                $errors[] = sprintf('CRM operation %s %s status %s must use the closed CRM Problem.', strtoupper($method), $path, $problemStatus);
+            }
+        }
+        if ($requestRef === null) {
+            if (isset($operation['requestBody']) || in_array(['$ref' => '#/components/parameters/CrmIdempotencyKey'], $operation['parameters'] ?? [], true)) {
+                $errors[] = sprintf('Read-only CRM operation %s %s must not accept a write body or Idempotency-Key.', strtoupper($method), $path);
+            }
+
+            continue;
+        }
+        $content = $operation['requestBody']['content'] ?? [];
+        if (($operation['requestBody']['required'] ?? null) !== true
+            || array_keys($content) !== ['application/json']
+            || ($content['application/json']['schema']['$ref'] ?? null) !== $requestRef
+            || ! in_array(['$ref' => '#/components/parameters/CrmIdempotencyKey'], $operation['parameters'] ?? [], true)
+            || ($operation['responses'][$successStatus]['headers']['Idempotent-Replayed']['$ref'] ?? null) !== '#/components/headers/IdempotentReplayed') {
+            $errors[] = sprintf('CRM write %s %s must require its exact JSON schema, bounded Idempotency-Key, and canonical replay header.', strtoupper($method), $path);
+        }
+    }
+
+    $crmPaths = array_values(array_filter(array_keys($tier1['paths'] ?? []), static fn (string $path): bool => str_contains($path, '/crm/')));
+    if ($crmPaths !== ['/v1/tenants/{tenant}/crm/companies', '/v1/tenants/{tenant}/crm/companies/{company}', '/v1/tenants/{tenant}/crm/people', '/v1/tenants/{tenant}/crm/people/{person}']) {
+        $errors[] = 'Tier 1 CRM must expose exactly the four implemented company/person resource paths.';
+    }
+    if (! in_array(['$ref' => '#/components/parameters/CrmCompany'], $tier1['paths']['/v1/tenants/{tenant}/crm/companies/{company}']['parameters'] ?? [], true)
+        || ! in_array(['$ref' => '#/components/parameters/CrmPerson'], $tier1['paths']['/v1/tenants/{tenant}/crm/people/{person}']['parameters'] ?? [], true)) {
+        $errors[] = 'CRM item paths must require UUID company/person identifiers resolved within tenant scope.';
+    }
+    $companyListParameters = $tier1['paths']['/v1/tenants/{tenant}/crm/companies']['get']['parameters'] ?? [];
+    $peopleListParameters = $tier1['paths']['/v1/tenants/{tenant}/crm/people']['get']['parameters'] ?? [];
+    $expectedCompanyListParameters = array_map(static fn (string $name): array => ['$ref' => '#/components/parameters/'.$name], ['CrmSearch', 'CrmSort', 'CrmDirection', 'CrmPage', 'CrmPerPage']);
+    $expectedPeopleListParameters = array_map(static fn (string $name): array => ['$ref' => '#/components/parameters/'.$name], ['CrmSearch', 'CrmCompanyFilter', 'CrmSort', 'CrmDirection', 'CrmPage', 'CrmPerPage']);
+    if ($companyListParameters !== $expectedCompanyListParameters || $peopleListParameters !== $expectedPeopleListParameters) {
+        $errors[] = 'CRM list OpenAPI parameters must exactly mirror the implemented company and person query boundaries.';
+    }
+    $crmIdempotencyKey = $tier1['components']['parameters']['CrmIdempotencyKey'] ?? [];
+    if (($crmIdempotencyKey['required'] ?? null) !== true
+        || ($crmIdempotencyKey['schema']['minLength'] ?? null) !== 8
+        || ($crmIdempotencyKey['schema']['maxLength'] ?? null) !== 200
+        || ($tier1['components']['responses']['CrmProblem']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/crm/problem.json') {
+        $errors[] = 'Tier 1 CRM must expose its 8–200 character idempotency key and closed CRM Problem response.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect CRM contracts: %s', $exception->getMessage());
+}
+
+$messagingDocuments = [
+    'schemas/v1/messaging/channel-create-request.json',
+    'schemas/v1/messaging/channel-list-query.json',
+    'schemas/v1/messaging/channel-list.json',
+    'schemas/v1/messaging/channel-response.json',
+    'schemas/v1/messaging/channel.json',
+    'schemas/v1/messaging/conversation-create-request.json',
+    'schemas/v1/messaging/conversation-list-query.json',
+    'schemas/v1/messaging/conversation-list.json',
+    'schemas/v1/messaging/conversation-response.json',
+    'schemas/v1/messaging/conversation.json',
+    'schemas/v1/messaging/message-create-request.json',
+    'schemas/v1/messaging/message-list-query.json',
+    'schemas/v1/messaging/message-list.json',
+    'schemas/v1/messaging/message-response.json',
+    'schemas/v1/messaging/message.json',
+    'schemas/v1/messaging/metadata.json',
+    'schemas/v1/messaging/pagination-links.json',
+    'schemas/v1/messaging/pagination-meta.json',
+    'schemas/v1/messaging/problem.json',
+    'schemas/v1/messaging/slack-url-verification-response.json',
+    'schemas/v1/messaging/slack-webhook-accepted-response.json',
+    'schemas/v1/messaging/slack-webhook-request.json',
+];
+
+foreach ($messagingDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Messaging contract document %s', $relativePath);
+    }
+}
+
+try {
+    $messagingSchemas = [];
+    foreach ($messagingDocuments as $relativePath) {
+        $messagingSchemas[basename($relativePath)] = json_decode((string) file_get_contents($root.'/'.$relativePath), true, flags: JSON_THROW_ON_ERROR);
+    }
+
+    foreach ($messagingSchemas as $filename => $messagingSchema) {
+        if (in_array($filename, ['metadata.json', 'slack-webhook-request.json', 'slack-webhook-accepted-response.json'], true)) {
+            continue;
+        }
+        if (($messagingSchema['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Messaging schema %s must reject unknown root keys.', $messagingSchema['$id'] ?? $filename);
+        }
+    }
+
+    $metadata = $messagingSchemas['metadata.json'];
+    if (($metadata['anyOf'][0]['type'] ?? null) !== 'object'
+        || ($metadata['anyOf'][0]['maxProperties'] ?? null) !== 20
+        || ($metadata['anyOf'][0]['additionalProperties']['type'] ?? null) !== ['string', 'null']
+        || ($metadata['anyOf'][0]['additionalProperties']['maxLength'] ?? null) !== 500
+        || ($metadata['anyOf'][1]['type'] ?? null) !== 'array'
+        || ($metadata['anyOf'][1]['maxItems'] ?? null) !== 20
+        || ($metadata['anyOf'][1]['items']['type'] ?? null) !== ['string', 'null']) {
+        $errors[] = 'Messaging metadata must exactly preserve the bounded string/null map-or-list behavior implemented by the service.';
+    }
+
+    $channelCreate = $messagingSchemas['channel-create-request.json'];
+    $conversationCreate = $messagingSchemas['conversation-create-request.json'];
+    $messageCreate = $messagingSchemas['message-create-request.json'];
+    if (($channelCreate['required'] ?? null) !== ['provider', 'name', 'credential_reference']
+        || ($channelCreate['properties']['provider']['enum'] ?? null) !== ['local', 'slack']
+        || ($channelCreate['properties']['credential_reference']['writeOnly'] ?? null) !== true
+        || ($channelCreate['properties']['credential_reference']['pattern'] ?? null) !== '^[A-Za-z0-9._:/-]+$'
+        || ! in_array('external_channel_id', $channelCreate['allOf'][0]['then']['required'] ?? [], true)) {
+        $errors[] = 'Messaging channel creation must keep the provider allowlist, write-only credential reference, and Slack external-channel requirement.';
+    }
+    if (($conversationCreate['properties']['external_conversation_id']['maxLength'] ?? null) !== 191
+        || ($conversationCreate['properties']['subject']['maxLength'] ?? null) !== 200
+        || ($messageCreate['required'] ?? null) !== ['text']
+        || ($messageCreate['properties']['text']['minLength'] ?? null) !== 1
+        || ($messageCreate['properties']['text']['maxLength'] ?? null) !== 10000
+        || ($messageCreate['properties']['text']['pattern'] ?? null) !== '\\S') {
+        $errors[] = 'Messaging conversation and message writes must preserve the exact provider-ID, subject, and non-blank text bounds.';
+    }
+    foreach ([$channelCreate, $conversationCreate, $messageCreate] as $messagingWrite) {
+        if (($messagingWrite['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Messaging write %s must reject every unknown top-level field.', $messagingWrite['$id'] ?? 'unknown');
+        }
+        if (isset($messagingWrite['properties']['metadata']) && ($messagingWrite['properties']['metadata']['$ref'] ?? null) !== 'metadata.json') {
+            $errors[] = sprintf('Messaging write %s must use the bounded metadata schema.', $messagingWrite['$id'] ?? 'unknown');
+        }
+    }
+
+    $channel = $messagingSchemas['channel.json'];
+    $conversation = $messagingSchemas['conversation.json'];
+    $message = $messagingSchemas['message.json'];
+    $expectedChannelFields = ['active', 'created_at', 'credentials_configured', 'external_channel_id', 'id', 'metadata', 'name', 'provider', 'tenant_id', 'updated_at'];
+    $expectedConversationFields = ['channel_id', 'created_at', 'external_conversation_id', 'id', 'metadata', 'status', 'subject', 'tenant_id', 'updated_at'];
+    $expectedMessageFields = ['conversation_id', 'created_at', 'delivery_status', 'direction', 'id', 'metadata', 'provider_message_id', 'sender_external_id', 'tenant_id', 'text', 'thread_external_id', 'updated_at'];
+    foreach ([[$channel, $expectedChannelFields, 'channel'], [$conversation, $expectedConversationFields, 'conversation'], [$message, $expectedMessageFields, 'message']] as [$resource, $expectedFields, $resourceName]) {
+        $properties = array_keys($resource['properties'] ?? []);
+        sort($properties);
+        $required = $resource['required'] ?? [];
+        sort($required);
+        if ($properties !== $expectedFields || $required !== $expectedFields) {
+            $errors[] = sprintf('Messaging %s response must expose and require exactly the fields emitted by its API resource.', $resourceName);
+        }
+        foreach (['credential_reference', 'credentials', 'provider_payload', 'raw', 'crm_company_id', 'crm_person_id'] as $forbiddenField) {
+            if (array_key_exists($forbiddenField, $resource['properties'] ?? [])) {
+                $errors[] = sprintf('Messaging %s response must never expose %s.', $resourceName, $forbiddenField);
+            }
+        }
+    }
+    if (($channel['properties']['credentials_configured']['const'] ?? null) !== true
+        || ($channel['properties']['tenant_id']['format'] ?? null) !== 'uuid'
+        || ($conversation['properties']['status']['enum'] ?? null) !== ['open', 'closed']
+        || ($message['properties']['direction']['enum'] ?? null) !== ['inbound', 'outbound']
+        || ($message['properties']['delivery_status']['enum'] ?? null) !== ['sent', 'failed', 'unknown', 'received']) {
+        $errors[] = 'Messaging resources must expose only the credential marker, UUID tenant scope, finite conversation status, normalized direction, and finite delivery outcomes.';
+    }
+    foreach (['channel-response.json' => 'channel.json', 'conversation-response.json' => 'conversation.json', 'message-response.json' => 'message.json'] as $wrapper => $resourceRef) {
+        if (($messagingSchemas[$wrapper]['required'] ?? null) !== ['data']
+            || ($messagingSchemas[$wrapper]['properties']['data']['$ref'] ?? null) !== $resourceRef) {
+            $errors[] = sprintf('Messaging response wrapper %s must contain exactly %s under data.', $wrapper, $resourceRef);
+        }
+    }
+
+    $channelQuery = $messagingSchemas['channel-list-query.json'];
+    $conversationQuery = $messagingSchemas['conversation-list-query.json'];
+    $messageQuery = $messagingSchemas['message-list-query.json'];
+    foreach ([$channelQuery, $conversationQuery, $messageQuery] as $listQuery) {
+        if (($listQuery['properties']['page']['minimum'] ?? null) !== 1
+            || ($listQuery['properties']['page']['maximum'] ?? null) !== 10000
+            || ($listQuery['properties']['page']['default'] ?? null) !== 1
+            || ($listQuery['properties']['per_page']['minimum'] ?? null) !== 1
+            || ($listQuery['properties']['per_page']['maximum'] ?? null) !== 50
+            || ($listQuery['properties']['per_page']['default'] ?? null) !== 20) {
+            $errors[] = sprintf('Messaging list query %s must enforce page 1..10000 and per_page 1..50 with service defaults.', $listQuery['$id'] ?? 'unknown');
+        }
+    }
+    if (($channelQuery['properties']['provider']['enum'] ?? null) !== ['local', 'slack']
+        || ($conversationQuery['properties']['status']['enum'] ?? null) !== ['open', 'closed']
+        || ($messageQuery['properties']['direction']['enum'] ?? null) !== ['inbound', 'outbound']) {
+        $errors[] = 'Messaging list filters must exactly preserve provider, conversation status, and message direction allowlists.';
+    }
+    $paginationLinks = $messagingSchemas['pagination-links.json'];
+    $paginationMeta = $messagingSchemas['pagination-meta.json'];
+    if (($paginationLinks['required'] ?? null) !== ['first', 'last', 'prev', 'next']
+        || ($paginationMeta['required'] ?? null) !== ['current_page', 'from', 'last_page', 'links', 'path', 'per_page', 'to', 'total']
+        || ($paginationMeta['properties']['links']['items']['additionalProperties'] ?? null) !== false
+        || ($paginationMeta['properties']['per_page']['maximum'] ?? null) !== 50) {
+        $errors[] = 'Messaging pagination must model the exact closed Laravel resource links and metadata shape with a maximum page size of 50.';
+    }
+    foreach (['channel-list.json' => 'channel.json', 'conversation-list.json' => 'conversation.json', 'message-list.json' => 'message.json'] as $listSchema => $itemRef) {
+        $list = $messagingSchemas[$listSchema];
+        if (($list['required'] ?? null) !== ['data', 'links', 'meta']
+            || ($list['properties']['data']['maxItems'] ?? null) !== 50
+            || ($list['properties']['data']['items']['$ref'] ?? null) !== $itemRef
+            || ($list['properties']['links']['$ref'] ?? null) !== 'pagination-links.json'
+            || ($list['properties']['meta']['$ref'] ?? null) !== 'pagination-meta.json') {
+            $errors[] = sprintf('Messaging list %s must expose its exact bounded resource page.', $listSchema);
+        }
+    }
+
+    $slackRequest = $messagingSchemas['slack-webhook-request.json'];
+    foreach (['url_verification', 'event_callback', 'event', 'ignored_callback', 'authorization', 'file_reference'] as $closedDefinition) {
+        if (($slackRequest['$defs'][$closedDefinition]['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Messaging Slack webhook definition %s must reject unknown fields.', $closedDefinition);
+        }
+    }
+    if (($slackRequest['$defs']['url_verification']['properties']['challenge']['maxLength'] ?? null) !== 256
+        || ($slackRequest['$defs']['event_callback']['properties']['event_id']['pattern'] ?? null) !== '^[A-Za-z0-9._:-]{1,191}$'
+        || ($slackRequest['$defs']['event']['properties']['text']['maxLength'] ?? null) !== 10000) {
+        $errors[] = 'Messaging Slack envelopes must preserve the exact challenge, event ID, and normalized text bounds.';
+    }
+    foreach ([
+        $slackRequest['$defs']['event']['properties']['callback_url'] ?? [],
+        $slackRequest['$defs']['event']['properties']['response_url'] ?? [],
+        $slackRequest['$defs']['ignored_callback']['properties']['callback_url'] ?? [],
+        $slackRequest['$defs']['ignored_callback']['properties']['response_url'] ?? [],
+        $slackRequest['$defs']['file_reference']['properties']['url_private'] ?? [],
+        $slackRequest['$defs']['file_reference']['properties']['permalink'] ?? [],
+    ] as $providerUrl) {
+        if (($providerUrl['x-magic-html-runnable'] ?? null) !== false) {
+            $errors[] = 'Every provider-supplied Messaging URL must be explicitly non-runnable.';
+        }
+    }
+    $slackAccepted = $messagingSchemas['slack-webhook-accepted-response.json'];
+    foreach ($slackAccepted['oneOf'] ?? [] as $acceptedVariant) {
+        if (($acceptedVariant['additionalProperties'] ?? null) !== false
+            || ($acceptedVariant['properties']['accepted']['const'] ?? null) !== true) {
+            $errors[] = 'Every accepted Slack response variant must be closed and explicitly accepted.';
+        }
+    }
+    if (($messagingSchemas['slack-url-verification-response.json']['properties']['challenge']['maxLength'] ?? null) !== 256) {
+        $errors[] = 'Messaging Slack URL verification must return only the bounded challenge.';
+    }
+
+    $messagingProblem = $messagingSchemas['problem.json'];
+    $expectedMessagingProblemTypes = ['unauthenticated', 'validation_failed', 'resource_not_found', 'idempotency_conflict', 'idempotency_in_progress', 'resource_conflict', 'delivery_provider_unavailable', 'payload_too_large', 'invalid_signature', 'invalid_event', 'event_id_conflict', 'rate_limited'];
+    if (($messagingProblem['properties']['type']['const'] ?? null) !== 'about:blank'
+        || ($messagingProblem['properties']['title']['enum'] ?? null) !== $expectedMessagingProblemTypes
+        || ($messagingProblem['properties']['status']['enum'] ?? null) !== [401, 404, 409, 413, 422, 429, 503]
+        || ! in_array('errors', $messagingProblem['allOf'][0]['then']['required'] ?? [], true)) {
+        $errors[] = 'Messaging Problem must exactly cover service authentication, validation, scope, idempotency, delivery, Slack verification/dedupe, limits, and throttling.';
+    }
+
+    $tier1 = json_decode((string) file_get_contents($root.'/openapi/tier1.json'), true, flags: JSON_THROW_ON_ERROR);
+    $messagingOperations = [
+        ['/v1/tenants/{tenant}/messaging/channels', 'get', 'listMessagingChannels', null, '200', '../schemas/v1/messaging/channel-list.json', ['200', '401', '422', '429']],
+        ['/v1/tenants/{tenant}/messaging/channels', 'post', 'createMessagingChannel', '../schemas/v1/messaging/channel-create-request.json', '201', '../schemas/v1/messaging/channel-response.json', ['201', '401', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/messaging/channels/{channel}', 'get', 'getMessagingChannel', null, '200', '../schemas/v1/messaging/channel-response.json', ['200', '401', '404', '429']],
+        ['/v1/tenants/{tenant}/messaging/channels/{channel}/conversations', 'get', 'listMessagingConversations', null, '200', '../schemas/v1/messaging/conversation-list.json', ['200', '401', '404', '422', '429']],
+        ['/v1/tenants/{tenant}/messaging/channels/{channel}/conversations', 'post', 'createMessagingConversation', '../schemas/v1/messaging/conversation-create-request.json', '201', '../schemas/v1/messaging/conversation-response.json', ['201', '401', '404', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/messaging/channels/{channel}/conversations/{conversation}', 'get', 'getMessagingConversation', null, '200', '../schemas/v1/messaging/conversation-response.json', ['200', '401', '404', '429']],
+        ['/v1/tenants/{tenant}/messaging/conversations/{conversation}/messages', 'get', 'listMessagingMessages', null, '200', '../schemas/v1/messaging/message-list.json', ['200', '401', '404', '422', '429']],
+        ['/v1/tenants/{tenant}/messaging/conversations/{conversation}/messages', 'post', 'createMessagingMessage', '../schemas/v1/messaging/message-create-request.json', '201', '../schemas/v1/messaging/message-response.json', ['201', '401', '404', '409', '422', '429', '503']],
+    ];
+    foreach ($messagingOperations as [$path, $method, $operationId, $requestRef, $successStatus, $responseRef, $expectedStatuses]) {
+        $operation = $tier1['paths'][$path][$method] ?? [];
+        if (($operation['operationId'] ?? null) !== $operationId
+            || ($operation['security'][0]['serviceBearer'] ?? null) !== []) {
+            $errors[] = sprintf('Messaging service operation %s %s must have exact operationId %s and Bearer authentication.', strtoupper($method), $path, $operationId);
+        }
+        if (! in_array(['$ref' => '#/components/parameters/TenantUuid'], $tier1['paths'][$path]['parameters'] ?? [], true)) {
+            $errors[] = sprintf('Messaging service path %s must carry UUID tenant scope.', $path);
+        }
+        $actualStatuses = array_map(static fn (int|string $status): string => (string) $status, array_keys($operation['responses'] ?? []));
+        if ($actualStatuses !== $expectedStatuses) {
+            $errors[] = sprintf('Messaging operation %s %s must expose exactly statuses %s.', strtoupper($method), $path, implode(', ', $expectedStatuses));
+        }
+        if (($operation['responses'][$successStatus]['content']['application/json']['schema']['$ref'] ?? null) !== $responseRef) {
+            $errors[] = sprintf('Messaging operation %s %s success response must use %s.', strtoupper($method), $path, $responseRef);
+        }
+        foreach (array_diff($expectedStatuses, [$successStatus]) as $problemStatus) {
+            if (($operation['responses'][$problemStatus]['$ref'] ?? null) !== '#/components/responses/MessagingProblem') {
+                $errors[] = sprintf('Messaging operation %s %s status %s must use Messaging Problem.', strtoupper($method), $path, $problemStatus);
+            }
+        }
+        if ($requestRef === null) {
+            if (isset($operation['requestBody']) || in_array(['$ref' => '#/components/parameters/MessagingIdempotencyKey'], $operation['parameters'] ?? [], true)) {
+                $errors[] = sprintf('Read-only Messaging operation %s %s must not accept a write body or Idempotency-Key.', strtoupper($method), $path);
+            }
+
+            continue;
+        }
+        $content = $operation['requestBody']['content'] ?? [];
+        if (($operation['requestBody']['required'] ?? null) !== true
+            || array_keys($content) !== ['application/json']
+            || ($content['application/json']['schema']['$ref'] ?? null) !== $requestRef
+            || ! in_array(['$ref' => '#/components/parameters/MessagingIdempotencyKey'], $operation['parameters'] ?? [], true)
+            || ($operation['responses'][$successStatus]['headers']['Idempotent-Replayed']['$ref'] ?? null) !== '#/components/headers/IdempotentReplayed') {
+            $errors[] = sprintf('Messaging write %s %s must require its exact JSON schema, idempotency key, and canonical replay header.', strtoupper($method), $path);
+        }
+    }
+
+    $webhookPath = '/v1/tenants/{tenant}/messaging/channels/{channel}/webhooks/slack';
+    $webhook = $tier1['paths'][$webhookPath]['post'] ?? [];
+    if (($webhook['operationId'] ?? null) !== 'ingestSlackMessagingWebhook'
+        || ($webhook['security'] ?? null) !== [['slackHmacV0' => []]]
+        || in_array(['$ref' => '#/components/parameters/MessagingIdempotencyKey'], $webhook['parameters'] ?? [], true)
+        || ! in_array(['$ref' => '#/components/parameters/SlackRequestTimestamp'], $webhook['parameters'] ?? [], true)
+        || ! in_array(['$ref' => '#/components/parameters/SlackSignature'], $webhook['parameters'] ?? [], true)
+        || ($webhook['requestBody']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/messaging/slack-webhook-request.json'
+        || ($webhook['responses']['200']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/messaging/slack-url-verification-response.json'
+        || ($webhook['responses']['202']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/messaging/slack-webhook-accepted-response.json') {
+        $errors[] = 'Messaging Slack webhook must use exact HMAC headers, provider-event dedupe rather than Idempotency-Key, and its closed request/success schemas.';
+    }
+    $webhookStatuses = array_map(static fn (int|string $status): string => (string) $status, array_keys($webhook['responses'] ?? []));
+    if ($webhookStatuses !== ['200', '202', '401', '404', '409', '413', '422', '429']) {
+        $errors[] = 'Messaging Slack webhook must expose exact challenge, acceptance, authentication, scope, dedupe, size, validation, and rate-limit statuses.';
+    }
+    foreach (['401', '404', '409', '413', '422', '429'] as $webhookProblemStatus) {
+        if (($webhook['responses'][$webhookProblemStatus]['$ref'] ?? null) !== '#/components/responses/MessagingProblem') {
+            $errors[] = sprintf('Messaging Slack webhook status %s must use Messaging Problem.', $webhookProblemStatus);
+        }
+    }
+    $expectedWebhookSecurity = [
+        'signature_version' => 'v0_hmac_sha256',
+        'signature_base' => 'v0:timestamp:exact_raw_body',
+        'maximum_timestamp_skew_seconds' => 300,
+        'maximum_payload_bytes' => 262144,
+        'signing_credential_scope' => 'active_channel_tenant_and_slack_provider',
+        'dedupe_scope' => 'messaging_channel_and_provider_event_id',
+        'dedupe_fingerprint' => 'sha256_exact_raw_body',
+        'changed_replay_status' => 409,
+        'provider_callback_execution' => false,
+        'provider_urls_persisted' => false,
+        'raw_payload_persisted' => false,
+        'normalized_fields_only' => true,
+    ];
+    if (($webhook['x-magic-html-webhook-security'] ?? null) !== $expectedWebhookSecurity) {
+        $errors[] = 'Messaging Slack webhook must expose its complete HMAC, replay, bounded payload, normalized persistence, and non-runnable callback boundary.';
+    }
+    $messageWrite = $tier1['paths']['/v1/tenants/{tenant}/messaging/conversations/{conversation}/messages']['post'] ?? [];
+    $expectedDeliveryBoundary = [
+        'providers' => ['local', 'slack'],
+        'slack_endpoint' => 'https://slack.com/api/chat.postMessage',
+        'provider_endpoints_server_owned' => true,
+        'runtime_credential_resolution' => true,
+        'credential_scope' => 'active_channel_tenant_and_provider',
+        'credentials_or_provider_payloads_persisted' => false,
+        'automatic_retry' => false,
+        'confirmed_success_status' => 'sent',
+        'definite_failure_status' => 'failed',
+        'ambiguous_outcome_status' => 'unknown',
+        'unknown_requires_reconciliation_before_retry' => true,
+        'idempotent_replay_redelivers' => false,
+    ];
+    if (($messageWrite['x-magic-html-delivery-boundary'] ?? null) !== $expectedDeliveryBoundary) {
+        $errors[] = 'Messaging outbound delivery must expose fixed provider endpoints, runtime credentials, no automatic retry, finite outcomes, and no redelivery on replay.';
+    }
+    $messagingPaths = array_values(array_filter(array_keys($tier1['paths'] ?? []), static fn (string $path): bool => str_contains($path, '/messaging/')));
+    if ($messagingPaths !== [
+        '/v1/tenants/{tenant}/messaging/channels',
+        '/v1/tenants/{tenant}/messaging/channels/{channel}',
+        '/v1/tenants/{tenant}/messaging/channels/{channel}/conversations',
+        '/v1/tenants/{tenant}/messaging/channels/{channel}/conversations/{conversation}',
+        '/v1/tenants/{tenant}/messaging/conversations/{conversation}/messages',
+        '/v1/tenants/{tenant}/messaging/channels/{channel}/webhooks/slack',
+    ]) {
+        $errors[] = 'Tier 1 Messaging must expose exactly its nine operations across the six implemented paths.';
+    }
+    $messagingIdempotency = $tier1['components']['parameters']['MessagingIdempotencyKey'] ?? [];
+    if (($messagingIdempotency['required'] ?? null) !== true
+        || ($messagingIdempotency['schema']['minLength'] ?? null) !== 8
+        || ($messagingIdempotency['schema']['maxLength'] ?? null) !== 200
+        || ($messagingIdempotency['schema']['pattern'] ?? null) !== '^[A-Za-z0-9._:-]+$'
+        || ($tier1['components']['parameters']['SlackRequestTimestamp']['schema']['pattern'] ?? null) !== '^[0-9]+$'
+        || ($tier1['components']['parameters']['SlackSignature']['schema']['pattern'] ?? null) !== '^v0=[a-f0-9]{64}$'
+        || ($tier1['components']['responses']['MessagingProblem']['content']['application/problem+json']['schema']['$ref'] ?? null) !== '../schemas/v1/messaging/problem.json') {
+        $errors[] = 'Tier 1 Messaging must expose exact idempotency, Slack HMAC header, and application/problem+json definitions.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Messaging contracts: %s', $exception->getMessage());
+}
+
+$channelDocuments = [
+    'schemas/v1/channel/connection-create-request.json',
+    'schemas/v1/channel/connection-list-query.json',
+    'schemas/v1/channel/connection-list.json',
+    'schemas/v1/channel/connection-response.json',
+    'schemas/v1/channel/connection-update-request.json',
+    'schemas/v1/channel/connection-verification-response.json',
+    'schemas/v1/channel/connection-version-request.json',
+    'schemas/v1/channel/connection.json',
+    'schemas/v1/channel/credentials.json',
+    'schemas/v1/channel/deleted-response.json',
+    'schemas/v1/channel/media-artifact-create-request.json',
+    'schemas/v1/channel/media-artifact-response.json',
+    'schemas/v1/channel/media-artifact.json',
+    'schemas/v1/channel/pagination-meta.json',
+    'schemas/v1/channel/problem.json',
+    'schemas/v1/channel/provider-identity.json',
+    'schemas/v1/channel/publication-content.json',
+    'schemas/v1/channel/publication-create-request.json',
+    'schemas/v1/channel/publication-error.json',
+    'schemas/v1/channel/publication-list-query.json',
+    'schemas/v1/channel/publication-list.json',
+    'schemas/v1/channel/publication-response.json',
+    'schemas/v1/channel/publication.json',
+];
+
+foreach ($channelDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Channel contract document %s', $relativePath);
+    }
+}
+
+try {
+    $channelSchemas = [];
+    foreach ($channelDocuments as $relativePath) {
+        $channelSchemas[basename($relativePath)] = json_decode((string) file_get_contents($root.'/'.$relativePath), true, flags: JSON_THROW_ON_ERROR);
+    }
+
+    foreach ($channelSchemas as $filename => $channelSchema) {
+        if (($channelSchema['$schema'] ?? null) !== 'https://json-schema.org/draft/2020-12/schema') {
+            $errors[] = sprintf('Channel schema %s must declare JSON Schema 2020-12.', $filename);
+        }
+        if (($channelSchema['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Channel schema %s must reject unknown root keys.', $channelSchema['$id'] ?? $filename);
+        }
+    }
+
+    $expectedProviders = ['x', 'threads', 'instagram', 'line', 'youtube'];
+    $connectionCreate = $channelSchemas['connection-create-request.json'];
+    $connectionUpdate = $channelSchemas['connection-update-request.json'];
+    $credentials = $channelSchemas['credentials.json'];
+    $connection = $channelSchemas['connection.json'];
+    if (($connectionCreate['required'] ?? null) !== ['name', 'provider', 'credentials']
+        || ($connectionCreate['properties']['provider']['enum'] ?? null) !== $expectedProviders
+        || ($connectionCreate['properties']['configuration']['maxProperties'] ?? null) !== 0
+        || ($connectionUpdate['required'] ?? null) !== ['expected_version']
+        || ($connectionUpdate['properties']['expected_version']['minimum'] ?? null) !== 1
+        || count($connectionUpdate['anyOf'] ?? []) !== 4) {
+        $errors[] = 'Channel connection writes must be closed, provider-bounded, configuration-empty, optimistic-versioned, and non-empty.';
+    }
+    foreach ($connectionCreate['definitions'] ?? [] as $definition) {
+        if (($definition['additionalProperties'] ?? null) !== false) {
+            $errors[] = 'Channel provider credential definitions must reject unknown keys.';
+        }
+    }
+    if (($credentials['minProperties'] ?? null) !== 1
+        || ($credentials['maxProperties'] ?? null) !== 1
+        || ($credentials['properties']['access_token']['writeOnly'] ?? null) !== true
+        || ($credentials['properties']['channel_access_token']['writeOnly'] ?? null) !== true
+        || ($credentials['properties']['access_token']['maxLength'] ?? null) !== 8192) {
+        $errors[] = 'Channel credentials must allow exactly one bounded write-only provider token.';
+    }
+
+    $expectedConnectionFields = ['id', 'tenant_id', 'name', 'provider', 'account_ref', 'configuration', 'has_credentials', 'version', 'credential_version', 'verification_status', 'verified_at', 'created_at', 'updated_at'];
+    if (array_keys($connection['properties'] ?? []) !== $expectedConnectionFields
+        || ($connection['required'] ?? null) !== $expectedConnectionFields
+        || ($connection['properties']['provider']['enum'] ?? null) !== $expectedProviders
+        || ($connection['properties']['has_credentials']['const'] ?? null) !== true
+        || ($connection['properties']['verification_status']['enum'] ?? null) !== ['unverified', 'verified']) {
+        $errors[] = 'Channel connection resources must expose the exact credential-redacted version and verification state.';
+    }
+    foreach (['credentials', 'access_token', 'channel_access_token', 'provider_payload', 'raw'] as $secretField) {
+        if (isset($connection['properties'][$secretField])) {
+            $errors[] = sprintf('Channel connection resources must not expose %s.', $secretField);
+        }
+    }
+
+    $artifactCreate = $channelSchemas['media-artifact-create-request.json'];
+    $artifact = $channelSchemas['media-artifact.json'];
+    $expectedArtifactFields = ['id', 'tenant_id', 'mime_type', 'extension', 'size_bytes', 'sha256', 'status', 'expires_at', 'claimed_at', 'deleted_at', 'created_at'];
+    if (($artifactCreate['required'] ?? null) !== ['video']
+        || ($artifactCreate['properties']['video']['format'] ?? null) !== 'binary'
+        || ($artifact['required'] ?? null) !== $expectedArtifactFields
+        || array_keys($artifact['properties'] ?? []) !== $expectedArtifactFields
+        || ($artifact['properties']['size_bytes']['maximum'] ?? null) !== 536870912
+        || ($artifact['properties']['mime_type']['const'] ?? null) !== 'video/mp4'
+        || ($artifact['properties']['extension']['const'] ?? null) !== 'mp4'
+        || ($artifact['properties']['sha256']['pattern'] ?? null) !== '^[a-f0-9]{64}$'
+        || ($artifact['properties']['status']['enum'] ?? null) !== ['available', 'claimed', 'retained', 'deleted']) {
+        $errors[] = 'Channel private media must expose one bounded MP4 binary and safe immutable metadata only.';
+    }
+    foreach (['disk', 'path', 'url', 'download_url'] as $privateField) {
+        if (isset($artifact['properties'][$privateField])) {
+            $errors[] = sprintf('Channel private media resources must not expose %s.', $privateField);
+        }
+    }
+
+    $publicationContent = $channelSchemas['publication-content.json'];
+    $expectedContentDefinitions = ['x_content', 'threads_content', 'instagram_content', 'line_content', 'line_message', 'line_text_message', 'line_image_message', 'youtube_content'];
+    if (array_keys($publicationContent['definitions'] ?? []) !== $expectedContentDefinitions) {
+        $errors[] = 'Channel publication content must define exactly X, Threads, Instagram, LINE, and YouTube closed content shapes.';
+    }
+    foreach ($publicationContent['definitions'] ?? [] as $name => $definition) {
+        if (str_ends_with((string) $name, '_content') || str_ends_with((string) $name, '_message')) {
+            if (($definition['additionalProperties'] ?? null) !== false && $name !== 'line_message') {
+                $errors[] = sprintf('Channel publication definition %s must reject unknown keys.', $name);
+            }
+        }
+    }
+    $youtubeContent = $publicationContent['definitions']['youtube_content'] ?? [];
+    if (($youtubeContent['required'] ?? null) !== ['media_artifact_id', 'title']
+        || array_keys($youtubeContent['properties'] ?? []) !== ['media_artifact_id', 'title', 'description', 'privacy_status', 'category_id']
+        || ($youtubeContent['properties']['privacy_status']['enum'] ?? null) !== ['private', 'unlisted', 'public']
+        || ($youtubeContent['properties']['title']['maxLength'] ?? null) !== 100) {
+        $errors[] = 'Channel YouTube publication input must accept only a private artifact UUID and bounded video metadata.';
+    }
+    foreach (['url', 'path', 'tags', 'provider_payload'] as $forbiddenYoutubeField) {
+        if (isset($youtubeContent['properties'][$forbiddenYoutubeField])) {
+            $errors[] = sprintf('Channel YouTube publication must not accept caller field %s.', $forbiddenYoutubeField);
+        }
+    }
+    $lineMessage = $publicationContent['definitions']['line_message']['oneOf'] ?? [];
+    if (count($lineMessage) !== 2
+        || ($publicationContent['definitions']['line_text_message']['required'] ?? null) !== ['type', 'text']
+        || ($publicationContent['definitions']['line_image_message']['required'] ?? null) !== ['type', 'originalContentUrl', 'previewImageUrl']) {
+        $errors[] = 'Channel LINE content must contain only bounded closed text or image message variants.';
+    }
+
+    $publication = $channelSchemas['publication.json'];
+    $expectedPublicationFields = ['id', 'tenant_id', 'connection_id', 'provider', 'status', 'content', 'provider_content_id', 'permalink', 'error', 'started_at', 'finished_at', 'created_at', 'updated_at'];
+    if (($publication['required'] ?? null) !== $expectedPublicationFields
+        || array_keys($publication['properties'] ?? []) !== $expectedPublicationFields
+        || ($publication['properties']['provider']['enum'] ?? null) !== $expectedProviders
+        || ($publication['properties']['status']['enum'] ?? null) !== ['queued', 'dispatching', 'succeeded', 'failed', 'unknown']) {
+        $errors[] = 'Channel publication resources must expose exact normalized provider and finite delivery states.';
+    }
+    foreach (['raw', 'provider_payload', 'credentials', 'access_token', 'channel_access_token'] as $forbiddenPublicationField) {
+        if (isset($publication['properties'][$forbiddenPublicationField])) {
+            $errors[] = sprintf('Channel publication resources must not expose %s.', $forbiddenPublicationField);
+        }
+    }
+
+    $connectionQuery = $channelSchemas['connection-list-query.json'];
+    $publicationQuery = $channelSchemas['publication-list-query.json'];
+    if (array_keys($connectionQuery['properties'] ?? []) !== ['provider', 'page', 'per_page']
+        || array_keys($publicationQuery['properties'] ?? []) !== ['connection_id', 'status', 'page', 'per_page']
+        || ($connectionQuery['properties']['per_page']['maximum'] ?? null) !== 100
+        || ($publicationQuery['properties']['status']['enum'] ?? null) !== ['queued', 'dispatching', 'succeeded', 'failed', 'unknown']) {
+        $errors[] = 'Channel list query contracts must exactly match bounded provider, connection, status, and pagination filters.';
+    }
+    foreach (['connection-list.json', 'publication-list.json'] as $listSchema) {
+        if (($channelSchemas[$listSchema]['required'] ?? null) !== ['data', 'meta']
+            || ($channelSchemas[$listSchema]['properties']['data']['maxItems'] ?? null) !== 100
+            || ($channelSchemas[$listSchema]['properties']['meta']['$ref'] ?? null) !== 'pagination-meta.json') {
+            $errors[] = sprintf('Channel list schema %s must expose a bounded page and exact pagination metadata.', $listSchema);
+        }
+    }
+
+    $channelProblem = $channelSchemas['problem.json'];
+    $expectedChannelProblemTypes = ['unauthenticated', 'validation_failed', 'channel_record_not_found', 'idempotency_conflict', 'idempotency_in_progress', 'channel_version_conflict', 'invalid_credentials', 'invalid_connection', 'invalid_content', 'provider_rejected', 'provider_unavailable', 'provider_rate_limited', 'unsupported_provider', 'delivery_unknown', 'invalid_provider_response', 'payload_too_large', 'rate_limited'];
+    if (($channelProblem['properties']['type']['enum'] ?? null) !== $expectedChannelProblemTypes
+        || ($channelProblem['properties']['status']['enum'] ?? null) !== [401, 404, 409, 413, 422, 429, 503]
+        || ! in_array('errors', $channelProblem['allOf'][0]['then']['required'] ?? [], true)
+        || ! in_array('current_version', $channelProblem['allOf'][1]['then']['required'] ?? [], true)) {
+        $errors[] = 'Channel Problem must exactly cover authentication, validation, tenant scope, idempotency, version, provider, payload, and throttling failures.';
+    }
+
+    $tier1 = json_decode((string) file_get_contents($root.'/openapi/tier1.json'), true, flags: JSON_THROW_ON_ERROR);
+    $channelOperations = [
+        ['/v1/tenants/{tenant}/channels/connections', 'get', 'listChannelConnections', null, null, '200', '../schemas/v1/channel/connection-list.json', ['200', '401', '422', '429']],
+        ['/v1/tenants/{tenant}/channels/connections', 'post', 'createChannelConnection', 'application/json', '../schemas/v1/channel/connection-create-request.json', '201', '../schemas/v1/channel/connection-response.json', ['201', '401', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}', 'get', 'getChannelConnection', null, null, '200', '../schemas/v1/channel/connection-response.json', ['200', '401', '404', '429']],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}', 'patch', 'updateChannelConnection', 'application/json', '../schemas/v1/channel/connection-update-request.json', '200', '../schemas/v1/channel/connection-response.json', ['200', '401', '404', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}', 'delete', 'deleteChannelConnection', 'application/json', '../schemas/v1/channel/connection-version-request.json', '200', '../schemas/v1/channel/deleted-response.json', ['200', '401', '404', '409', '422', '429']],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}/verify', 'post', 'verifyChannelConnection', 'application/json', '../schemas/v1/channel/connection-version-request.json', '200', '../schemas/v1/channel/connection-verification-response.json', ['200', '401', '404', '409', '422', '429', '503']],
+        ['/v1/tenants/{tenant}/channels/media-artifacts', 'post', 'createChannelMediaArtifact', 'multipart/form-data', '../schemas/v1/channel/media-artifact-create-request.json', '201', '../schemas/v1/channel/media-artifact-response.json', ['201', '401', '409', '413', '422', '429', '503']],
+        ['/v1/tenants/{tenant}/channels/media-artifacts/{artifact}', 'get', 'getChannelMediaArtifact', null, null, '200', '../schemas/v1/channel/media-artifact-response.json', ['200', '401', '404', '429']],
+        ['/v1/tenants/{tenant}/channels/publications', 'get', 'listChannelPublications', null, null, '200', '../schemas/v1/channel/publication-list.json', ['200', '401', '422', '429']],
+        ['/v1/tenants/{tenant}/channels/publications', 'post', 'createChannelPublication', 'application/json', '../schemas/v1/channel/publication-create-request.json', '202', '../schemas/v1/channel/publication-response.json', ['202', '401', '404', '409', '422', '429', '503']],
+        ['/v1/tenants/{tenant}/channels/publications/{publication}', 'get', 'getChannelPublication', null, null, '200', '../schemas/v1/channel/publication-response.json', ['200', '401', '404', '429']],
+    ];
+    foreach ($channelOperations as [$path, $method, $operationId, $contentType, $requestRef, $successStatus, $responseRef, $expectedStatuses]) {
+        $operation = $tier1['paths'][$path][$method] ?? [];
+        $actualStatuses = array_map(static fn (int|string $status): string => (string) $status, array_keys($operation['responses'] ?? []));
+        if (($operation['operationId'] ?? null) !== $operationId
+            || ($operation['security'] ?? null) !== [['serviceBearer' => []]]
+            || $actualStatuses !== $expectedStatuses
+            || ($operation['responses'][$successStatus]['content']['application/json']['schema']['$ref'] ?? null) !== $responseRef) {
+            $errors[] = sprintf('Tier 1 Channel operation %s must expose its exact ID, Bearer scope, statuses, and success schema.', $operationId);
+        }
+        if ($contentType !== null && ($operation['requestBody']['content'][$contentType]['schema']['$ref'] ?? null) !== $requestRef) {
+            $errors[] = sprintf('Tier 1 Channel operation %s must expose only its exact %s request schema.', $operationId, $contentType);
+        }
+        foreach (array_diff($expectedStatuses, [$successStatus]) as $problemStatus) {
+            if (($operation['responses'][$problemStatus]['$ref'] ?? null) !== '#/components/responses/ChannelProblem') {
+                $errors[] = sprintf('Tier 1 Channel operation %s status %s must use Channel Problem.', $operationId, $problemStatus);
+            }
+        }
+    }
+
+    $channelWrites = [
+        ['/v1/tenants/{tenant}/channels/connections', 'post', '201'],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}', 'patch', '200'],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}', 'delete', '200'],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}/verify', 'post', '200'],
+        ['/v1/tenants/{tenant}/channels/media-artifacts', 'post', '201'],
+        ['/v1/tenants/{tenant}/channels/publications', 'post', '202'],
+    ];
+    foreach ($channelWrites as [$path, $method, $status]) {
+        $operation = $tier1['paths'][$path][$method] ?? [];
+        if (! in_array(['$ref' => '#/components/parameters/ChannelIdempotencyKey'], $operation['parameters'] ?? [], true)
+            || ($operation['responses'][$status]['headers']['Idempotent-Replayed']['$ref'] ?? null) !== '#/components/headers/IdempotentReplayed') {
+            $errors[] = sprintf('Channel write %s %s must require its bounded key and expose canonical replay state.', strtoupper($method), $path);
+        }
+    }
+    $expectedVersionRequests = [
+        ['/v1/tenants/{tenant}/channels/connections/{connection}', 'patch', '../schemas/v1/channel/connection-update-request.json'],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}', 'delete', '../schemas/v1/channel/connection-version-request.json'],
+        ['/v1/tenants/{tenant}/channels/connections/{connection}/verify', 'post', '../schemas/v1/channel/connection-version-request.json'],
+    ];
+    foreach ($expectedVersionRequests as [$path, $method, $requestRef]) {
+        if (($tier1['paths'][$path][$method]['requestBody']['content']['application/json']['schema']['$ref'] ?? null) !== $requestRef) {
+            $errors[] = sprintf('Channel optimistic write %s %s must require expected_version through its exact schema.', strtoupper($method), $path);
+        }
+    }
+
+    $channelPaths = array_values(array_filter(array_keys($tier1['paths'] ?? []), static fn (string $path): bool => str_starts_with($path, '/v1/tenants/{tenant}/channels/')));
+    if ($channelPaths !== [
+        '/v1/tenants/{tenant}/channels/connections',
+        '/v1/tenants/{tenant}/channels/connections/{connection}',
+        '/v1/tenants/{tenant}/channels/connections/{connection}/verify',
+        '/v1/tenants/{tenant}/channels/media-artifacts',
+        '/v1/tenants/{tenant}/channels/media-artifacts/{artifact}',
+        '/v1/tenants/{tenant}/channels/publications',
+        '/v1/tenants/{tenant}/channels/publications/{publication}',
+    ]) {
+        $errors[] = 'Tier 1 Channel must expose exactly its eleven scoped operations across seven paths.';
+    }
+    $channelIdempotency = $tier1['components']['parameters']['ChannelIdempotencyKey'] ?? [];
+    if (($channelIdempotency['required'] ?? null) !== true
+        || ($channelIdempotency['schema']['minLength'] ?? null) !== 8
+        || ($channelIdempotency['schema']['maxLength'] ?? null) !== 200
+        || ($tier1['components']['responses']['ChannelProblem']['content']['application/problem+json']['schema']['$ref'] ?? null) !== '../schemas/v1/channel/problem.json') {
+        $errors[] = 'Tier 1 Channel must expose its exact idempotency and application/problem+json components.';
+    }
+
+    $verificationBoundary = $tier1['paths']['/v1/tenants/{tenant}/channels/connections/{connection}/verify']['post']['x-magic-html-channel-verification-boundary'] ?? [];
+    if ($verificationBoundary !== [
+        'provider_endpoints_server_owned' => true,
+        'credentials_encrypted_and_redacted' => true,
+        'read_only_identity_lookup' => true,
+        'youtube_channels_list_mine' => true,
+        'verified_credential_version_must_match' => true,
+    ]) {
+        $errors[] = 'Channel verification must expose the fixed-endpoint, encrypted-credential, read-only identity boundary.';
+    }
+    $mediaBoundary = $tier1['paths']['/v1/tenants/{tenant}/channels/media-artifacts']['post']['x-magic-html-channel-media-boundary'] ?? [];
+    if ($mediaBoundary !== [
+        'storage' => 'private',
+        'maximum_bytes' => 536870912,
+        'accepted_mime_types' => ['video/mp4', 'application/mp4'],
+        'accepted_extension' => 'mp4',
+        'iso_base_media_ftyp_required' => true,
+        'streamed_storage' => true,
+        'caller_path_or_url_fetch' => false,
+        'idempotency_fingerprint' => ['sha256', 'size_bytes', 'normalized_mime_type', 'extension'],
+        'available_retention_hours' => 24,
+        'unknown_retention_hours' => 24,
+    ]) {
+        $errors[] = 'Channel private media must expose its complete bounded upload, private retention, and no-fetch boundary.';
+    }
+    $publicationWrite = $tier1['paths']['/v1/tenants/{tenant}/channels/publications']['post'] ?? [];
+    if (($publicationWrite['x-magic-html-channel-delivery-boundary'] ?? null) !== [
+        'providers' => ['x', 'threads', 'instagram', 'line', 'youtube'],
+        'provider_endpoints_server_owned' => true,
+        'credentials_encrypted_and_redacted' => true,
+        'verified_current_credentials_required' => true,
+        'queue_job_tries' => 1,
+        'automatic_retry_after_dispatch' => false,
+        'confirmed_success_status' => 'succeeded',
+        'definite_failure_status' => 'failed',
+        'ambiguous_outcome_status' => 'unknown',
+        'unknown_requires_reconciliation_before_new_publication' => true,
+        'idempotent_replay_redelivers' => false,
+    ]) {
+        $errors[] = 'Channel delivery must expose exact providers, verified credentials, single-attempt delivery, finite outcomes, and no replay delivery.';
+    }
+    if (($publicationWrite['x-magic-html-youtube-resumable-boundary'] ?? null) !== [
+        'session_endpoint' => 'https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet%2Cstatus',
+        'private_media_artifact_required' => true,
+        'artifact_sha256_in_idempotency_fingerprint' => true,
+        'returned_location_https_only' => true,
+        'returned_location_exact_host' => 'www.googleapis.com',
+        'returned_location_port' => 443,
+        'returned_location_expected_upload_path' => true,
+        'returned_location_credentials_or_fragment_allowed' => false,
+        'single_streamed_put' => true,
+        'automatic_status_query_or_resume' => false,
+        'ambiguous_delivery_status' => 'unknown',
+    ]) {
+        $errors[] = 'Channel YouTube delivery must expose its fixed initiation, strict returned Location, streamed PUT, and no-resume ambiguity boundary.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Channel contracts: %s', $exception->getMessage());
+}
+
+$measurementDocuments = [
+    'schemas/v1/measurement/connection-create-request.json',
+    'schemas/v1/measurement/connection-list-query.json',
+    'schemas/v1/measurement/connection-list.json',
+    'schemas/v1/measurement/connection-response.json',
+    'schemas/v1/measurement/connection-update-request.json',
+    'schemas/v1/measurement/connection.json',
+    'schemas/v1/measurement/ga4-report-request.json',
+    'schemas/v1/measurement/gbp-performance-report-request.json',
+    'schemas/v1/measurement/gsc-report-request.json',
+    'schemas/v1/measurement/mutation-confirmation.json',
+    'schemas/v1/measurement/mutation-request.json',
+    'schemas/v1/measurement/mutation-response.json',
+    'schemas/v1/measurement/oauth-credentials.json',
+    'schemas/v1/measurement/pagination-links.json',
+    'schemas/v1/measurement/pagination-meta.json',
+    'schemas/v1/measurement/problem.json',
+    'schemas/v1/measurement/provider-configuration.json',
+    'schemas/v1/measurement/rate-limit-response.json',
+    'schemas/v1/measurement/report-response.json',
+    'schemas/v1/measurement/resource-list-query.json',
+    'schemas/v1/measurement/resource-list-response.json',
+    'schemas/v1/measurement/service-account-credentials.json',
+    'schemas/v1/measurement/verification-response.json',
+];
+
+foreach ($measurementDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Measurement contract document %s', $relativePath);
+    }
+}
+
+try {
+    $measurementSchemas = [];
+    foreach ($measurementDocuments as $relativePath) {
+        $measurementSchemas[basename($relativePath)] = json_decode((string) file_get_contents($root.'/'.$relativePath), true, flags: JSON_THROW_ON_ERROR);
+    }
+
+    foreach ($measurementSchemas as $filename => $measurementSchema) {
+        if (($measurementSchema['$schema'] ?? null) !== 'https://json-schema.org/draft/2020-12/schema'
+            || ($measurementSchema['$id'] ?? null) !== 'https://contracts.magic-html.dev/v1/measurement/'.$filename) {
+            $errors[] = sprintf('Measurement schema %s must declare its exact JSON Schema 2020-12 identity.', $filename);
+        }
+        if ($filename !== 'provider-configuration.json' && ($measurementSchema['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Measurement schema %s must reject unknown root keys.', $filename);
+        }
+    }
+    foreach ($measurementSchemas['provider-configuration.json']['oneOf'] ?? [] as $providerConfiguration) {
+        if (($providerConfiguration['additionalProperties'] ?? null) !== false) {
+            $errors[] = 'Every Measurement provider configuration variant must reject unknown keys.';
+        }
+    }
+
+    $connectionCreate = $measurementSchemas['connection-create-request.json'];
+    $connectionUpdate = $measurementSchemas['connection-update-request.json'];
+    $connection = $measurementSchemas['connection.json'];
+    $expectedConnectionFields = ['contract_version', 'id', 'tenant_id', 'name', 'provider', 'auth_mode', 'configuration', 'credentials_configured', 'verification_status', 'verified_at', 'created_at', 'updated_at'];
+    if (($connectionCreate['required'] ?? null) !== ['contract_version', 'name', 'provider', 'auth_mode', 'configuration', 'credentials']
+        || ($connectionCreate['properties']['provider']['enum'] ?? null) !== ['ga4', 'gsc', 'gtm', 'gbp']
+        || count($connectionCreate['allOf'] ?? []) !== 6
+        || ($connectionUpdate['required'] ?? null) !== ['contract_version']
+        || array_keys($connectionUpdate['properties'] ?? []) !== ['contract_version', 'name', 'configuration', 'credentials']
+        || ($connection['required'] ?? null) !== $expectedConnectionFields
+        || array_keys($connection['properties'] ?? []) !== $expectedConnectionFields
+        || ($connection['properties']['verification_status']['enum'] ?? null) !== ['unverified', 'verified', 'failed']) {
+        $errors[] = 'Measurement connection schemas must exactly model provider/auth pairing, immutable provider identity, and credential-redacted responses.';
+    }
+    foreach (['credentials', 'client_id', 'client_secret', 'refresh_token', 'client_email', 'private_key', 'token_uri', 'connection_revision', 'verification_error'] as $forbiddenConnectionField) {
+        if (isset($connection['properties'][$forbiddenConnectionField])) {
+            $errors[] = sprintf('Measurement connection responses must not expose %s.', $forbiddenConnectionField);
+        }
+    }
+    foreach (['oauth-credentials.json', 'service-account-credentials.json'] as $credentialsSchema) {
+        foreach ($measurementSchemas[$credentialsSchema]['properties'] ?? [] as $credential) {
+            if (($credential['writeOnly'] ?? null) !== true || ($credential['maxLength'] ?? 16384) > 16384) {
+                $errors[] = sprintf('Every Measurement credential in %s must be write-only and bounded.', $credentialsSchema);
+            }
+        }
+    }
+
+    $connectionQuery = $measurementSchemas['connection-list-query.json'];
+    $resourceQuery = $measurementSchemas['resource-list-query.json'];
+    if (array_keys($connectionQuery['properties'] ?? []) !== ['page', 'per_page']
+        || ($connectionQuery['properties']['page']['minimum'] ?? null) !== 1
+        || ($connectionQuery['properties']['per_page']['maximum'] ?? null) !== 100
+        || ($measurementSchemas['connection-list.json']['properties']['data']['maxItems'] ?? null) !== 100
+        || ($resourceQuery['required'] ?? null) !== ['kind']
+        || ($resourceQuery['properties']['page_size']['maximum'] ?? null) !== 100
+        || ($resourceQuery['properties']['page_token']['maxLength'] ?? null) !== 2048) {
+        $errors[] = 'Measurement list queries must be closed and enforce exact bounded connection and provider pagination.';
+    }
+
+    $ga4Report = $measurementSchemas['ga4-report-request.json'];
+    $gscReport = $measurementSchemas['gsc-report-request.json'];
+    $gbpReport = $measurementSchemas['gbp-performance-report-request.json'];
+    if (($ga4Report['properties']['dimensions']['maxItems'] ?? null) !== 9
+        || ($ga4Report['properties']['metrics']['maxItems'] ?? null) !== 10
+        || ($ga4Report['properties']['limit']['maximum'] ?? null) !== 5000
+        || ($ga4Report['properties']['offset']['maximum'] ?? null) !== 100000
+        || ($gscReport['properties']['dimensions']['maxItems'] ?? null) !== 5
+        || ($gscReport['properties']['row_limit']['maximum'] ?? null) !== 5000
+        || ($gscReport['properties']['start_row']['maximum'] ?? null) !== 100000
+        || ($gbpReport['properties']['metrics']['maxItems'] ?? null) !== 10) {
+        $errors[] = 'Measurement report schemas must enforce the exact date, dimension, metric, row, and offset boundaries.';
+    }
+
+    $mutation = $measurementSchemas['mutation-request.json'];
+    $confirmation = $measurementSchemas['mutation-confirmation.json'];
+    if (($mutation['required'] ?? null) !== ['contract_version', 'operation', 'resource', 'expected_version', 'payload', 'confirmation']
+        || ($mutation['properties']['operation']['enum'] ?? null) !== ['gtm.update_tag', 'gtm.publish_version', 'gbp.update_location', 'gbp.reply_review']
+        || ($mutation['properties']['expected_version']['maxLength'] ?? null) !== 128
+        || ($mutation['properties']['payload']['type'] ?? null) !== 'object'
+        || ($mutation['properties']['payload']['maxProperties'] ?? null) !== 50
+        || count($mutation['allOf'] ?? []) !== 4
+        || ($confirmation['required'] ?? null) !== ['confirmed', 'summary_digest']
+        || ($confirmation['properties']['confirmed']['const'] ?? null) !== true
+        || ($confirmation['properties']['summary_digest']['pattern'] ?? null) !== '^[a-f0-9]{64}$') {
+        $errors[] = 'Measurement mutations must exactly require a bounded operation, live version, closed payload root, and canonical confirmation digest.';
+    }
+    $mutationDefinitions = $mutation['$defs'] ?? [];
+    if (($mutationDefinitions['gtm_tag_payload']['minProperties'] ?? null) !== 1
+        || ($mutationDefinitions['gtm_tag_payload']['additionalProperties'] ?? null) !== false
+        || ($mutationDefinitions['gtm_trigger_ids']['maxItems'] ?? null) !== 100
+        || ($mutationDefinitions['gtm_parameter_list_0']['maxItems'] ?? null) !== 100
+        || isset($mutationDefinitions['gtm_parameter_4']['properties']['list'])
+        || ($mutationDefinitions['gbp_location_payload']['minProperties'] ?? null) !== 1
+        || ($mutationDefinitions['gbp_location_payload']['additionalProperties'] ?? null) !== false
+        || ($mutationDefinitions['gbp_phone_numbers']['properties']['additionalPhones']['maxItems'] ?? null) !== 10
+        || ($mutationDefinitions['gbp_regular_hours']['properties']['periods']['maxItems'] ?? null) !== 14
+        || ($mutationDefinitions['time_of_day']['properties']['hours']['maximum'] ?? null) !== 23
+        || ($mutationDefinitions['time_of_day']['properties']['minutes']['maximum'] ?? null) !== 59
+        || ($mutationDefinitions['gbp_profile']['properties']['description']['maxLength'] ?? null) !== 750
+        || ($mutationDefinitions['gbp_review_reply_payload']['properties']['comment']['maxLength'] ?? null) !== 4096) {
+        $errors[] = 'Measurement mutation payloads must expose exact closed and bounded GTM tag and GBP location/review shapes, including recursive-depth limits.';
+    }
+
+    $tier1 = json_decode((string) file_get_contents($root.'/openapi/tier1.json'), true, flags: JSON_THROW_ON_ERROR);
+    $measurementOperations = [
+        ['/v1/tenants/{tenant}/measurement-connections', 'get', 'listMeasurementConnections', null, null, '200', '../schemas/v1/measurement/connection-list.json', ['200', '401', '422', '429']],
+        ['/v1/tenants/{tenant}/measurement-connections', 'post', 'createMeasurementConnection', 'application/json', '../schemas/v1/measurement/connection-create-request.json', '201', '../schemas/v1/measurement/connection-response.json', ['201', '401', '422', '429']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}', 'get', 'getMeasurementConnection', null, null, '200', '../schemas/v1/measurement/connection-response.json', ['200', '401', '404', '422', '429']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}', 'patch', 'updateMeasurementConnection', 'application/json', '../schemas/v1/measurement/connection-update-request.json', '200', '../schemas/v1/measurement/connection-response.json', ['200', '401', '404', '422', '429']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}', 'delete', 'deleteMeasurementConnection', null, null, '204', null, ['204', '401', '404', '422', '429']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}/verify', 'post', 'verifyMeasurementConnection', null, null, '200', '../schemas/v1/measurement/verification-response.json', ['200', '401', '404', '409', '422', '429', '502', '503']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}/ga4/reports', 'post', 'runGa4MeasurementReport', 'application/json', '../schemas/v1/measurement/ga4-report-request.json', '200', '../schemas/v1/measurement/report-response.json', ['200', '401', '404', '409', '422', '429', '502', '503']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}/gsc/reports', 'post', 'runGscMeasurementReport', 'application/json', '../schemas/v1/measurement/gsc-report-request.json', '200', '../schemas/v1/measurement/report-response.json', ['200', '401', '404', '409', '422', '429', '502', '503']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}/gbp/performance-reports', 'post', 'runGbpMeasurementPerformanceReport', 'application/json', '../schemas/v1/measurement/gbp-performance-report-request.json', '200', '../schemas/v1/measurement/report-response.json', ['200', '401', '404', '409', '422', '429', '502', '503']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/resources', 'get', 'listMeasurementProviderResources', null, null, '200', '../schemas/v1/measurement/resource-list-response.json', ['200', '401', '404', '409', '422', '429', '502', '503']],
+        ['/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/mutations', 'post', 'createMeasurementProviderMutation', 'application/json', '../schemas/v1/measurement/mutation-request.json', '200', '../schemas/v1/measurement/mutation-response.json', ['200', '401', '404', '409', '422', '429', '502', '503']],
+    ];
+    foreach ($measurementOperations as [$path, $method, $operationId, $contentType, $requestRef, $successStatus, $responseRef, $expectedStatuses]) {
+        $operation = $tier1['paths'][$path][$method] ?? [];
+        $actualStatuses = array_map(static fn (int|string $status): string => (string) $status, array_keys($operation['responses'] ?? []));
+        if (($operation['operationId'] ?? null) !== $operationId
+            || ($operation['security'] ?? null) !== [['serviceBearer' => []]]
+            || $actualStatuses !== $expectedStatuses) {
+            $errors[] = sprintf('Tier 1 Measurement operation %s must expose its exact ID, Bearer scope, and statuses.', $operationId);
+        }
+        if ($contentType !== null && ($operation['requestBody']['content'][$contentType]['schema']['$ref'] ?? null) !== $requestRef) {
+            $errors[] = sprintf('Tier 1 Measurement operation %s must use only request schema %s.', $operationId, $requestRef);
+        }
+        if ($contentType === null && isset($operation['requestBody'])) {
+            $errors[] = sprintf('Tier 1 Measurement operation %s must not declare a request body.', $operationId);
+        }
+        if ($responseRef !== null && ($operation['responses'][$successStatus]['content']['application/json']['schema']['$ref'] ?? null) !== $responseRef) {
+            $errors[] = sprintf('Tier 1 Measurement operation %s must use success schema %s.', $operationId, $responseRef);
+        }
+        foreach (array_diff($expectedStatuses, [$successStatus, '429']) as $problemStatus) {
+            if (($operation['responses'][$problemStatus]['$ref'] ?? null) !== '#/components/responses/MeasurementProblem') {
+                $errors[] = sprintf('Tier 1 Measurement operation %s status %s must use Measurement Problem.', $operationId, $problemStatus);
+            }
+        }
+        if (($operation['responses']['429']['$ref'] ?? null) !== '#/components/responses/MeasurementRateLimited') {
+            $errors[] = sprintf('Tier 1 Measurement operation %s must expose the current Laravel throttle response.', $operationId);
+        }
+    }
+
+    $measurementPaths = array_values(array_filter(array_keys($tier1['paths'] ?? []), static fn (string $path): bool => str_starts_with($path, '/v1/tenants/{tenant}/measurement-connections')));
+    if ($measurementPaths !== [
+        '/v1/tenants/{tenant}/measurement-connections',
+        '/v1/tenants/{tenant}/measurement-connections/{connection}',
+        '/v1/tenants/{tenant}/measurement-connections/{connection}/verify',
+        '/v1/tenants/{tenant}/measurement-connections/{connection}/ga4/reports',
+        '/v1/tenants/{tenant}/measurement-connections/{connection}/gsc/reports',
+        '/v1/tenants/{tenant}/measurement-connections/{connection}/gbp/performance-reports',
+        '/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/resources',
+        '/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/mutations',
+    ]) {
+        $errors[] = 'Tier 1 Measurement must expose exactly its eleven scoped operations across eight paths.';
+    }
+    foreach ($measurementPaths as $measurementPath) {
+        if (isset($tier1['paths'][$measurementPath]['put'])) {
+            $errors[] = sprintf('Tier 1 Measurement path %s must not expose unimplemented PUT.', $measurementPath);
+        }
+        if (! in_array(['$ref' => '#/components/parameters/MeasurementTenant'], $tier1['paths'][$measurementPath]['parameters'] ?? [], true)) {
+            $errors[] = sprintf('Tier 1 Measurement path %s must carry exact tenant scope.', $measurementPath);
+        }
+    }
+
+    $mutationOperation = $tier1['paths']['/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/mutations']['post'] ?? [];
+    $measurementIdempotency = $tier1['components']['parameters']['MeasurementIdempotencyKey'] ?? [];
+    if (($measurementIdempotency['required'] ?? null) !== true
+        || ($measurementIdempotency['schema']['minLength'] ?? null) !== 8
+        || ($measurementIdempotency['schema']['maxLength'] ?? null) !== 200
+        || ! in_array(['$ref' => '#/components/parameters/MeasurementIdempotencyKey'], $mutationOperation['parameters'] ?? [], true)
+        || ($mutationOperation['responses']['200']['headers']['Idempotency-Replayed']['$ref'] ?? null) !== '#/components/headers/IdempotentReplayed') {
+        $errors[] = 'Measurement mutation must require its exact idempotency key and expose canonical replay state.';
+    }
+    foreach ($measurementOperations as [$path, $method]) {
+        if ($path !== '/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/mutations'
+            && in_array(['$ref' => '#/components/parameters/MeasurementIdempotencyKey'], $tier1['paths'][$path][$method]['parameters'] ?? [], true)) {
+            $errors[] = sprintf('Measurement non-mutation operation %s %s must not require mutation idempotency.', strtoupper($method), $path);
+        }
+    }
+
+    $fixedEndpoints = [
+        'token' => 'https://oauth2.googleapis.com/token',
+        'ga4_data' => 'https://analyticsdata.googleapis.com/v1beta',
+        'gsc' => 'https://www.googleapis.com/webmasters/v3',
+        'gtm' => 'https://tagmanager.googleapis.com/tagmanager/v2',
+        'gbp_account' => 'https://mybusinessaccountmanagement.googleapis.com/v1',
+        'gbp_business' => 'https://mybusinessbusinessinformation.googleapis.com/v1',
+        'gbp_reviews' => 'https://mybusiness.googleapis.com/v4',
+        'gbp_performance' => 'https://businessprofileperformance.googleapis.com/v1',
+    ];
+    $verificationBoundary = $tier1['paths']['/v1/tenants/{tenant}/measurement-connections/{connection}/verify']['post']['x-magic-html-measurement-verification-boundary'] ?? [];
+    if (($verificationBoundary['provider_endpoints_server_owned'] ?? null) !== true
+        || ($verificationBoundary['fixed_endpoints'] ?? null) !== $fixedEndpoints
+        || ($verificationBoundary['credential_values_returned'] ?? null) !== false
+        || ($verificationBoundary['provider_envelopes_returned_on_error'] ?? null) !== false) {
+        $errors[] = 'Measurement verification must expose exact fixed endpoints and secret-redacted failure boundaries.';
+    }
+    $ga4Boundary = $tier1['paths']['/v1/tenants/{tenant}/measurement-connections/{connection}/ga4/reports']['post']['x-magic-html-measurement-read-boundary'] ?? [];
+    $resourceBoundary = $tier1['paths']['/v1/tenants/{tenant}/measurement-connections/{connection}/{provider}/resources']['get']['x-magic-html-measurement-read-boundary'] ?? [];
+    if (($ga4Boundary['maximum_date_difference_days'] ?? null) !== 366
+        || ($ga4Boundary['maximum_rows'] ?? null) !== 5000
+        || ($ga4Boundary['provider_response_maximum_bytes'] ?? null) !== 10485760
+        || ($resourceBoundary['maximum_page_size'] ?? null) !== 100
+        || ($resourceBoundary['maximum_page_token_length'] ?? null) !== 2048
+        || ($resourceBoundary['provider_endpoint_server_owned'] ?? null) !== true) {
+        $errors[] = 'Measurement reads must expose exact date, row, pagination, response-size, and server-owned endpoint boundaries.';
+    }
+    $mutationBoundary = $mutationOperation['x-magic-html-measurement-mutation-boundary'] ?? [];
+    if (($mutationBoundary['provider_endpoints_server_owned'] ?? null) !== true
+        || ($mutationBoundary['confirmation_digest'] ?? null) !== 'sha256(canonical_json({provider,operation,resource,expected_version,payload}))'
+        || ($mutationBoundary['expected_live_version_required'] ?? null) !== true
+        || ($mutationBoundary['idempotency_scope'] ?? null) !== 'tenant_connection_key'
+        || ($mutationBoundary['automatic_retry_after_dispatch'] ?? null) !== false
+        || ($mutationBoundary['ambiguous_outcome_record_state'] ?? null) !== 'processing'
+        || ($mutationBoundary['ambiguous_outcome_retry'] ?? null) !== '409_idempotency_in_progress_until_reconciled'
+        || ($mutationBoundary['exact_completed_replay_calls_provider'] ?? null) !== false
+        || ($mutationBoundary['maximum_payload_json_bytes'] ?? null) !== 65536) {
+        $errors[] = 'Measurement mutation must expose exact confirmation, optimistic version, idempotency, and unknown-no-retry boundaries.';
+    }
+    if (($tier1['components']['responses']['MeasurementProblem']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/measurement/problem.json'
+        || ($tier1['components']['responses']['MeasurementRateLimited']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/measurement/rate-limit-response.json') {
+        $errors[] = 'Tier 1 Measurement must expose exact domain Problem and current throttle response components.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Measurement contracts: %s', $exception->getMessage());
+}
+
+$siteSourceDocuments = [
+    'schemas/v1/site-source/connection-create-request.json',
+    'schemas/v1/site-source/connection-list.json',
+    'schemas/v1/site-source/connection-update-request.json',
+    'schemas/v1/site-source/connection.json',
+    'schemas/v1/site-source/fetch-job.json',
+    'schemas/v1/site-source/fetch-request.json',
+    'schemas/v1/site-source/problem.json',
+    'schemas/v1/site-source/snapshot.json',
+    'schemas/v1/site-source/verification.json',
+];
+
+foreach ($siteSourceDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Site Source contract document %s', $relativePath);
+    }
+}
+
+try {
+    $connectionCreate = json_decode((string) file_get_contents($root.'/schemas/v1/site-source/connection-create-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $connectionUpdate = json_decode((string) file_get_contents($root.'/schemas/v1/site-source/connection-update-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $connection = json_decode((string) file_get_contents($root.'/schemas/v1/site-source/connection.json'), true, flags: JSON_THROW_ON_ERROR);
+    $fetchJob = json_decode((string) file_get_contents($root.'/schemas/v1/site-source/fetch-job.json'), true, flags: JSON_THROW_ON_ERROR);
+    $snapshot = json_decode((string) file_get_contents($root.'/schemas/v1/site-source/snapshot.json'), true, flags: JSON_THROW_ON_ERROR);
+    $siteSourceProblem = json_decode((string) file_get_contents($root.'/schemas/v1/site-source/problem.json'), true, flags: JSON_THROW_ON_ERROR);
+
+    foreach ([$connectionCreate, $connectionUpdate, $connection, $fetchJob, $snapshot, $siteSourceProblem] as $siteSourceSchema) {
+        if (($siteSourceSchema['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Site Source schema %s must reject unknown root keys.', $siteSourceSchema['$id'] ?? 'unknown');
+        }
+    }
+    if (($connectionCreate['properties']['driver']['enum'] ?? null) !== ['github', 'sftp', 'ftps', 'ftp']) {
+        $errors[] = 'Site Source must expose exactly the GitHub, SFTP, FTPS, and FTP driver allowlist.';
+    }
+    foreach (['github_configuration', 'sftp_configuration', 'ftps_configuration', 'ftp_configuration', 'github_credentials', 'sftp_credentials', 'password_credentials'] as $closedDefinition) {
+        if (($connectionCreate['$defs'][$closedDefinition]['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Site Source driver definition %s must be closed.', $closedDefinition);
+        }
+    }
+    if (($connectionCreate['$defs']['sftp_configuration']['properties']['port']['const'] ?? null) !== 22
+        || ($connectionCreate['$defs']['sftp_configuration']['properties']['host_key_fingerprint']['pattern'] ?? null) !== '^SHA256:[A-Za-z0-9+/]{43}$') {
+        $errors[] = 'Site Source SFTP must pin port 22 and a SHA-256 host-key fingerprint.';
+    }
+    if (($connectionCreate['$defs']['ftps_configuration']['properties']['verify_peer']['const'] ?? null) !== true
+        || ($connectionCreate['$defs']['ftps_configuration']['properties']['port']['enum'] ?? null) !== [21, 990]
+        || ($connectionCreate['$defs']['ftps_configuration']['allOf'][0]['then']['properties']['port']['const'] ?? null) !== 21
+        || ($connectionCreate['$defs']['ftps_configuration']['allOf'][1]['then']['properties']['port']['const'] ?? null) !== 990) {
+        $errors[] = 'Site Source FTPS must require peer verification on its finite ports.';
+    }
+    if (($connectionCreate['$defs']['ftp_configuration']['properties']['port']['const'] ?? null) !== 21) {
+        $errors[] = 'Site Source plain FTP must remain confined to its explicitly allowed port.';
+    }
+    foreach (['credentials', 'token', 'password', 'private_key', 'private_key_passphrase', 'username'] as $secretProperty) {
+        if (array_key_exists($secretProperty, $connection['properties'] ?? [])) {
+            $errors[] = sprintf('Site Source connection responses must not expose credential property %s.', $secretProperty);
+        }
+    }
+    if (($connection['properties']['credentials_configured']['const'] ?? null) !== true) {
+        $errors[] = 'Site Source responses must expose only the credential configured marker.';
+    }
+    if (($snapshot['properties']['files']['maxItems'] ?? null) !== 2000
+        || ($snapshot['properties']['byte_size']['maximum'] ?? null) !== 52428800
+        || ($snapshot['properties']['files']['items']['properties']['byte_size']['maximum'] ?? null) !== 10485760
+        || ($snapshot['properties']['files']['items']['properties']['content_base64']['contentEncoding'] ?? null) !== 'base64') {
+        $errors[] = 'Site Source snapshots must expose bounded resolved base64 file bytes.';
+    }
+    foreach (['path', 'media_type', 'byte_size', 'sha256', 'content_base64'] as $fileField) {
+        if (! in_array($fileField, $snapshot['properties']['files']['items']['required'] ?? [], true)) {
+            $errors[] = sprintf('Site Source snapshot files must require %s.', $fileField);
+        }
+    }
+    if (($fetchJob['properties']['status']['enum'] ?? null) !== ['queued', 'running', 'succeeded', 'failed']) {
+        $errors[] = 'Site Source fetch must use the common asynchronous job states.';
+    }
+    if (! in_array('connection_changed', $siteSourceProblem['properties']['type']['enum'] ?? [], true)) {
+        $errors[] = 'Site Source verification races must use the closed connection_changed Problem type.';
+    }
+
+    $tier1 = json_decode((string) file_get_contents($root.'/openapi/tier1.json'), true, flags: JSON_THROW_ON_ERROR);
+    $siteSourceOperations = [
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections', 'get', '200', '../schemas/v1/site-source/connection-list.json'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections', 'post', '201', '../schemas/v1/site-source/connection.json'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}', 'get', '200', '../schemas/v1/site-source/connection.json'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}', 'patch', '200', '../schemas/v1/site-source/connection.json'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}', 'delete', '204', null],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/verify', 'post', '200', '../schemas/v1/site-source/verification.json'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/fetch-jobs', 'post', '202', '../schemas/v1/site-source/fetch-job.json'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/fetch-jobs/{fetchJob}', 'get', '200', '../schemas/v1/site-source/fetch-job.json'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/fetch-jobs/{fetchJob}/snapshot', 'get', '200', '../schemas/v1/site-source/snapshot.json'],
+    ];
+    foreach ($siteSourceOperations as [$path, $method, $status, $responseRef]) {
+        $operation = $tier1['paths'][$path][$method] ?? [];
+        if ($operation === []) {
+            $errors[] = sprintf('Tier 1 OpenAPI is missing Site Source operation %s %s.', strtoupper($method), $path);
+
+            continue;
+        }
+        if (($operation['security'][0]['serviceBearer'] ?? null) !== []) {
+            $errors[] = sprintf('Site Source operation %s %s must require service Bearer authentication.', strtoupper($method), $path);
+        }
+        $parameters = $tier1['paths'][$path]['parameters'] ?? [];
+        foreach (['Tenant', 'Site'] as $scopeParameter) {
+            if (! in_array(['$ref' => '#/components/parameters/'.$scopeParameter], $parameters, true)) {
+                $errors[] = sprintf('Site Source path %s must include %s scope.', $path, $scopeParameter);
+            }
+        }
+        if ($responseRef !== null && ($operation['responses'][$status]['content']['application/json']['schema']['$ref'] ?? null) !== $responseRef) {
+            $errors[] = sprintf('Site Source operation %s %s response %s must use %s.', strtoupper($method), $path, $status, $responseRef);
+        }
+    }
+    $siteSourceWrites = [
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections', 'post', '201'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}', 'patch', '200'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}', 'delete', '204'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/verify', 'post', '200'],
+        ['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/fetch-jobs', 'post', '202'],
+    ];
+    foreach ($siteSourceWrites as [$path, $method, $status]) {
+        $operation = $tier1['paths'][$path][$method] ?? [];
+        if (! in_array(['$ref' => '#/components/parameters/SiteSourceIdempotencyKey'], $operation['parameters'] ?? [], true)
+            || ($operation['responses'][$status]['headers']['Idempotent-Replayed']['$ref'] ?? null) !== '#/components/headers/IdempotentReplayed') {
+            $errors[] = sprintf('Site Source write %s %s must require replay-safe idempotency metadata.', strtoupper($method), $path);
+        }
+    }
+    $sourceSecurity = $tier1['paths']['/v1/tenants/{tenant}/sites/{site}/source-connections/{connection}/fetch-jobs']['post']['x-magic-html-source-security'] ?? [];
+    $expectedSourceSecurity = [
+        'public_destinations_only' => true,
+        'credentials_encrypted_and_redacted' => true,
+        'tls_peer_or_sftp_host_key_verification' => true,
+        'plain_ftp_default_enabled' => false,
+        'reject_symlinks_submodules_git_metadata_secrets_and_server_executables' => true,
+        'max_files' => 2000,
+        'max_file_bytes' => 10485760,
+        'max_total_bytes' => 52428800,
+        'timeout_seconds' => 30,
+    ];
+    if ($sourceSecurity !== $expectedSourceSecurity) {
+        $errors[] = 'Site Source fetch must expose its complete bounded remote-source security boundary.';
+    }
+    if (($tier1['components']['parameters']['SiteSourceIdempotencyKey']['required'] ?? null) !== true
+        || ($tier1['components']['parameters']['SiteSourceIdempotencyKey']['schema']['minLength'] ?? null) !== 8
+        || ($tier1['components']['parameters']['SiteSourceIdempotencyKey']['schema']['maxLength'] ?? null) !== 200
+        || ($tier1['components']['responses']['SiteSourceProblem']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/site-source/problem.json') {
+        $errors[] = 'Tier 1 Site Source must expose its bounded idempotency key and closed Problem response.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Site Source contracts: %s', $exception->getMessage());
 }
 
 $documentDocuments = [
@@ -1244,8 +2859,8 @@ try {
 try {
     $tier2 = json_decode((string) file_get_contents($root.'/openapi/tier2.json'), true, flags: JSON_THROW_ON_ERROR);
     $emailBuild = $tier2['paths']['/v1/email-builds']['post'] ?? [];
-    if (($tier2['info']['version'] ?? null) !== '1.3.0') {
-        $errors[] = 'Tier 2 OpenAPI version must advance for the stateless Email Builder contract.';
+    if (($tier2['info']['version'] ?? null) !== '1.6.0') {
+        $errors[] = 'Tier 2 OpenAPI version must include recoverable Site Change merge results and credential-isolated Knowledge source synchronization.';
     }
     foreach ($emailBuild['parameters'] ?? [] as $parameter) {
         if (($parameter['name'] ?? null) === 'Idempotency-Key') {
@@ -1260,6 +2875,1385 @@ try {
     }
 } catch (JsonException $exception) {
     $errors[] = sprintf('Unable to inspect Tier 2 Email Builder inventory: %s', $exception->getMessage());
+}
+
+$siteChangeDocuments = [
+    'schemas/v1/site-change/change-run-request.json',
+    'schemas/v1/site-change/change-run.json',
+    'schemas/v1/site-change/check-result.json',
+    'schemas/v1/site-change/diff-file.json',
+    'schemas/v1/site-change/diff-manifest.json',
+    'schemas/v1/site-change/merge-request.json',
+    'schemas/v1/site-change/merge-result.json',
+    'schemas/v1/site-change/problem.json',
+    'schemas/v1/site-change/repository-request.json',
+    'schemas/v1/site-change/repository.json',
+    'schemas/v1/site-change/submission-request.json',
+    'schemas/v1/site-change/submission.json',
+];
+
+foreach ($siteChangeDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Site Change contract document %s', $relativePath);
+    }
+}
+
+try {
+    $repositoryRequest = json_decode((string) file_get_contents($root.'/schemas/v1/site-change/repository-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $repository = json_decode((string) file_get_contents($root.'/schemas/v1/site-change/repository.json'), true, flags: JSON_THROW_ON_ERROR);
+    $changeRequest = json_decode((string) file_get_contents($root.'/schemas/v1/site-change/change-run-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $change = json_decode((string) file_get_contents($root.'/schemas/v1/site-change/change-run.json'), true, flags: JSON_THROW_ON_ERROR);
+    $diffFile = json_decode((string) file_get_contents($root.'/schemas/v1/site-change/diff-file.json'), true, flags: JSON_THROW_ON_ERROR);
+    $diffManifest = json_decode((string) file_get_contents($root.'/schemas/v1/site-change/diff-manifest.json'), true, flags: JSON_THROW_ON_ERROR);
+    $mergeRequest = json_decode((string) file_get_contents($root.'/schemas/v1/site-change/merge-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $approvalArtifactInput = json_decode((string) file_get_contents($root.'/schemas/v1/approval/artifact-input.json'), true, flags: JSON_THROW_ON_ERROR);
+    $approvalArtifact = json_decode((string) file_get_contents($root.'/schemas/v1/approval/artifact.json'), true, flags: JSON_THROW_ON_ERROR);
+
+    $expectedRepositoryRequestProperties = ['contract_version', 'default_branch', 'description', 'operation', 'owner', 'provider', 'repository', 'visibility'];
+    $repositoryRequestProperties = array_keys($repositoryRequest['properties'] ?? []);
+    sort($repositoryRequestProperties);
+    sort($expectedRepositoryRequestProperties);
+    if (($repositoryRequest['additionalProperties'] ?? null) !== false
+        || $repositoryRequestProperties !== $expectedRepositoryRequestProperties
+        || ($repositoryRequest['properties']['provider']['const'] ?? null) !== 'github'
+        || ($repositoryRequest['properties']['operation']['enum'] ?? null) !== ['register', 'provision']) {
+        $errors[] = 'Site Change repository input must be closed to finite GitHub register/provision fields.';
+    }
+
+    $expectedChangeRequestProperties = ['contract_version', 'execution_profile', 'expected_base_sha', 'instruction'];
+    $changeRequestProperties = array_keys($changeRequest['properties'] ?? []);
+    sort($changeRequestProperties);
+    if (($changeRequest['additionalProperties'] ?? null) !== false
+        || $changeRequestProperties !== $expectedChangeRequestProperties
+        || ($changeRequest['required'] ?? null) !== ['contract_version', 'expected_base_sha', 'instruction', 'execution_profile']
+        || ($changeRequest['properties']['execution_profile']['const'] ?? null) !== 'site_content_v1'
+        || ($changeRequest['properties']['instruction']['writeOnly'] ?? null) !== true
+        || ($changeRequest['properties']['instruction']['maxLength'] ?? null) !== 20000) {
+        $errors[] = 'Site Change runs must accept only a bounded write-only instruction, exact base SHA, and finite site_content_v1 profile.';
+    }
+
+    foreach (['url', 'remote_url', 'clone_url', 'api_url', 'token', 'credential', 'credential_id', 'command', 'executable', 'branch', 'ref', 'workspace'] as $forbiddenInput) {
+        if (isset($repositoryRequest['properties'][$forbiddenInput]) || isset($changeRequest['properties'][$forbiddenInput])) {
+            $errors[] = sprintf('Site Change public inputs must not expose caller-controlled %s.', $forbiddenInput);
+        }
+    }
+
+    foreach (['clone_url', 'api_url', 'token', 'credential', 'credential_id', 'installation_id', 'provider_payload'] as $forbiddenResourceField) {
+        if (isset($repository['properties'][$forbiddenResourceField]) || isset($change['properties'][$forbiddenResourceField])) {
+            $errors[] = sprintf('Site Change resources must not expose %s.', $forbiddenResourceField);
+        }
+    }
+
+    $expectedDiffDescription = 'The exact review identity later supplied to Approval. Sort files by path in bytewise ascending order, then hash base_sha + NUL + head_sha + NUL followed for each file by status + NUL + path + NUL + (previous_path or empty) + NUL + (before_blob_sha or empty) + NUL + (after_blob_sha or empty) + NUL + (before_mode or empty) + NUL + (after_mode or empty) + NUL + patch_sha256 + NUL. Encode the SHA-256 as lowercase hexadecimal. The response contains the corresponding normalized text patches, is capped at 5,000,000 bytes, and rejects a detected credential instead of masking a change from reviewers.';
+    if (($diffManifest['description'] ?? null) !== $expectedDiffDescription
+        || ($diffManifest['properties']['files']['maxItems'] ?? null) !== 200
+        || ($diffManifest['properties']['files']['items']['$ref'] ?? null) !== 'diff-file.json'
+        || ($diffManifest['properties']['diff_digest']['pattern'] ?? null) !== '^[a-f0-9]{64}$') {
+        $errors[] = 'Site Change diff manifests must preserve the bounded canonical immutable digest contract.';
+    }
+    $expectedDiffFileFields = ['additions', 'after_blob_sha', 'after_mode', 'before_blob_sha', 'before_mode', 'binary', 'deletions', 'patch', 'patch_sha256', 'path', 'previous_path', 'status'];
+    $diffFileFields = $diffFile['required'] ?? [];
+    sort($diffFileFields);
+    if (($diffFile['additionalProperties'] ?? null) !== false
+        || $diffFileFields !== $expectedDiffFileFields
+        || ($diffFile['properties']['before_mode']['enum'] ?? null) !== ['100644', '100755', null]
+        || ($diffFile['properties']['after_mode']['enum'] ?? null) !== ['100644', '100755', null]) {
+        $errors[] = 'Site Change diff entries must bind status, path, old/new blob SHAs, regular-file modes, and exact patch digest.';
+    }
+
+    $expectedMergeProperties = ['approval_request_id', 'contract_version', 'expected_base_sha', 'expected_diff_digest', 'expected_head_sha'];
+    $mergeProperties = array_keys($mergeRequest['properties'] ?? []);
+    sort($mergeProperties);
+    if (($mergeRequest['additionalProperties'] ?? null) !== false
+        || $mergeProperties !== $expectedMergeProperties
+        || ($mergeRequest['required'] ?? null) !== ['contract_version', 'expected_base_sha', 'expected_head_sha', 'expected_diff_digest', 'approval_request_id']) {
+        $errors[] = 'Site Change merge input must contain only expected immutable identities and an Approval request UUID.';
+    }
+
+    $approvalInputTypes = $approvalArtifactInput['properties']['type']['enum'] ?? [];
+    $approvalResourceTypes = $approvalArtifact['properties']['type']['enum'] ?? [];
+    if (! in_array('site_change', $approvalInputTypes, true) || $approvalInputTypes !== $approvalResourceTypes) {
+        $errors[] = 'Approval artifact input and output must both include the additive site_change type.';
+    }
+
+    $tier1 = json_decode((string) file_get_contents($root.'/openapi/tier1.json'), true, flags: JSON_THROW_ON_ERROR);
+    $approvalTypeParameter = array_values(array_filter(
+        $tier1['paths']['/v1/tenants/{tenant}/sites/{site}/approval-requests']['get']['parameters'] ?? [],
+        static fn (array $parameter): bool => ($parameter['name'] ?? null) === 'artifact_type'
+    ))[0] ?? [];
+    $approvalTypeFilter = $approvalTypeParameter['schema']['enum'] ?? [];
+    if (! in_array('site_change', $approvalTypeFilter, true)) {
+        $errors[] = 'Approval list filtering must recognize the site_change artifact type.';
+    }
+
+    $tier2 = json_decode((string) file_get_contents($root.'/openapi/tier2.json'), true, flags: JSON_THROW_ON_ERROR);
+    $siteChangeOperations = [
+        ['/v1/tenants/{tenant}/sites/{site}/site-change-repositories', 'post', '../schemas/v1/site-change/repository-request.json', '201', '../schemas/v1/site-change/repository.json', true],
+        ['/v1/tenants/{tenant}/sites/{site}/site-change-repositories/{repository}', 'get', null, '200', '../schemas/v1/site-change/repository.json', false],
+        ['/v1/tenants/{tenant}/sites/{site}/site-change-repositories/{repository}/change-runs', 'post', '../schemas/v1/site-change/change-run-request.json', '202', '../schemas/v1/site-change/change-run.json', true],
+        ['/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}', 'get', null, '200', '../schemas/v1/site-change/change-run.json', false],
+        ['/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/diff-manifest', 'get', null, '200', '../schemas/v1/site-change/diff-manifest.json', false],
+        ['/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/submissions', 'post', '../schemas/v1/site-change/submission-request.json', '201', '../schemas/v1/site-change/submission.json', true],
+        ['/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/merges', 'get', null, '200', '../schemas/v1/site-change/merge-result.json', false],
+        ['/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/merges', 'post', '../schemas/v1/site-change/merge-request.json', '200', '../schemas/v1/site-change/merge-result.json', true],
+    ];
+    foreach ($siteChangeOperations as [$path, $method, $requestRef, $successStatus, $responseRef, $idempotent]) {
+        $operation = $tier2['paths'][$path][$method] ?? [];
+        if ($operation === []) {
+            $errors[] = sprintf('Tier 2 OpenAPI is missing Site Change operation %s %s.', strtoupper($method), $path);
+
+            continue;
+        }
+        if (($operation['security'][0]['serviceBearer'] ?? null) !== []) {
+            $errors[] = sprintf('Site Change operation %s %s must require service Bearer authentication.', strtoupper($method), $path);
+        }
+        if ($requestRef !== null && ($operation['requestBody']['content']['application/json']['schema']['$ref'] ?? null) !== $requestRef) {
+            $errors[] = sprintf('Site Change operation %s %s must use request schema %s.', strtoupper($method), $path, $requestRef);
+        }
+        if (($operation['responses'][$successStatus]['content']['application/json']['schema']['$ref'] ?? null) !== $responseRef) {
+            $errors[] = sprintf('Site Change operation %s %s response %s must use %s.', strtoupper($method), $path, $successStatus, $responseRef);
+        }
+        $usesIdempotencyKey = false;
+        foreach ($operation['parameters'] ?? [] as $parameter) {
+            if (($parameter['$ref'] ?? null) === '#/components/parameters/SiteChangeIdempotencyKey') {
+                $usesIdempotencyKey = true;
+            }
+        }
+        if ($usesIdempotencyKey !== $idempotent) {
+            $errors[] = sprintf('Site Change operation %s %s has incorrect idempotency semantics.', strtoupper($method), $path);
+        }
+    }
+
+    $mergeRead = $tier2['paths']['/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/merges']['get'] ?? [];
+    if (($mergeRead['operationId'] ?? null) !== 'getSiteChangeMergeResult'
+        || isset($mergeRead['requestBody'])
+        || isset($mergeRead['responses']['200']['headers']['Idempotent-Replayed'])
+        || ($mergeRead['responses']['404']['$ref'] ?? null) !== '#/components/responses/SiteChangeProblem') {
+        $errors[] = 'Site Change merge recovery must be a side-effect-free authenticated read of the immutable merge result.';
+    }
+
+    $siteChangeIdempotencyKey = $tier2['components']['parameters']['SiteChangeIdempotencyKey']['schema'] ?? [];
+    if (($siteChangeIdempotencyKey['minLength'] ?? null) !== 8 || ($siteChangeIdempotencyKey['maxLength'] ?? null) !== 200) {
+        $errors[] = 'Site Change writes must require a bounded Idempotency-Key.';
+    }
+    $providerBoundary = $tier2['paths']['/v1/tenants/{tenant}/sites/{site}/site-change-repositories']['post']['x-magic-html-provider-boundary'] ?? [];
+    if (($providerBoundary['providers'] ?? null) !== ['github']
+        || ($providerBoundary['caller_selected_url'] ?? null) !== false
+        || ($providerBoundary['caller_credentials'] ?? null) !== false
+        || ($providerBoundary['fixed_api_endpoint'] ?? null) !== true) {
+        $errors[] = 'Site Change v1 must expose only fixed-endpoint GitHub without caller URLs or credentials.';
+    }
+    $executionBoundary = $tier2['paths']['/v1/tenants/{tenant}/sites/{site}/site-change-repositories/{repository}/change-runs']['post']['x-magic-html-execution-boundary'] ?? [];
+    if (($executionBoundary['execution_profiles'] ?? null) !== ['site_content_v1']
+        || ($executionBoundary['caller_selected_command'] ?? null) !== false
+        || ($executionBoundary['caller_selected_ref'] ?? null) !== false
+        || ($executionBoundary['caller_selected_url'] ?? null) !== false
+        || ($executionBoundary['disposable_workspace'] ?? null) !== true) {
+        $errors[] = 'Site Change execution must be disposable and reject caller-selected commands, refs, and URLs.';
+    }
+    $approvalBoundary = $tier2['paths']['/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/merges']['post']['x-magic-html-approval-boundary'] ?? [];
+    if (($approvalBoundary['review_decision_owner'] ?? null) !== 'approval'
+        || ($approvalBoundary['technical_merge_eligibility_owner'] ?? null) !== 'site_change'
+        || ($approvalBoundary['approval_url_from_service_config'] ?? null) !== true
+        || ($approvalBoundary['revalidate_on_merge'] ?? null) !== true
+        || ($approvalBoundary['automatic_rebase'] ?? null) !== false
+        || ($approvalBoundary['automatic_conflict_resolution'] ?? null) !== false) {
+        $errors[] = 'Site Change merge execution must revalidate Approval and fail closed on stale or conflicting state.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Site Change contracts: %s', $exception->getMessage());
+}
+
+try {
+    $resourceContractSchema = json_decode((string) file_get_contents($root.'/schemas/v1/resource-contract/ast.json'), true, flags: JSON_THROW_ON_ERROR);
+
+    $expectedRootProperties = ['contract_kind', 'contract_version', 'diagnostics', 'resources', 'sources', 'status'];
+    $actualRootProperties = array_keys($resourceContractSchema['properties'] ?? []);
+    sort($actualRootProperties);
+    $actualRootRequired = $resourceContractSchema['required'] ?? [];
+    sort($actualRootRequired);
+    if (($resourceContractSchema['additionalProperties'] ?? null) !== false
+        || $actualRootProperties !== $expectedRootProperties
+        || $actualRootRequired !== $expectedRootProperties
+        || ($resourceContractSchema['properties']['contract_version']['const'] ?? null) !== '1.0'
+        || ($resourceContractSchema['properties']['contract_kind']['const'] ?? null) !== 'magic_html_resource'
+        || ($resourceContractSchema['properties']['status']['enum'] ?? null) !== ['proposal', 'operational']) {
+        $errors[] = 'Resource Contract AST must be a closed v1 proposal/operational envelope.';
+    }
+
+    $resourceDefinition = $resourceContractSchema['$defs']['resource'] ?? [];
+    $resourceKinds = array_map(
+        static fn (array $branch): mixed => $branch['properties']['kind']['const'] ?? null,
+        $resourceDefinition['oneOf'] ?? [],
+    );
+    $expectedResourceProperties = ['bindings', 'capabilities', 'fields', 'item', 'kind', 'name', 'policies', 'provenance', 'resource_key'];
+    $actualResourceProperties = array_keys($resourceDefinition['properties'] ?? []);
+    sort($actualResourceProperties);
+    $actualResourceRequired = $resourceDefinition['required'] ?? [];
+    sort($actualResourceRequired);
+    if (($resourceDefinition['additionalProperties'] ?? null) !== false
+        || $resourceKinds !== ['content', 'collection', 'form']
+        || $actualResourceProperties !== $expectedResourceProperties
+        || $actualResourceRequired !== $expectedResourceProperties) {
+        $errors[] = 'Resource Contract AST must model Content, Collection, and Form as exact mutually exclusive closed resource kinds.';
+    }
+
+    $policyNames = ['audit', 'authentication', 'authorization', 'concurrency', 'storage', 'tenant_scope', 'validation', 'write_semantics'];
+    $actualPolicyNames = $resourceContractSchema['$defs']['policies']['required'] ?? [];
+    sort($actualPolicyNames);
+    if ($actualPolicyNames !== $policyNames
+        || ($resourceContractSchema['$defs']['policies']['additionalProperties'] ?? null) !== false
+        || ($resourceContractSchema['$defs']['unresolvedPolicy']['properties']['reference']['type'] ?? null) !== 'null'
+        || ($resourceContractSchema['$defs']['explicitPolicy']['properties']['status']['const'] ?? null) !== 'explicit') {
+        $errors[] = 'Resource Contract policies must explicitly cover every host-owned operational boundary and retain unresolved state.';
+    }
+
+    $policyReference = $resourceContractSchema['$defs']['explicitPolicy']['properties']['reference'] ?? [];
+    $policyDescription = strtolower((string) ($policyReference['description'] ?? ''));
+    foreach (['credential', 'token', 'secret', 'connection string', 'provider configuration'] as $forbiddenPayload) {
+        if (! str_contains($policyDescription, $forbiddenPayload)) {
+            $errors[] = sprintf('Resource Contract policy references must explicitly forbid %s values.', $forbiddenPayload);
+        }
+    }
+
+    $operationalGate = $resourceContractSchema['allOf'][0] ?? [];
+    if (($operationalGate['if']['properties']['status']['const'] ?? null) !== 'operational'
+        || ($operationalGate['then']['properties']['resources']['minItems'] ?? null) !== 1
+        || ($operationalGate['then']['properties']['resources']['items']['$ref'] ?? null) !== '#/$defs/operationalResource'
+        || ($operationalGate['then']['properties']['diagnostics']['items']['allOf'][1]['properties']['blocks']['maxItems'] ?? null) !== 0
+        || ($resourceContractSchema['$defs']['operationalResource']['properties']['policies']['$ref'] ?? null) !== '#/$defs/explicitPolicies'
+        || ($resourceContractSchema['$defs']['operationalResource']['properties']['bindings']['minItems'] ?? null) !== 1) {
+        $errors[] = 'Operational Resource Contract ASTs must fail closed without resources, explicit bindings, and every explicit host policy.';
+    }
+
+    $inputRequired = $resourceContractSchema['$defs']['input']['required'] ?? [];
+    foreach (['required', 'readonly', 'disabled', 'multiple', 'min', 'max', 'step', 'min_length', 'max_length', 'pattern', 'accept', 'options', 'provenance'] as $inputConstraint) {
+        if (! in_array($inputConstraint, $inputRequired, true)) {
+            $errors[] = sprintf('Resource Contract HTML input constraint %s must be explicit and provenance-bound.', $inputConstraint);
+        }
+    }
+    if (($resourceContractSchema['$defs']['collectionItem']['required'] ?? null) !== ['key_path', 'provenance']
+        || ($resourceContractSchema['$defs']['collectionItem']['properties']['key_path']['oneOf'][0]['type'] ?? null) !== 'null'
+        || ($resourceContractSchema['$defs']['operationalResource']['allOf'][1]['then']['properties']['item']['$ref'] ?? null) !== '#/$defs/resolvedCollectionItem'
+        || ($resourceContractSchema['$defs']['resolvedCollectionItem']['properties']['key_path']['$ref'] ?? null) !== '#/$defs/resolvedFieldPath'
+        || ($resourceContractSchema['$defs']['provenance']['required'] ?? null) !== ['source_id', 'pointer_kind', 'pointer', 'attribute']
+        || ($resourceContractSchema['$defs']['source']['properties']['digest_scope']['enum'] ?? null) !== ['exact_input', 'canonical_dom', 'canonical_json']) {
+        $errors[] = 'Resource Contract item identity, source digest scope, and every HTML fact must retain deterministic provenance.';
+    }
+
+    $crudPurposes = ['create', 'update', 'delete', 'upsert'];
+    $capabilityNames = $resourceContractSchema['$defs']['capability']['properties']['name']['enum'] ?? [];
+    $bindingPurposes = $resourceContractSchema['$defs']['resourceBinding']['properties']['purpose']['enum'] ?? [];
+    $contentCapabilityNames = $resourceContractSchema['$defs']['contentCapability']['properties']['name']['enum'] ?? [];
+    $collectionCapabilityNames = $resourceContractSchema['$defs']['collectionCapability']['properties']['name']['enum'] ?? [];
+    $contentBindingPurposes = $resourceContractSchema['$defs']['contentBinding']['properties']['purpose']['enum'] ?? [];
+    $collectionBindingPurposes = $resourceContractSchema['$defs']['collectionBinding']['properties']['purpose']['enum'] ?? [];
+    foreach ($crudPurposes as $crudPurpose) {
+        if (! in_array($crudPurpose, $capabilityNames, true)
+            || ! in_array($crudPurpose, $bindingPurposes, true)
+            || ! in_array($crudPurpose, $contentCapabilityNames, true)
+            || ! in_array($crudPurpose, $collectionCapabilityNames, true)
+            || ! in_array($crudPurpose, $contentBindingPurposes, true)
+            || ! in_array($crudPurpose, $collectionBindingPurposes, true)) {
+            $errors[] = sprintf('Resource Contract host completion must be able to declare %s capability and binding without scanner inference.', $crudPurpose);
+        }
+    }
+    if (! in_array('confirmation', $resourceContractSchema['$defs']['resourceBinding']['required'] ?? [], true)
+        || ($resourceContractSchema['$defs']['resourceBinding']['properties']['confirmation']['enum'] ?? null) !== ['unresolved', 'required', 'not_required']
+        || ($resourceContractSchema['$defs']['operationalResourceBinding']['allOf'][0]['then']['properties']['confirmation']['enum'] ?? null) !== ['required', 'not_required']
+        || isset($resourceContractSchema['$defs']['dataField']['properties']['input'])) {
+        $errors[] = 'Resource Contract operational writes must resolve confirmation and allow host-provenanced data-resource input presentation.';
+    }
+
+    foreach ([
+        $resourceContractSchema['properties']['resources']['description'] ?? '',
+        $resourceContractSchema['$defs']['resource']['properties']['fields']['description'] ?? '',
+        $resourceContractSchema['$defs']['resource']['properties']['bindings']['description'] ?? '',
+        $resourceContractSchema['$defs']['provenanceList']['description'] ?? '',
+        $resourceContractSchema['$defs']['input']['properties']['options']['description'] ?? '',
+    ] as $orderedArrayDescription) {
+        if (! str_contains(strtolower((string) $orderedArrayDescription), 'preserv')) {
+            $errors[] = 'Resource Contract presentation-bearing arrays must document source-order preservation.';
+        }
+    }
+
+    $closedObjects = function (mixed $schema, string $pointer = '#') use (&$closedObjects, &$errors): void {
+        if (! is_array($schema)) {
+            return;
+        }
+        if (($schema['type'] ?? null) === 'object' && ($schema['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Resource Contract object schema %s must reject unknown keys.', $pointer);
+        }
+        foreach ($schema as $key => $child) {
+            if (is_array($child)) {
+                $closedObjects($child, $pointer.'/'.str_replace(['~', '/'], ['~0', '~1'], (string) $key));
+            }
+        }
+    };
+    $closedObjects($resourceContractSchema);
+
+    $resolveResourceContractRef = static function (string $reference) use ($resourceContractSchema): array {
+        if (! str_starts_with($reference, '#/')) {
+            throw new RuntimeException('Only local Resource Contract fixture references are supported.');
+        }
+        $resolved = $resourceContractSchema;
+        foreach (explode('/', substr($reference, 2)) as $segment) {
+            $segment = str_replace(['~1', '~0'], ['/', '~'], $segment);
+            if (! is_array($resolved) || ! array_key_exists($segment, $resolved)) {
+                throw new RuntimeException(sprintf('Unable to resolve Resource Contract schema reference %s.', $reference));
+            }
+            $resolved = $resolved[$segment];
+        }
+
+        return $resolved;
+    };
+
+    $resourceContractTypeMatches = static function (mixed $instance, string $type): bool {
+        return match ($type) {
+            'object' => $instance instanceof stdClass,
+            'array' => is_array($instance),
+            'string' => is_string($instance),
+            'integer' => is_int($instance),
+            'number' => is_int($instance) || is_float($instance),
+            'boolean' => is_bool($instance),
+            'null' => $instance === null,
+            default => false,
+        };
+    };
+
+    $validateResourceContract = function (mixed $instance, array $schema, string $pointer = '#') use (&$validateResourceContract, $resolveResourceContractRef, $resourceContractTypeMatches): array {
+        $fixtureErrors = [];
+
+        if (isset($schema['$ref'])) {
+            $fixtureErrors = [...$fixtureErrors, ...$validateResourceContract($instance, $resolveResourceContractRef((string) $schema['$ref']), $pointer)];
+        }
+
+        if (array_key_exists('const', $schema) && json_encode($instance) !== json_encode($schema['const'])) {
+            $fixtureErrors[] = $pointer.' does not match const.';
+        }
+        if (isset($schema['enum'])) {
+            $matchesEnum = false;
+            foreach ($schema['enum'] as $candidate) {
+                if (json_encode($instance) === json_encode($candidate)) {
+                    $matchesEnum = true;
+                    break;
+                }
+            }
+            if (! $matchesEnum) {
+                $fixtureErrors[] = $pointer.' does not match enum.';
+            }
+        }
+
+        if (isset($schema['type'])) {
+            $types = is_array($schema['type']) ? $schema['type'] : [$schema['type']];
+            $matchesType = false;
+            foreach ($types as $type) {
+                if (is_string($type) && $resourceContractTypeMatches($instance, $type)) {
+                    $matchesType = true;
+                    break;
+                }
+            }
+            if (! $matchesType) {
+                $fixtureErrors[] = $pointer.' does not match type.';
+
+                return $fixtureErrors;
+            }
+        }
+
+        if ($instance instanceof stdClass) {
+            $properties = get_object_vars($instance);
+            foreach ($schema['required'] ?? [] as $requiredProperty) {
+                if (! array_key_exists((string) $requiredProperty, $properties)) {
+                    $fixtureErrors[] = $pointer.' is missing '.$requiredProperty.'.';
+                }
+            }
+            if (($schema['additionalProperties'] ?? null) === false) {
+                foreach (array_keys($properties) as $propertyName) {
+                    if (! array_key_exists($propertyName, $schema['properties'] ?? [])) {
+                        $fixtureErrors[] = $pointer.' has unknown property '.$propertyName.'.';
+                    }
+                }
+            }
+            foreach ($schema['properties'] ?? [] as $propertyName => $propertySchema) {
+                if (array_key_exists($propertyName, $properties)) {
+                    $fixtureErrors = [
+                        ...$fixtureErrors,
+                        ...$validateResourceContract($properties[$propertyName], $propertySchema, $pointer.'/'.str_replace(['~', '/'], ['~0', '~1'], (string) $propertyName)),
+                    ];
+                }
+            }
+            if (isset($schema['minProperties']) && count($properties) < $schema['minProperties']) {
+                $fixtureErrors[] = $pointer.' has too few properties.';
+            }
+            if (isset($schema['maxProperties']) && count($properties) > $schema['maxProperties']) {
+                $fixtureErrors[] = $pointer.' has too many properties.';
+            }
+        }
+
+        if (is_array($instance)) {
+            if (isset($schema['minItems']) && count($instance) < $schema['minItems']) {
+                $fixtureErrors[] = $pointer.' has too few items.';
+            }
+            if (isset($schema['maxItems']) && count($instance) > $schema['maxItems']) {
+                $fixtureErrors[] = $pointer.' has too many items.';
+            }
+            if (($schema['uniqueItems'] ?? false) === true) {
+                $encodedItems = array_map(static fn (mixed $item): string => (string) json_encode($item), $instance);
+                if (count($encodedItems) !== count(array_unique($encodedItems))) {
+                    $fixtureErrors[] = $pointer.' has duplicate items.';
+                }
+            }
+            if (isset($schema['items'])) {
+                foreach ($instance as $index => $item) {
+                    $fixtureErrors = [...$fixtureErrors, ...$validateResourceContract($item, $schema['items'], $pointer.'/'.$index)];
+                }
+            }
+            if (isset($schema['contains'])) {
+                $contains = false;
+                foreach ($instance as $index => $item) {
+                    if ($validateResourceContract($item, $schema['contains'], $pointer.'/'.$index) === []) {
+                        $contains = true;
+                        break;
+                    }
+                }
+                if (! $contains) {
+                    $fixtureErrors[] = $pointer.' does not contain a required item.';
+                }
+            }
+        }
+
+        if (is_string($instance)) {
+            $length = function_exists('mb_strlen') ? mb_strlen($instance, 'UTF-8') : strlen($instance);
+            if (isset($schema['minLength']) && $length < $schema['minLength']) {
+                $fixtureErrors[] = $pointer.' is shorter than minLength.';
+            }
+            if (isset($schema['maxLength']) && $length > $schema['maxLength']) {
+                $fixtureErrors[] = $pointer.' is longer than maxLength.';
+            }
+            if (isset($schema['pattern'])) {
+                $pattern = '~'.str_replace('~', '\\~', (string) $schema['pattern']).'~uD';
+                if (preg_match($pattern, $instance) !== 1) {
+                    $fixtureErrors[] = $pointer.' does not match pattern.';
+                }
+            }
+        }
+
+        if ((is_int($instance) || is_float($instance)) && isset($schema['minimum']) && $instance < $schema['minimum']) {
+            $fixtureErrors[] = $pointer.' is below minimum.';
+        }
+        if ((is_int($instance) || is_float($instance)) && isset($schema['maximum']) && $instance > $schema['maximum']) {
+            $fixtureErrors[] = $pointer.' is above maximum.';
+        }
+
+        foreach ($schema['allOf'] ?? [] as $allOfSchema) {
+            $fixtureErrors = [...$fixtureErrors, ...$validateResourceContract($instance, $allOfSchema, $pointer)];
+        }
+        if (isset($schema['oneOf'])) {
+            $oneOfMatches = 0;
+            foreach ($schema['oneOf'] as $oneOfSchema) {
+                if ($validateResourceContract($instance, $oneOfSchema, $pointer) === []) {
+                    $oneOfMatches++;
+                }
+            }
+            if ($oneOfMatches !== 1) {
+                $fixtureErrors[] = $pointer.' must match exactly one oneOf branch.';
+            }
+        }
+        if (isset($schema['not']) && $validateResourceContract($instance, $schema['not'], $pointer) === []) {
+            $fixtureErrors[] = $pointer.' matches a forbidden schema.';
+        }
+        if (isset($schema['if']) && $validateResourceContract($instance, $schema['if'], $pointer) === [] && isset($schema['then'])) {
+            $fixtureErrors = [...$fixtureErrors, ...$validateResourceContract($instance, $schema['then'], $pointer)];
+        }
+
+        return $fixtureErrors;
+    };
+
+    $fixtureExpectations = [
+        'proposal.json' => true,
+        'operational.json' => true,
+        'invalid-operational-unresolved.json' => false,
+        'invalid-marker-proposal.json' => true,
+        'unmarked-html-proposal.json' => true,
+    ];
+    $validResourceFixtures = [];
+    foreach ($fixtureExpectations as $filename => $expectedValid) {
+        $fixture = json_decode((string) file_get_contents($root.'/tests/fixtures/resource-contract/'.$filename), false, flags: JSON_THROW_ON_ERROR);
+        $fixtureErrors = $validateResourceContract($fixture, $resourceContractSchema);
+        if (($fixtureErrors === []) !== $expectedValid) {
+            $errors[] = sprintf(
+                'Resource Contract fixture %s was expected to be %s: %s',
+                $filename,
+                $expectedValid ? 'valid' : 'invalid',
+                implode(' ', array_slice($fixtureErrors, 0, 10)),
+            );
+        }
+        if ($expectedValid && $fixtureErrors === []) {
+            $validResourceFixtures[$filename] = $fixture;
+        }
+    }
+
+    $proposalFixture = $validResourceFixtures['proposal.json'] ?? null;
+    if ($proposalFixture instanceof stdClass) {
+        $fixtureKinds = array_map(static fn (stdClass $resource): mixed => $resource->kind ?? null, $proposalFixture->resources ?? []);
+        if ($fixtureKinds !== ['collection', 'content', 'form']) {
+            $errors[] = 'Resource Contract proposal fixture must cover all three MECE resource kinds.';
+        }
+        $collectionFieldOrder = array_map(static fn (stdClass $field): mixed => $field->path ?? null, $proposalFixture->resources[0]->fields ?? []);
+        if ($collectionFieldOrder !== ['title', 'id']) {
+            $errors[] = 'Resource Contract fixture must retain non-sorted semantic field presentation order.';
+        }
+    }
+
+    $unmarkedFixture = $validResourceFixtures['unmarked-html-proposal.json'] ?? null;
+    if (! $unmarkedFixture instanceof stdClass
+        || ($unmarkedFixture->status ?? null) !== 'proposal'
+        || ($unmarkedFixture->resources ?? null) !== []
+        || ($unmarkedFixture->diagnostics[0]->code ?? null) !== 'resource.marker.missing'
+        || ! in_array('api', $unmarkedFixture->diagnostics[0]->blocks ?? [], true)) {
+        $errors[] = 'Unmarked arbitrary HTML must remain an API-blocked proposal with no invented resource.';
+    }
+
+    $invalidMarkerFixture = $validResourceFixtures['invalid-marker-proposal.json'] ?? null;
+    if (! $invalidMarkerFixture instanceof stdClass
+        || ($invalidMarkerFixture->resources[0]->name ?? null) !== ''
+        || ($invalidMarkerFixture->resources[0]->fields[0]->path ?? null) !== ''
+        || ($invalidMarkerFixture->diagnostics[0]->severity ?? null) !== 'error') {
+        $errors[] = 'Invalid explicit markers must remain attributable in a schema-valid proposal while operational projection stays blocked.';
+    }
+
+    $operationalFixture = $validResourceFixtures['operational.json'] ?? null;
+    if ($operationalFixture instanceof stdClass) {
+        $operationalKinds = array_map(static fn (stdClass $resource): mixed => $resource->kind ?? null, $operationalFixture->resources ?? []);
+        $crudResource = $operationalFixture->resources[1] ?? null;
+        $crudCapabilities = $crudResource instanceof stdClass
+            ? array_map(static fn (stdClass $capability): mixed => $capability->name ?? null, $crudResource->capabilities ?? [])
+            : [];
+        $crudPurposesFixture = $crudResource instanceof stdClass
+            ? array_map(static fn (stdClass $binding): mixed => $binding->purpose ?? null, $crudResource->bindings ?? [])
+            : [];
+        if ($operationalKinds !== ['form', 'collection']
+            || $crudCapabilities !== ['create', 'delete', 'list', 'update', 'upsert']
+            || $crudPurposesFixture !== ['list', 'create', 'update', 'delete', 'upsert']
+            || ! (($crudResource->fields[0]->input ?? null) instanceof stdClass)
+            || ($crudResource->fields[0]->input->provenance[0]->source_id ?? null) !== 'metadata:host') {
+            $errors[] = 'Operational fixture must preserve source order while proving host-provenanced Collection CRUD and input presentation.';
+        }
+        $declaredCrudPaths = $crudResource instanceof stdClass
+            ? array_map(static fn (stdClass $field): mixed => $field->path ?? null, $crudResource->fields ?? [])
+            : [];
+        if (! in_array($crudResource->item->key_path ?? null, $declaredCrudPaths, true)) {
+            $errors[] = 'Operational Collection item key_path must name one of its declared fields.';
+        }
+        foreach (array_slice($crudResource->bindings ?? [], 1) as $writeBinding) {
+            if (($writeBinding->confirmation ?? null) === 'unresolved'
+                || ($writeBinding->provenance[0]->source_id ?? null) !== 'metadata:host') {
+                $errors[] = 'Operational CRUD binding confirmation and target must be explicit trusted-host metadata.';
+            }
+        }
+    }
+
+    $assertCanonicalStrings = static function (array $values, string $label) use (&$errors): void {
+        $sorted = $values;
+        usort($sorted, static fn (string $left, string $right): int => strcmp($left, $right));
+        if ($values !== $sorted || count($values) !== count(array_unique($values))) {
+            $errors[] = sprintf('Resource Contract fixture %s must be unique and bytewise sorted.', $label);
+        }
+    };
+    foreach ($validResourceFixtures as $filename => $fixture) {
+        $assertCanonicalStrings(array_map(static fn (stdClass $source): string => (string) $source->source_id, $fixture->sources), $filename.' sources');
+        foreach ($fixture->resources as $resource) {
+            if (($resource->resource_key ?? null) !== ($resource->kind ?? '').':'.($resource->name ?? '')) {
+                $errors[] = sprintf('Resource Contract fixture %s resource_key must equal kind:name.', $filename);
+            }
+            $assertCanonicalStrings(array_map(static fn (stdClass $capability): string => (string) $capability->name, $resource->capabilities), $filename.' '.$resource->resource_key.' capabilities');
+        }
+        $assertCanonicalStrings(array_map(
+            static fn (stdClass $diagnostic): string => (string) ($diagnostic->resource_key ?? '').'\0'.(string) ($diagnostic->field_path ?? '').'\0'.(string) $diagnostic->code.'\0'.(string) $diagnostic->diagnostic_id,
+            $fixture->diagnostics,
+        ), $filename.' diagnostics');
+        foreach ($fixture->diagnostics as $diagnostic) {
+            $assertCanonicalStrings(array_map(static fn (mixed $block): string => (string) $block, $diagnostic->blocks), $filename.' '.$diagnostic->diagnostic_id.' blocks');
+        }
+    }
+} catch (JsonException|RuntimeException $exception) {
+    $errors[] = sprintf('Unable to inspect Resource Contract AST: %s', $exception->getMessage());
+}
+
+$presentationDocuments = [
+    'schemas/v1/presentation/adapter-profile.json',
+    'schemas/v1/presentation/component-ast.json',
+    'schemas/v1/presentation/font-asset-set.json',
+    'schemas/v1/presentation/font-policy-check-request.json',
+    'schemas/v1/presentation/font-policy-check-result.json',
+    'schemas/v1/presentation/materialize-request.json',
+    'schemas/v1/presentation/materialize-result.json',
+    'schemas/v1/presentation/problem.json',
+];
+
+foreach ($presentationDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Presentation contract document %s', $relativePath);
+    }
+}
+
+try {
+    $componentAst = json_decode((string) file_get_contents($root.'/schemas/v1/presentation/component-ast.json'), true, flags: JSON_THROW_ON_ERROR);
+    $adapterProfile = json_decode((string) file_get_contents($root.'/schemas/v1/presentation/adapter-profile.json'), true, flags: JSON_THROW_ON_ERROR);
+    $fontAssetSet = json_decode((string) file_get_contents($root.'/schemas/v1/presentation/font-asset-set.json'), true, flags: JSON_THROW_ON_ERROR);
+    $fontPolicyCheckRequest = json_decode((string) file_get_contents($root.'/schemas/v1/presentation/font-policy-check-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $fontPolicyCheckResult = json_decode((string) file_get_contents($root.'/schemas/v1/presentation/font-policy-check-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    $materializeRequest = json_decode((string) file_get_contents($root.'/schemas/v1/presentation/materialize-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $materializeResult = json_decode((string) file_get_contents($root.'/schemas/v1/presentation/materialize-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    $presentationProblem = json_decode((string) file_get_contents($root.'/schemas/v1/presentation/problem.json'), true, flags: JSON_THROW_ON_ERROR);
+
+    foreach ([$componentAst, $adapterProfile, $fontAssetSet, $fontPolicyCheckRequest, $fontPolicyCheckResult, $materializeRequest, $materializeResult, $presentationProblem] as $presentationSchema) {
+        if (($presentationSchema['$schema'] ?? null) !== 'https://json-schema.org/draft/2020-12/schema'
+            || ! str_starts_with((string) ($presentationSchema['$id'] ?? ''), 'https://contracts.magic-html.dev/v1/presentation/')
+            || ($presentationSchema['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Presentation schema %s must be a closed JSON Schema 2020-12 document.', $presentationSchema['$id'] ?? 'unknown');
+        }
+    }
+
+    $expectedCompositions = ['hero', 'feature-grid', 'content', 'steps', 'testimonials', 'faq', 'cta', 'contact'];
+    $component = $componentAst['$defs']['component'] ?? [];
+    if (($componentAst['required'] ?? null) !== ['contract_version', 'surface_id', 'components']
+        || ($componentAst['properties']['components']['minItems'] ?? null) !== 1
+        || ($componentAst['properties']['components']['maxItems'] ?? null) !== 50
+        || ($component['properties']['composition']['enum'] ?? null) !== $expectedCompositions
+        || count($component['allOf'] ?? []) !== 8
+        || count($component['properties']['slots']['items']['oneOf'] ?? []) !== 4) {
+        $errors[] = 'Presentation Component AST must expose the exact finite surface, composition, variant, and semantic-slot boundary.';
+    }
+
+    $closedPresentationObjects = function (mixed $schema, string $pointer = '#') use (&$closedPresentationObjects, &$errors): void {
+        if (! is_array($schema)) {
+            return;
+        }
+        if (($schema['type'] ?? null) === 'object' && ($schema['additionalProperties'] ?? null) !== false) {
+            $errors[] = sprintf('Presentation object schema %s must reject unknown keys.', $pointer);
+        }
+        foreach ($schema as $key => $child) {
+            if (is_array($child)) {
+                $closedPresentationObjects($child, $pointer.'/'.str_replace(['~', '/'], ['~0', '~1'], (string) $key));
+            }
+        }
+    };
+    foreach ([$componentAst, $adapterProfile, $fontAssetSet, $fontPolicyCheckRequest, $fontPolicyCheckResult, $materializeRequest, $materializeResult, $presentationProblem] as $presentationSchema) {
+        $closedPresentationObjects($presentationSchema);
+    }
+
+    $componentPropertyNames = [];
+    $collectPresentationPropertyNames = function (mixed $schema) use (&$collectPresentationPropertyNames, &$componentPropertyNames): void {
+        if (! is_array($schema)) {
+            return;
+        }
+        foreach (array_keys($schema['properties'] ?? []) as $propertyName) {
+            $componentPropertyNames[] = (string) $propertyName;
+        }
+        foreach ($schema as $child) {
+            $collectPresentationPropertyNames($child);
+        }
+    };
+    $collectPresentationPropertyNames($componentAst);
+    foreach (['class', 'classes', 'css', 'html', 'template', 'provider_component_id', 'package_url', 'credential', 'remote_url'] as $forbiddenComponentProperty) {
+        if (in_array($forbiddenComponentProperty, $componentPropertyNames, true)) {
+            $errors[] = sprintf('Provider-neutral Component AST must not expose %s.', $forbiddenComponentProperty);
+        }
+    }
+
+    $hrefPattern = $componentAst['$defs']['actionsSlot']['properties']['content']['properties']['actions']['items']['properties']['href']['pattern'] ?? null;
+    if (! is_string($hrefPattern)
+        || preg_match('~'.$hrefPattern.'~D', '/contact') !== 1
+        || preg_match('~'.$hrefPattern.'~D', '#features') !== 1
+        || preg_match('~'.$hrefPattern.'~D', 'https://example.com/contact') !== 1
+        || preg_match('~'.$hrefPattern.'~D', 'javascript:alert(1)') === 1
+        || preg_match('~'.$hrefPattern.'~D', '//example.com') === 1) {
+        $errors[] = 'Presentation action links must allow only explicit relative, fragment, or HTTPS destinations.';
+    }
+
+    $expectedAdapterProperties = ['adapter_profile', 'assets', 'component_ast', 'contract_version', 'font_asset_set', 'font_assets'];
+    $actualRequestProperties = array_keys($materializeRequest['properties'] ?? []);
+    sort($actualRequestProperties);
+    if ($actualRequestProperties !== $expectedAdapterProperties
+        || ($materializeRequest['required'] ?? null) !== ['contract_version', 'component_ast', 'adapter_profile', 'assets', 'font_assets']
+        || ($materializeRequest['properties']['assets']['maxItems'] ?? null) !== 50
+        || ($materializeRequest['properties']['font_assets']['maxItems'] ?? null) !== 20
+        || ($materializeRequest['$defs']['fontAsset']['properties']['family']['pattern'] ?? null) !== '^[A-Za-z0-9][A-Za-z0-9 ._-]{0,99}$'
+        || ($materializeRequest['$defs']['relativeAssetPath']['pattern'] ?? null) !== '^assets/(?:[A-Za-z0-9._-]+/)*[A-Za-z0-9][A-Za-z0-9._-]{0,199}$') {
+        $errors[] = 'Presentation materialization requests must accept only closed AST, registry profile, and bounded relative immutable assets.';
+    }
+
+    if (($adapterProfile['required'] ?? null) !== ['profile_id', 'component_adapter', 'utility_adapter', 'icon_adapter', 'icon_style', 'font_adapter', 'font_family', 'image_adapter', 'catalog_locks']
+        || ($adapterProfile['properties']['font_adapter']['enum'] ?? null) !== ['system', 'self-hosted', 'licensed-self-hosted']
+        || ($adapterProfile['properties']['image_adapter']['const'] ?? null) !== 'relative-assets'
+        || ($adapterProfile['properties']['catalog_locks']['items']['$ref'] ?? null) !== '#/$defs/catalogLock'
+        || ($adapterProfile['$defs']['catalogLock']['properties']['license_scope']['enum'] ?? null) !== ['open-source', 'private-byo']
+        || ($adapterProfile['$defs']['catalogLock']['properties']['digest']['pattern'] ?? null) !== '^[a-f0-9]{64}$') {
+        $errors[] = 'Presentation Adapter Profiles must pin registry adapters, immutable catalogs, and explicit open-source/private-BYO licensing.';
+    }
+
+    if (($fontAssetSet['required'] ?? null) !== ['contract_version', 'set_id', 'provider', 'family', 'upstream', 'license', 'transformation', 'asset_refs']
+        || ($fontAssetSet['properties']['provider']['const'] ?? null) !== 'google-fonts'
+        || ($fontAssetSet['$defs']['upstream']['properties']['catalog']['const'] ?? null) !== 'google/fonts'
+        || ($fontAssetSet['$defs']['license']['properties']['spdx']['enum'] ?? null) !== ['OFL-1.1', 'Apache-2.0', 'Ubuntu-font-1.0']
+        || ($fontAssetSet['$defs']['transformation']['properties']['kind']['enum'] ?? null) !== ['none', 'woff2-compression', 'subset']
+        || ($fontAssetSet['properties']['asset_refs']['uniqueItems'] ?? null) !== true
+        || ($fontPolicyCheckRequest['properties']['font_assets']['items']['$ref'] ?? null) !== './materialize-request.json#/$defs/fontAsset'
+        || ($fontPolicyCheckResult['properties']['policy_version']['const'] ?? null) !== 'google-fonts-self-host-v1'
+        || ($fontPolicyCheckResult['properties']['eligible_for_materialization']['const'] ?? null) !== true) {
+        $errors[] = 'Presentation licensed font contracts must pin Google Fonts provenance, SPDX evidence, transformations, governed WOFF2 references, and a deterministic policy decision.';
+    }
+
+    if (($materializeResult['required'] ?? null) !== ['contract_version', 'surface_id', 'profile_id', 'catalog_locks', 'font_policy', 'html', 'css', 'required_assets', 'source_map', 'digest']
+        || ($materializeResult['properties']['digest']['pattern'] ?? null) !== '^[a-f0-9]{64}$'
+        || ($materializeResult['properties']['catalog_locks']['items']['$ref'] ?? null) !== './adapter-profile.json#/$defs/catalogLock'
+        || ($materializeResult['properties']['font_policy']['oneOf'][1]['$ref'] ?? null) !== './font-policy-check-result.json'
+        || ($materializeResult['properties']['source_map']['items']['required'] ?? null) !== ['component_key', 'composition', 'variant', 'html_id', 'slot_roles']
+        || ($materializeResult['properties']['source_map']['items']['properties']['composition']['enum'] ?? null) !== $expectedCompositions) {
+        $errors[] = 'Presentation results must expose canonical HTML/CSS, immutable assets, source map, and digest.';
+    }
+
+    $tier0 = json_decode((string) file_get_contents($root.'/openapi/tier0.json'), true, flags: JSON_THROW_ON_ERROR);
+    $materializeOperation = $tier0['paths']['/v1/presentations/materialize']['post'] ?? [];
+    $fontPolicyOperation = $tier0['paths']['/v1/presentations/font-assets/check']['post'] ?? [];
+    $expectedBoundary = [
+        'remote_asset_fetch' => false,
+        'remote_catalog_fetch' => false,
+        'executable_input' => false,
+        'arbitrary_css_class_input' => false,
+        'provider_credentials' => false,
+        'adapter_selection' => 'server_registry_only',
+        'tailwind_plus_catalog' => 'private_byo_only',
+        'output_javascript' => false,
+    ];
+    if (($tier0['info']['version'] ?? null) !== '1.3.0'
+        || ($materializeOperation['operationId'] ?? null) !== 'materializePresentation'
+        || ($materializeOperation['security'] ?? null) !== [['presentationServiceBearer' => []]]
+        || isset($materializeOperation['parameters'])
+        || ($materializeOperation['requestBody']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/presentation/materialize-request.json'
+        || ($materializeOperation['responses']['200']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/presentation/materialize-result.json'
+        || ($materializeOperation['x-magic-html-presentation-boundary'] ?? null) !== $expectedBoundary
+        || ($tier0['components']['responses']['PresentationProblem']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/presentation/problem.json') {
+        $errors[] = 'Tier 0 Presentation materialization must expose the exact synchronous Bearer-authenticated fail-closed adapter boundary.';
+    }
+
+    $expectedFontPolicyBoundary = [
+        'remote_asset_fetch' => false,
+        'remote_catalog_fetch' => false,
+        'provider_credentials' => false,
+        'accepted_provider' => 'google-fonts',
+        'accepted_licenses' => ['OFL-1.1', 'Apache-2.0', 'Ubuntu-font-1.0'],
+        'legal_advice' => false,
+    ];
+    if (($fontPolicyOperation['operationId'] ?? null) !== 'checkPresentationFontAssets'
+        || ($fontPolicyOperation['security'] ?? null) !== [['presentationServiceBearer' => []]]
+        || ($fontPolicyOperation['requestBody']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/presentation/font-policy-check-request.json'
+        || ($fontPolicyOperation['responses']['200']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/presentation/font-policy-check-result.json'
+        || ($fontPolicyOperation['x-magic-html-font-policy-boundary'] ?? null) !== $expectedFontPolicyBoundary) {
+        $errors[] = 'Tier 0 font policy checks must expose the exact synchronous Bearer-authenticated no-fetch licensing boundary.';
+    }
+
+    $requestFixture = json_decode((string) file_get_contents($root.'/tests/fixtures/presentation/materialize-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $resultFixture = json_decode((string) file_get_contents($root.'/tests/fixtures/presentation/materialize-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    $fontPolicyRequestFixture = json_decode((string) file_get_contents($root.'/tests/fixtures/presentation/font-policy-check-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $fontPolicyResultFixture = json_decode((string) file_get_contents($root.'/tests/fixtures/presentation/font-policy-check-result.json'), true, flags: JSON_THROW_ON_ERROR);
+    if (($requestFixture['component_ast']['components'][0]['slots'][1]['content']['resource_key'] ?? null) !== 'content:home'
+        || ($requestFixture['component_ast']['components'][0]['slots'][1]['content']['path'] ?? null) !== 'hero.title'
+        || ($requestFixture['adapter_profile']['component_adapter'] ?? null) !== 'tailwindcss-core'
+        || ($requestFixture['adapter_profile']['icon_adapter'] ?? null) !== 'heroicons-v2'
+        || ($requestFixture['adapter_profile']['font_adapter'] ?? null) !== 'system'
+        || ($resultFixture['source_map'][0]['html_id'] ?? null) !== 'm-component-hero') {
+        $errors[] = 'Presentation fixtures must prove Resource binding, Tailwind, Heroicons, font, image, and source-map integration.';
+    }
+    if (($fontPolicyRequestFixture['font_asset_set']['provider'] ?? null) !== 'google-fonts'
+        || ($fontPolicyRequestFixture['font_asset_set']['license']['spdx'] ?? null) !== 'OFL-1.1'
+        || ($fontPolicyRequestFixture['font_asset_set']['asset_refs'] ?? null) !== ['font-inter-400']
+        || ($fontPolicyRequestFixture['font_assets'][0]['family'] ?? null) !== 'Inter'
+        || ($fontPolicyResultFixture['policy_version'] ?? null) !== 'google-fonts-self-host-v1'
+        || ($fontPolicyResultFixture['eligible_for_materialization'] ?? null) !== true) {
+        $errors[] = 'Presentation font policy fixtures must prove a commercially reusable, immutable Google Fonts WOFF2 asset set.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Presentation contracts: %s', $exception->getMessage());
+}
+
+$knowledgeSourceDocuments = [
+    'schemas/v1/knowledge-source/configuration.json',
+    'schemas/v1/knowledge-source/credentials.json',
+    'schemas/v1/knowledge-source/connection-create-request.json',
+    'schemas/v1/knowledge-source/connection-update-request.json',
+    'schemas/v1/knowledge-source/connection.json',
+    'schemas/v1/knowledge-source/connection-list.json',
+    'schemas/v1/knowledge-source/sync-request.json',
+    'schemas/v1/knowledge-source/sync-run.json',
+    'schemas/v1/knowledge-source/webhook-accepted.json',
+    'schemas/v1/knowledge-source/problem.json',
+];
+
+foreach ($knowledgeSourceDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Knowledge Source contract document %s', $relativePath);
+    }
+}
+
+try {
+    $sourceCreate = json_decode((string) file_get_contents($root.'/schemas/v1/knowledge-source/connection-create-request.json'), true, flags: JSON_THROW_ON_ERROR);
+    $sourceConnection = json_decode((string) file_get_contents($root.'/schemas/v1/knowledge-source/connection.json'), true, flags: JSON_THROW_ON_ERROR);
+    $sourceSync = json_decode((string) file_get_contents($root.'/schemas/v1/knowledge-source/sync-run.json'), true, flags: JSON_THROW_ON_ERROR);
+    $tier2 = json_decode((string) file_get_contents($root.'/openapi/tier2.json'), true, flags: JSON_THROW_ON_ERROR);
+
+    if (($sourceCreate['properties']['driver']['enum'] ?? null) !== ['google_drive', 'rss', 'wordpress', 'storage', 'line_works']
+        || ($sourceCreate['properties']['credentials']['$ref'] ?? null) !== 'credentials.json'
+        || isset($sourceConnection['properties']['credentials'])
+        || ($sourceConnection['additionalProperties'] ?? null) !== false) {
+        $errors[] = 'Knowledge Source connections must accept exactly five drivers, keep credentials write-only, and return a closed credential-free resource.';
+    }
+    if (($sourceSync['properties']['status']['enum'] ?? null) !== ['queued', 'running', 'succeeded', 'failed']
+        || ($sourceSync['properties']['stats']['additionalProperties'] ?? null) !== false) {
+        $errors[] = 'Knowledge Source sync runs must expose finite asynchronous states and closed bounded statistics.';
+    }
+
+    $sourcePaths = [
+        '/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/source-connections',
+        '/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/source-connections/{connection}',
+        '/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/source-connections/{connection}/sync-runs',
+        '/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/source-connections/{connection}/sync-runs/{syncRun}',
+        '/v1/source-connections/{connection}/webhooks/line-works',
+    ];
+    foreach ($sourcePaths as $sourcePath) {
+        if (! isset($tier2['paths'][$sourcePath])) {
+            $errors[] = sprintf('Tier 2 OpenAPI is missing Knowledge Source path %s.', $sourcePath);
+        }
+    }
+
+    $sync = $tier2['paths'][$sourcePaths[2]]['post'] ?? [];
+    if (($sync['security'] ?? null) !== [['serviceBearer' => []]]
+        || ! in_array(['$ref' => '#/components/parameters/KnowledgeSourceIdempotencyKey'], $sync['parameters'] ?? [], true)
+        || ($sync['x-magic-html-source-boundary']['knowledge_input'] ?? null) !== 'multipart_file_bytes_and_bounded_metadata'
+        || ($sync['x-magic-html-source-boundary']['knowledge_url_from_service_config'] ?? null) !== true) {
+        $errors[] = 'Knowledge Source sync must be service-authenticated, replay-safe, and hand resolved bytes to a fixed Knowledge service.';
+    }
+
+    $lineWorksWebhook = $tier2['paths'][$sourcePaths[4]]['post'] ?? [];
+    $webhookHeaders = array_column($lineWorksWebhook['parameters'] ?? [], 'name');
+    if (($lineWorksWebhook['security'] ?? null) !== []
+        || $webhookHeaders !== ['X-WORKS-BotId', 'X-WORKS-Signature']
+        || ($lineWorksWebhook['responses']['202']['content']['application/json']['schema']['$ref'] ?? null) !== '../schemas/v1/knowledge-source/webhook-accepted.json') {
+        $errors[] = 'LINE WORKS Knowledge ingress must use provider signature authentication and a bounded asynchronous acknowledgement.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Knowledge Source contracts: %s', $exception->getMessage());
+}
+
+try {
+    $mediaAsset = json_decode((string) file_get_contents($root.'/schemas/v1/media/asset.json'), true, flags: JSON_THROW_ON_ERROR);
+    $mediaProblem = json_decode((string) file_get_contents($root.'/schemas/v1/media/problem.json'), true, flags: JSON_THROW_ON_ERROR);
+    $tier1 = json_decode((string) file_get_contents($root.'/openapi/tier1.json'), true, flags: JSON_THROW_ON_ERROR);
+    $expectedMediaTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/avif',
+        'application/pdf',
+        'video/mp4',
+        'video/webm',
+        'audio/mpeg',
+        'audio/wav',
+        'audio/ogg',
+        'text/plain',
+        'text/markdown',
+        'text/html',
+        'text/csv',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.sqlite3',
+    ];
+    $privateDocumentTypes = array_slice($expectedMediaTypes, 11);
+
+    if (($mediaAsset['properties']['mime']['enum'] ?? null) !== $expectedMediaTypes) {
+        $errors[] = 'Media asset MIME types must include the existing public allowlist and the finite private document-vault allowlist.';
+    }
+    if (($mediaProblem['properties']['type']['enum'] ?? null) !== ['unauthorized', 'validation_failed', 'media_not_found', 'media_object_not_found', 'published_media_immutable', 'media_not_publishable', 'media_delete_failed']) {
+        $errors[] = 'Media problems must expose the finite private-delete and private-document publication failure types.';
+    }
+
+    $upload = $tier1['paths']['/v1/sites/{site}/media']['post'] ?? [];
+    $uploadBoundary = $upload['x-magic-html-media-boundary'] ?? [];
+    if (($upload['security'] ?? null) !== [['serviceBearer' => []]]
+        || ($uploadBoundary['private_document_mime_types'] ?? null) !== $privateDocumentTypes
+        || ($uploadBoundary['private_document_delivery'] ?? null) !== 'authenticated_attachment'
+        || ($uploadBoundary['private_document_publication'] ?? null) !== 'forbidden'
+        || ($uploadBoundary['content_processing'] ?? null) !== 'none') {
+        $errors[] = 'Media private documents must be authenticated opaque attachments and remain outside the publication surface.';
+    }
+
+    $delete = $tier1['paths']['/v1/sites/{site}/media/{media}']['delete'] ?? [];
+    $deleteBoundary = $delete['x-magic-html-private-delete'] ?? [];
+    $deleteResponses = array_keys($delete['responses'] ?? []);
+    sort($deleteResponses);
+    if (($delete['operationId'] ?? null) !== 'deletePrivateMedia'
+        || ($delete['security'] ?? null) !== [['serviceBearer' => []]]
+        || isset($delete['requestBody'])
+        || $deleteResponses !== [204, 401, 404, 409, 422, 503]
+        || ($deleteBoundary['confirmation_required'] ?? null) !== true
+        || ($deleteBoundary['accepts_file'] ?? null) !== false
+        || ($deleteBoundary['published_assets_immutable'] ?? null) !== true
+        || ($deleteBoundary['success_requires'] ?? null) !== ['object_absent', 'metadata_absent']
+        || ($deleteBoundary['failure_visibility'] ?? null) !== 'not_readable_or_publishable'
+        || ($deleteBoundary['retryable_failure_status'] ?? null) !== 503) {
+        $errors[] = 'Media private delete must be authenticated, confirmation-required, bodyless, published-immutable, fail-closed, and retryable.';
+    }
+
+    $publish = $tier1['paths']['/v1/sites/{site}/media/{media}/publish']['post'] ?? [];
+    $publishResponses = array_keys($publish['responses'] ?? []);
+    sort($publishResponses);
+    if (($publish['operationId'] ?? null) !== 'publishMedia'
+        || ($publish['security'] ?? null) !== [['serviceBearer' => []]]
+        || $publishResponses !== [200, 401, 404, 409]) {
+        $errors[] = 'Media publication must be service-authenticated and expose the private-document 409 boundary.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Media contracts: %s', $exception->getMessage());
+}
+
+$composerAstDocuments = [
+    'schemas/v1/composer-ast/applied-operation.json',
+    'schemas/v1/composer-ast/artifact.json',
+    'schemas/v1/composer-ast/ast-document.json',
+    'schemas/v1/composer-ast/ast-item.json',
+    'schemas/v1/composer-ast/discovery.json',
+    'schemas/v1/composer-ast/mutation-result.json',
+    'schemas/v1/composer-ast/non-root-pointer.json',
+    'schemas/v1/composer-ast/operation.json',
+    'schemas/v1/composer-ast/operations-request.json',
+    'schemas/v1/composer-ast/pointer.json',
+    'schemas/v1/composer-ast/restore-request.json',
+    'schemas/v1/composer-ast/revision-history.json',
+    'schemas/v1/composer-ast/revision.json',
+    'schemas/v1/composer-ast/snapshot.json',
+];
+
+foreach ($composerAstDocuments as $relativePath) {
+    if (! in_array($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relativePath), $jsonFiles, true)) {
+        $errors[] = sprintf('Missing Composer AST contract document %s', $relativePath);
+    }
+}
+
+try {
+    $composerAstSchemas = [];
+    foreach ($composerAstDocuments as $relativePath) {
+        $composerAstSchemas[basename($relativePath)] = json_decode((string) file_get_contents($root.'/'.$relativePath), true, flags: JSON_THROW_ON_ERROR);
+    }
+
+    $composerAstFixture = static function (string $filename) use ($root): array {
+        return json_decode(
+            (string) file_get_contents($root.'/tests/fixtures/composer-ast/'.$filename),
+            true,
+            flags: JSON_THROW_ON_ERROR,
+        );
+    };
+    $composerAstClosed = static function (array $value, array $required, array $properties): bool {
+        return array_diff($required, array_keys($value)) === []
+            && array_diff(array_keys($value), array_keys($properties)) === [];
+    };
+    $composerAstPatternMatches = static function (mixed $value, mixed $pattern): bool {
+        return is_string($value)
+            && is_string($pattern)
+            && preg_match('~'.$pattern.'~D', $value) === 1;
+    };
+
+    $artifactSchema = $composerAstSchemas['artifact.json'];
+    $discoverySchema = $composerAstSchemas['discovery.json'];
+    $snapshotSchema = $composerAstSchemas['snapshot.json'];
+    $pointerSchema = $composerAstSchemas['pointer.json'];
+    $nonRootPointerSchema = $composerAstSchemas['non-root-pointer.json'];
+    $operationSchema = $composerAstSchemas['operation.json'];
+    $operationsRequestSchema = $composerAstSchemas['operations-request.json'];
+    $mutationResultSchema = $composerAstSchemas['mutation-result.json'];
+    $revisionSchema = $composerAstSchemas['revision.json'];
+    $revisionHistorySchema = $composerAstSchemas['revision-history.json'];
+    $restoreRequestSchema = $composerAstSchemas['restore-request.json'];
+
+    if (($artifactSchema['additionalProperties'] ?? null) !== false
+        || ($artifactSchema['properties']['public_id']['minLength'] ?? null) !== 8
+        || ($artifactSchema['properties']['public_id']['maxLength'] ?? null) !== 200
+        || isset($artifactSchema['properties']['public_id']['format'])
+        || isset($artifactSchema['properties']['public_id']['pattern'])
+        || ! str_contains((string) ($artifactSchema['description'] ?? ''), 'opaque')
+        || ($artifactSchema['properties']['kind']['enum'] ?? null) !== ['page', 'section', 'component']) {
+        $errors[] = 'Composer AST artifacts must use closed bounded metadata and an opaque, non-database public identifier.';
+    }
+    if (($discoverySchema['properties']['contract_version']['const'] ?? null) !== '1.0'
+        || ($discoverySchema['properties']['data']['maxItems'] ?? null) !== 100
+        || isset($discoverySchema['properties']['data']['items']['properties']['document'])) {
+        $errors[] = 'Composer AST discovery must be contract 1.0, bounded to 100 metadata-only artifacts, and omit document bodies.';
+    }
+    if (($snapshotSchema['properties']['data']['properties']['document']['$ref'] ?? null) !== 'ast-document.json'
+        || ($snapshotSchema['properties']['data']['properties']['revision']['minimum'] ?? null) !== 0
+        || ($snapshotSchema['properties']['data']['properties']['etag']['pattern'] ?? null) !== '^"(0|[1-9][0-9]*)"$') {
+        $errors[] = 'Composer AST snapshots must expose the full open AST with an integer revision and its strong ETag.';
+    }
+    if (($composerAstSchemas['ast-document.json']['type'] ?? null) !== 'object'
+        || ($composerAstSchemas['ast-document.json']['minProperties'] ?? null) !== 1
+        || ($composerAstSchemas['ast-document.json']['additionalProperties'] ?? true) === false
+        || ! str_contains((string) ($composerAstSchemas['ast-document.json']['description'] ?? ''), 'owning Composer host')) {
+        $errors[] = 'Composer AST document transport must stay vocabulary-neutral while assigning finite grammar validation to the owning host.';
+    }
+
+    $pointerPattern = $pointerSchema['pattern'] ?? null;
+    foreach (['', '/', '/children/0', '/children/0/children/12'] as $acceptedPointer) {
+        if (! $composerAstPatternMatches($acceptedPointer, $pointerPattern)) {
+            $errors[] = sprintf('Composer AST pointer must accept revision-local fixture %s.', json_encode($acceptedPointer));
+        }
+    }
+    foreach (['children/0', '/items/0', '/children/01', '/children/-1'] as $rejectedPointer) {
+        if ($composerAstPatternMatches($rejectedPointer, $pointerPattern)) {
+            $errors[] = sprintf('Composer AST pointer must reject non-canonical fixture %s.', json_encode($rejectedPointer));
+        }
+    }
+    $nonRootPointerPattern = $nonRootPointerSchema['pattern'] ?? null;
+    if (! $composerAstPatternMatches('/children/0', $nonRootPointerPattern)
+        || $composerAstPatternMatches('', $nonRootPointerPattern)
+        || $composerAstPatternMatches('/', $nonRootPointerPattern)) {
+        $errors[] = 'Composer AST move/remove/duplicate targets must identify a non-root positional item.';
+    }
+
+    $expectedOperationShapes = [
+        'insert' => [['op', 'parent', 'node'], ['index', 'node', 'op', 'parent']],
+        'move' => [['op', 'target', 'parent'], ['index', 'op', 'parent', 'target']],
+        'update' => [['op', 'target', 'patch'], ['op', 'patch', 'target']],
+        'remove' => [['op', 'target'], ['op', 'target']],
+        'duplicate' => [['op', 'target'], ['op', 'target']],
+    ];
+    $actualOperationNames = [];
+    foreach ($operationSchema['oneOf'] ?? [] as $operationVariant) {
+        $operationName = $operationVariant['properties']['op']['const'] ?? null;
+        if (! is_string($operationName) || ! isset($expectedOperationShapes[$operationName])) {
+            continue;
+        }
+        $actualOperationNames[] = $operationName;
+        [$expectedRequired, $expectedProperties] = $expectedOperationShapes[$operationName];
+        $actualRequired = $operationVariant['required'] ?? [];
+        $actualProperties = array_keys($operationVariant['properties'] ?? []);
+        sort($actualProperties);
+        if (($operationVariant['additionalProperties'] ?? null) !== false
+            || $actualRequired !== $expectedRequired
+            || $actualProperties !== $expectedProperties) {
+            $errors[] = sprintf('Composer AST %s must expose exactly its finite operation fields.', $operationName);
+        }
+    }
+    if ($actualOperationNames !== array_keys($expectedOperationShapes)
+        || ($operationSchema['oneOf'][2]['properties']['patch']['not']['required'] ?? null) !== ['children']) {
+        $errors[] = 'Composer AST operation union must be exactly insert, move, update, remove, and duplicate, with children excluded from update patches.';
+    }
+
+    $operationsRequestProperties = array_keys($operationsRequestSchema['properties'] ?? []);
+    sort($operationsRequestProperties);
+    if (($operationsRequestSchema['additionalProperties'] ?? null) !== false
+        || ($operationsRequestSchema['properties']['contract_version']['const'] ?? null) !== '1.0'
+        || $operationsRequestProperties !== ['base_revision', 'contract_version', 'operations']
+        || ($operationsRequestSchema['properties']['base_revision']['minimum'] ?? null) !== 0
+        || ($operationsRequestSchema['properties']['operations']['minItems'] ?? null) !== 1
+        || ($operationsRequestSchema['properties']['operations']['maxItems'] ?? null) !== 25
+        || str_contains(strtolower((string) json_encode($operationsRequestSchema['properties'])), 'idempotency')) {
+        $errors[] = 'Composer AST operation bodies must contain only contract_version, base_revision, and 1–25 operations; idempotency remains an HTTP header.';
+    }
+    $restoreRequestProperties = array_keys($restoreRequestSchema['properties'] ?? []);
+    sort($restoreRequestProperties);
+    if (($restoreRequestSchema['additionalProperties'] ?? null) !== false
+        || $restoreRequestProperties !== ['base_revision', 'contract_version', 'restore_revision']
+        || ! str_contains((string) ($restoreRequestSchema['description'] ?? ''), 'never overwrites')
+        || str_contains(strtolower((string) json_encode($restoreRequestSchema['properties'])), 'idempotency')) {
+        $errors[] = 'Composer AST restore must be a closed append-only request and keep idempotency in its HTTP header.';
+    }
+    $mutationProperties = $mutationResultSchema['properties']['data']['properties'] ?? [];
+    if (! isset($mutationProperties['head_revision'], $mutationProperties['head_etag'])
+        || ($mutationProperties['operation_id']['maxLength'] ?? null) !== 200
+        || ($mutationProperties['applied']['maxItems'] ?? null) !== 25
+        || ($mutationProperties['document']['$ref'] ?? null) !== 'ast-document.json') {
+        $errors[] = 'Composer AST mutation results must distinguish committed and current heads, retain the bounded operation ID, and return the validated document.';
+    }
+    if (($revisionHistorySchema['properties']['data']['properties']['revisions']['minItems'] ?? null) !== 1
+        || ($revisionHistorySchema['properties']['data']['properties']['revisions']['maxItems'] ?? null) !== 100
+        || isset($revisionSchema['properties']['document'])
+        || ($revisionSchema['properties']['action']['enum'] ?? null) !== ['created', 'bootstrap', 'host_update', 'operations', 'restore']) {
+        $errors[] = 'Composer AST revision discovery must be bounded, metadata-only, and expose only finite append-only actions.';
+    }
+
+    $composerAstArtifactMatches = static function (mixed $value) use ($artifactSchema, $composerAstClosed): bool {
+        if (! is_array($value) || array_is_list($value)
+            || ! $composerAstClosed($value, $artifactSchema['required'], $artifactSchema['properties'])) {
+            return false;
+        }
+
+        return is_string($value['public_id'])
+            && strlen($value['public_id']) >= 8
+            && strlen($value['public_id']) <= 200
+            && is_string($value['key'])
+            && $value['key'] !== ''
+            && strlen($value['key']) <= 120
+            && is_string($value['name'])
+            && $value['name'] !== ''
+            && strlen($value['name']) <= 180
+            && in_array($value['kind'], ['page', 'section', 'component'], true)
+            && in_array($value['status'], ['draft', 'published'], true);
+    };
+    $composerAstPointerMatches = static fn (mixed $value, bool $rootAllowed = true): bool => $composerAstPatternMatches(
+        $value,
+        $rootAllowed ? $pointerPattern : $nonRootPointerPattern,
+    );
+    $composerAstOperationMatches = static function (mixed $operation) use ($expectedOperationShapes, $composerAstClosed, $composerAstPointerMatches): bool {
+        if (! is_array($operation) || array_is_list($operation) || ! is_string($operation['op'] ?? null)) {
+            return false;
+        }
+        $name = $operation['op'];
+        if (! isset($expectedOperationShapes[$name])) {
+            return false;
+        }
+        [$required, $properties] = $expectedOperationShapes[$name];
+        $propertyMap = array_fill_keys($properties, true);
+        if (! $composerAstClosed($operation, $required, $propertyMap)) {
+            return false;
+        }
+        if (isset($operation['index']) && (! is_int($operation['index']) || $operation['index'] < 0)) {
+            return false;
+        }
+        if (isset($operation['parent']) && ! $composerAstPointerMatches($operation['parent'])) {
+            return false;
+        }
+        if (isset($operation['target'])) {
+            $rootAllowed = $name === 'update';
+            if (! $composerAstPointerMatches($operation['target'], $rootAllowed)) {
+                return false;
+            }
+        }
+        if ($name === 'insert' && (! is_array($operation['node']) || $operation['node'] === [] || array_is_list($operation['node']))) {
+            return false;
+        }
+        if ($name === 'update' && (! is_array($operation['patch'])
+            || ($operation['patch'] !== [] && array_is_list($operation['patch']))
+            || array_key_exists('children', $operation['patch']))) {
+            return false;
+        }
+
+        return true;
+    };
+    $composerAstOperationsRequestMatches = static function (mixed $request) use ($operationsRequestSchema, $composerAstClosed, $composerAstOperationMatches): bool {
+        if (! is_array($request) || array_is_list($request)
+            || ! $composerAstClosed($request, $operationsRequestSchema['required'], $operationsRequestSchema['properties'])
+            || ($request['contract_version'] ?? null) !== '1.0'
+            || ! is_int($request['base_revision'] ?? null)
+            || $request['base_revision'] < 0
+            || ! is_array($request['operations'] ?? null)
+            || count($request['operations']) < 1
+            || count($request['operations']) > 25) {
+            return false;
+        }
+
+        foreach ($request['operations'] as $operation) {
+            if (! $composerAstOperationMatches($operation)) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    $operationsRequestFixture = $composerAstFixture('operations-request.json');
+    if (! $composerAstOperationsRequestMatches($operationsRequestFixture)
+        || array_column($operationsRequestFixture['operations'], 'op') !== ['duplicate', 'update', 'move', 'insert', 'remove']
+        || $composerAstOperationsRequestMatches($composerAstFixture('invalid-idempotency-in-body.json'))
+        || $composerAstOperationsRequestMatches($composerAstFixture('invalid-unbounded-agent-operation.json'))
+        || $composerAstOperationsRequestMatches($composerAstFixture('invalid-pointer.json'))
+        || $composerAstOperationsRequestMatches([
+            'contract_version' => '1.0',
+            'base_revision' => 3,
+            'operations' => array_fill(0, 26, ['op' => 'remove', 'target' => '/children/0']),
+        ])) {
+        $errors[] = 'Composer AST operation fixtures must prove the five finite operations, closed body, canonical pointers, header-only idempotency, and 25-operation limit.';
+    }
+
+    $composerAstEtagMatches = static fn (mixed $etag, int $revision): bool => $etag === '"'.$revision.'"';
+    $composerAstTimestampMatches = static function (mixed $timestamp): bool {
+        if (! is_string($timestamp)) {
+            return false;
+        }
+        $parsed = DateTimeImmutable::createFromFormat(DATE_ATOM, $timestamp);
+
+        return $parsed !== false && $parsed->format(DATE_ATOM) === $timestamp;
+    };
+    $composerAstMutationMatches = static function (mixed $result) use (
+        $mutationResultSchema,
+        $composerAstClosed,
+        $composerAstArtifactMatches,
+        $composerAstEtagMatches,
+        $composerAstPatternMatches,
+        $pointerPattern,
+        $composerAstTimestampMatches,
+    ): bool {
+        if (! is_array($result) || array_is_list($result)
+            || ! $composerAstClosed($result, $mutationResultSchema['required'], $mutationResultSchema['properties'])
+            || ($result['contract_version'] ?? null) !== '1.0'
+            || ! is_array($result['data'] ?? null)) {
+            return false;
+        }
+        $data = $result['data'];
+        $dataSchema = $mutationResultSchema['properties']['data'];
+        if (! $composerAstClosed($data, $dataSchema['required'], $dataSchema['properties'])
+            || ! $composerAstArtifactMatches($data['artifact'])
+            || ! is_string($data['operation_id'])
+            || strlen($data['operation_id']) < 1
+            || strlen($data['operation_id']) > 200
+            || preg_match('/^[A-Za-z0-9][A-Za-z0-9._:-]*$/', $data['operation_id']) !== 1
+            || ! is_int($data['base_revision'])
+            || $data['base_revision'] < 0
+            || ! is_int($data['revision'])
+            || $data['revision'] !== $data['base_revision'] + 1
+            || ! is_int($data['head_revision'])
+            || $data['head_revision'] < $data['revision']
+            || ! $composerAstEtagMatches($data['etag'], $data['revision'])
+            || ! $composerAstEtagMatches($data['head_etag'], $data['head_revision'])
+            || ! is_string($data['document_hash'])
+            || preg_match('/^[a-f0-9]{64}$/', $data['document_hash']) !== 1
+            || ! is_array($data['document'])
+            || $data['document'] === []
+            || array_is_list($data['document'])
+            || ! is_array($data['applied'])
+            || count($data['applied']) > 25
+            || ! $composerAstTimestampMatches($data['created_at'])) {
+            return false;
+        }
+        foreach ($data['applied'] as $index => $applied) {
+            if (! is_array($applied)
+                || array_is_list($applied)
+                || array_keys($applied) !== ['operation_index', 'op', 'pointer']
+                || $applied['operation_index'] !== $index
+                || ! in_array($applied['op'], ['insert', 'move', 'update', 'remove', 'duplicate'], true)
+                || ($applied['op'] === 'remove'
+                    ? $applied['pointer'] !== null
+                    : ! $composerAstPatternMatches($applied['pointer'], $pointerPattern))) {
+                return false;
+            }
+        }
+        if ($data['action'] === 'operations') {
+            return $data['restored_from_revision'] === null && count($data['applied']) >= 1;
+        }
+        if ($data['action'] === 'restore') {
+            return is_int($data['restored_from_revision'])
+                && $data['restored_from_revision'] >= 0
+                && $data['applied'] === [];
+        }
+
+        return false;
+    };
+
+    $operationsResultFixture = $composerAstFixture('operations-result.json');
+    $restoreResultFixture = $composerAstFixture('restore-result.json');
+    if (! $composerAstMutationMatches($operationsResultFixture)
+        || ! $composerAstMutationMatches($restoreResultFixture)
+        || ($operationsResultFixture['data']['document']['children'][0]['attrs']['data-design-key'] ?? null) !== 'title-primary') {
+        $errors[] = 'Composer AST mutation fixtures must prove atomic structural results, current-head metadata, and style identity preservation.';
+    }
+
+    $restoreRequestFixture = $composerAstFixture('restore-request.json');
+    $composerAstRestoreRequestMatches = static function (mixed $request) use ($restoreRequestSchema, $composerAstClosed): bool {
+        return is_array($request)
+            && ! array_is_list($request)
+            && $composerAstClosed($request, $restoreRequestSchema['required'], $restoreRequestSchema['properties'])
+            && ($request['contract_version'] ?? null) === '1.0'
+            && is_int($request['base_revision'] ?? null)
+            && $request['base_revision'] >= 0
+            && is_int($request['restore_revision'] ?? null)
+            && $request['restore_revision'] >= 0;
+    };
+    if (! $composerAstRestoreRequestMatches($restoreRequestFixture)
+        || $composerAstRestoreRequestMatches($composerAstFixture('invalid-restore-overwrite.json'))
+        || $restoreResultFixture['data']['base_revision'] !== $restoreRequestFixture['base_revision']
+        || $restoreResultFixture['data']['revision'] !== $restoreRequestFixture['base_revision'] + 1
+        || $restoreResultFixture['data']['restored_from_revision'] !== $restoreRequestFixture['restore_revision']) {
+        $errors[] = 'Composer AST restore fixtures must copy a selected old document into a new revision without accepting an overwrite target.';
+    }
+
+    $discoveryFixture = $composerAstFixture('discovery.json');
+    $discoveryItemSchema = $discoverySchema['properties']['data']['items'];
+    if (($discoveryFixture['contract_version'] ?? null) !== '1.0'
+        || ! is_array($discoveryFixture['data'] ?? null)
+        || count($discoveryFixture['data']) > 100
+        || ! $composerAstClosed($discoveryFixture['data'][0], $discoveryItemSchema['required'], $discoveryItemSchema['properties'])
+        || isset($discoveryFixture['data'][0]['document'])
+        || ! $composerAstEtagMatches($discoveryFixture['data'][0]['etag'], $discoveryFixture['data'][0]['revision'])) {
+        $errors[] = 'Composer AST discovery fixture must remain bounded, metadata-only, and revision/ETag coherent.';
+    }
+
+    $snapshotFixture = $composerAstFixture('snapshot.json');
+    $snapshotDataSchema = $snapshotSchema['properties']['data'];
+    if (($snapshotFixture['contract_version'] ?? null) !== '1.0'
+        || ! $composerAstClosed($snapshotFixture['data'], $snapshotDataSchema['required'], $snapshotDataSchema['properties'])
+        || ! $composerAstArtifactMatches($snapshotFixture['data']['artifact'])
+        || ! $composerAstEtagMatches($snapshotFixture['data']['etag'], $snapshotFixture['data']['revision'])
+        || ! is_array($snapshotFixture['data']['document'])
+        || ($snapshotFixture['data']['document']['role'] ?? null) !== 'Page') {
+        $errors[] = 'Composer AST snapshot fixture must bind one full Vocabulary AST document to its integer revision and strong ETag.';
+    }
+
+    $historyFixture = $composerAstFixture('revision-history.json');
+    $historyDataSchema = $revisionHistorySchema['properties']['data'];
+    $historyValid = ($historyFixture['contract_version'] ?? null) === '1.0'
+        && is_array($historyFixture['data'] ?? null)
+        && $composerAstClosed($historyFixture['data'], $historyDataSchema['required'], $historyDataSchema['properties'])
+        && $composerAstArtifactMatches($historyFixture['data']['artifact'])
+        && is_int($historyFixture['data']['head_revision'])
+        && is_array($historyFixture['data']['revisions'])
+        && count($historyFixture['data']['revisions']) <= 100
+        && ($historyFixture['data']['revisions'][0]['revision'] ?? null) === $historyFixture['data']['head_revision'];
+    $historyByRevision = [];
+    $previousRevision = PHP_INT_MAX;
+    foreach ($historyFixture['data']['revisions'] ?? [] as $revision) {
+        if (! is_array($revision)
+            || array_is_list($revision)
+            || ! $composerAstClosed($revision, $revisionSchema['required'], $revisionSchema['properties'])
+            || isset($revision['document'])
+            || ! is_int($revision['revision'])
+            || $revision['revision'] >= $previousRevision
+            || ! is_string($revision['document_hash'])
+            || preg_match('/^[a-f0-9]{64}$/', $revision['document_hash']) !== 1
+            || ! $composerAstTimestampMatches($revision['created_at'])) {
+            $historyValid = false;
+            break;
+        }
+        $previousRevision = $revision['revision'];
+        $historyByRevision[$revision['revision']] = $revision;
+        $action = $revision['action'] ?? null;
+        if ($action === 'created') {
+            $historyValid = $historyValid && $revision['parent_revision'] === null && $revision['operation_id'] === null && $revision['restored_from_revision'] === null;
+        } elseif ($action === 'bootstrap') {
+            $historyValid = $historyValid && $revision['operation_id'] === null && $revision['restored_from_revision'] === null;
+        } elseif ($action === 'host_update') {
+            $historyValid = $historyValid && is_int($revision['parent_revision']) && $revision['operation_id'] === null && $revision['restored_from_revision'] === null;
+        } elseif ($action === 'operations') {
+            $historyValid = $historyValid && is_int($revision['parent_revision']) && is_string($revision['operation_id']) && $revision['restored_from_revision'] === null;
+        } elseif ($action === 'restore') {
+            $historyValid = $historyValid && is_int($revision['parent_revision']) && is_string($revision['operation_id']) && is_int($revision['restored_from_revision']);
+        } else {
+            $historyValid = false;
+        }
+    }
+    $restoredRevision = $historyByRevision[$restoreResultFixture['data']['revision']] ?? null;
+    $sourceRevision = $historyByRevision[$restoreRequestFixture['restore_revision']] ?? null;
+    if (! $historyValid
+        || ! is_array($restoredRevision)
+        || ! is_array($sourceRevision)
+        || $restoredRevision['action'] !== 'restore'
+        || $restoredRevision['parent_revision'] !== $restoreRequestFixture['base_revision']
+        || $restoredRevision['document_hash'] !== $sourceRevision['document_hash']
+        || $restoreResultFixture['data']['document_hash'] !== $sourceRevision['document_hash']) {
+        $errors[] = 'Composer AST history fixtures must prove newest-first bounded metadata and append-only restoration that retains the source revision.';
+    }
+} catch (JsonException $exception) {
+    $errors[] = sprintf('Unable to inspect Composer AST contracts: %s', $exception->getMessage());
 }
 
 if ($errors !== []) {

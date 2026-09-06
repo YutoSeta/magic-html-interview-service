@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/connection-create-request.json",
+  "title": "Create Channel connection request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "provider", "credentials"],
+  "properties": {
+    "name": {"type": "string", "minLength": 1, "maxLength": 100},
+    "provider": {"enum": ["x", "threads", "instagram", "line", "youtube"]},
+    "account_ref": {"type": ["string", "null"], "maxLength": 255},
+    "configuration": {"type": "object", "maxProperties": 0, "additionalProperties": false},
+    "credentials": {"$ref": "credentials.json"}
+  },
+  "allOf": [
+    {"if": {"properties": {"provider": {"const": "line"}}, "required": ["provider"]}, "then": {"properties": {"credentials": {"$ref": "#/definitions/line_credentials"}}}, "else": {"properties": {"credentials": {"$ref": "#/definitions/access_token_credentials"}}}},
+    {"if": {"properties": {"provider": {"enum": ["threads", "instagram"]}}, "required": ["provider"]}, "then": {"required": ["account_ref"], "properties": {"account_ref": {"type": "string", "minLength": 1, "maxLength": 255}}}}
+  ],
+  "definitions": {
+    "access_token_credentials": {"type": "object", "additionalProperties": false, "required": ["access_token"], "properties": {"access_token": {"type": "string", "minLength": 8, "maxLength": 8192, "writeOnly": true}}},
+    "line_credentials": {"type": "object", "additionalProperties": false, "required": ["channel_access_token"], "properties": {"channel_access_token": {"type": "string", "minLength": 8, "maxLength": 8192, "writeOnly": true}}}
+  }
+}

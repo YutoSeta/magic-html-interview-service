@@ -1,0 +1,54 @@
+{
+  "profile": "balanced-order-richness-v1",
+  "subject_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+  "objective_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+  "rubric_digest": "33993231fc66fd321d37cdb7187c2e0017a311eed9acfab31c31b75adf69c44d",
+  "evidence_digest": "8ed6351c12f9d6915adfa685aab2c270855f58af31ced9d345e8a291dc330b9a",
+  "coverage": {
+    "required_ids": ["cdp:390", "cdp:768", "cdp:1440", "shot:390", "shot:768", "shot:1440", "objective:brief"],
+    "observed_ids": ["cdp:390", "cdp:768", "cdp:1440", "shot:390", "shot:768", "shot:1440", "objective:brief"]
+  },
+  "browser": {
+    "subject_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "evidence_digest": "afb2331b0c166c5e9dceec896d6f4fdb3292b32b0b9a3803cff466d3092ebb75",
+    "accessibility": {"score": 86, "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]},
+    "gates": {
+      "readability": {"outcome": "passed", "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]},
+      "accessibility": {"outcome": "passed", "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]},
+      "responsive_integrity": {"outcome": "passed", "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]},
+      "operability": {"outcome": "passed", "evidence_ids": ["cdp:390", "cdp:768", "cdp:1440"]}
+    }
+  },
+  "screenshot_reviewer": {
+    "subject_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "evidence_digest": "59b32cd5864ab5a21108bb7138db9c968a0a847ce706456c36b22f56ffd3d3cc",
+    "order": {
+      "hierarchy": {"score": 84, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]},
+      "alignment": {"score": 82, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]},
+      "spacing_rhythm": {"score": 81, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]},
+      "component_consistency": {"score": 83, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]},
+      "visual_system_consistency": {"score": 80, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]}
+    },
+    "richness": {
+      "useful_information_density": {"score": 79, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]},
+      "focal_variety": {"score": 78, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]},
+      "content_specificity": {"score": 82, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]},
+      "brand_distinctiveness": {"score": 77, "evidence_ids": ["shot:390", "shot:768", "shot:1440"]}
+    },
+    "gates": {
+      "readability": {"outcome": "passed", "evidence_ids": ["shot:390", "shot:768", "shot:1440"]},
+      "visual_hierarchy": {"outcome": "passed", "evidence_ids": ["shot:390", "shot:768", "shot:1440"]}
+    }
+  },
+  "agentic": {
+    "subject_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "objective_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+    "rubric_digest": "33993231fc66fd321d37cdb7187c2e0017a311eed9acfab31c31b75adf69c44d",
+    "evidence_digest": "ff4acfa1a7710115f18f9215e9294bdad551ffeabede59ed47d4cf0e9cf4a471",
+    "purpose_fit": {"score": 85, "evidence_ids": ["objective:brief", "shot:390", "shot:1440"]},
+    "gates": {
+      "information_priority": {"outcome": "passed", "evidence_ids": ["objective:brief", "shot:390", "shot:1440"]},
+      "primary_action_clarity": {"outcome": "passed", "evidence_ids": ["objective:brief", "shot:390", "shot:1440"]}
+    }
+  }
+}

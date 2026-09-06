@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/revision-history.json",
+  "title": "Bounded Composer AST revision history",
+  "type": "object",
+  "required": ["contract_version", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "data": {
+      "type": "object",
+      "required": ["artifact", "head_revision", "revisions"],
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {"$ref": "artifact.json"},
+        "head_revision": {"type": "integer", "minimum": 0},
+        "revisions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "description": "Newest-first append-only revision metadata. The full document remains available through the snapshot endpoint, not this bounded history.",
+          "items": {"$ref": "revision.json"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/neo-styler/author-request.json",
+  "title": "Author Site Request",
+  "description": "Authors every page of a site as HTML and CSS. The service derives the slots and the fixed parts from site_ast and content, shows the model the direction prose and the canvases, and has it write each page: the top page first, then a lead sub page chained off it (which fixes the shared parts' CSS), then the remaining pages in parallel, then the first item of each collection; other items are expanded without a model. Every page is judged (browser render at 320px and 1280px, slot usage, links) and regenerated with the findings until it passes or retry_limit is spent. Images are returned as requests, not generated here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "site_ast", "content", "design_context"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "site_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$", "description": "Caller-owned identity carried into the snapshot and used as the Forms Service site key." },
+    "site_ast": { "$ref": "./site-ast.json" },
+    "content": { "$ref": "./content.json" },
+    "design_context": { "$ref": "./common.json#/$defs/designContext" },
+    "execution_profile": { "$ref": "./common.json#/$defs/executionProfile" },
+    "retry_limit": { "type": "integer", "minimum": 0, "maximum": 3, "default": 2, "description": "How many times a failed page may be regenerated with the judge's findings." },
+    "page_keys": { "type": "array", "minItems": 1, "maxItems": 40, "items": { "type": "string", "maxLength": 80 }, "description": "Author only these pages (by key; collection items as <collection>/<id>). The top page is always authored first when it is included, because later pages reuse its fixed-part CSS." }
+  }
+}

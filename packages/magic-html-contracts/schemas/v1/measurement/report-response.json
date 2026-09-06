@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/measurement/report-response.json",
+  "title": "Measurement report response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "provider", "operation", "data"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "provider": {"enum": ["ga4", "gsc", "gbp"]},
+    "operation": {"enum": ["ga4.report", "gsc.report", "gbp.performance"]},
+    "data": {"type": ["object", "array"]}
+  },
+  "allOf": [
+    {"if": {"properties": {"provider": {"const": "ga4"}}, "required": ["provider"]}, "then": {"properties": {"operation": {"const": "ga4.report"}}}},
+    {"if": {"properties": {"provider": {"const": "gsc"}}, "required": ["provider"]}, "then": {"properties": {"operation": {"const": "gsc.report"}}}},
+    {"if": {"properties": {"provider": {"const": "gbp"}}, "required": ["provider"]}, "then": {"properties": {"operation": {"const": "gbp.performance"}}}}
+  ]
+}

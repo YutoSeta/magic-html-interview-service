@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/design-context/common.json",
+  "title": "Design Context Shared Definitions",
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "executionProfile": {
+      "type": "string",
+      "enum": ["fast", "balanced", "quality"],
+      "default": "fast",
+      "description": "Stable server-owned execution profile: fast is the latency/cost default, balanced increases reasoning, and quality prioritizes output quality. Concrete provider model names are not caller-controlled."
+    },
+    "canvasViewport": {
+      "type": "string",
+      "enum": ["desktop", "mobile"],
+      "default": "desktop",
+      "description": "Which screen the canvas depicts. desktop is the original single-image behaviour. mobile is a portrait phone first view; a landing page is rendered mobile first, then desktop with the mobile canvas passed as style_reference so both share one palette and composition."
+    },
+    "canvasFraming": {
+      "type": "string",
+      "enum": ["site-top", "landing"],
+      "default": "site-top",
+      "description": "What the first view contains. site-top: a header with navigation and the top page's first view. landing: a logo-and-CV-button header, a first view with one primary CV button, and a fixed CV bar overlapping the bottom edge; no navigation list."
+    },
+    "prose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "sha256"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 20000 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind", "mime", "content_base64", "sha256", "size", "metadata"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "kind": { "enum": ["design-dna", "design-direction", "canvas-brief", "design-canvas", "decorative-asset-plan", "decorative-asset"] },
+        "mime": { "enum": ["application/json", "text/markdown", "image/png", "image/jpeg", "image/webp"] },
+        "content_base64": { "type": "string", "minLength": 1, "maxLength": 22369624, "contentEncoding": "base64" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "size": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "metadata": { "type": "object", "maxProperties": 20 }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "model", "provider_request_count", "provider_retry_count", "duration_ms", "input_tokens", "cached_input_tokens", "output_tokens", "reasoning_tokens", "images"],
+      "properties": {
+        "provider": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "model": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "provider_request_count": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "provider_retry_count": { "type": "integer", "minimum": 0 },
+        "duration_ms": { "type": "integer", "minimum": 0 },
+        "input_tokens": { "type": "integer", "minimum": 0 },
+        "cached_input_tokens": { "type": "integer", "minimum": 0 },
+        "output_tokens": { "type": "integer", "minimum": 0 },
+        "reasoning_tokens": { "type": "integer", "minimum": 0 },
+        "images": { "type": "integer", "minimum": 0, "maximum": 8 }
+      }
+    },
+    "jobEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "id", "operation", "status", "created_at", "updated_at"],
+      "properties": {
+        "contract_version": { "const": "1.0" },
+        "id": { "type": "string", "format": "uuid" },
+        "operation": { "enum": ["generate_design_dna", "generate_design_direction", "generate_canvas", "plan_decorative_assets", "generate_decorative_asset"] },
+        "status": { "enum": ["queued", "running", "succeeded", "failed"] },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "result": { "type": "object" },
+        "error": { "type": "object" }
+      }
+    },
+    "canvasReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mime", "content_base64", "sha256"],
+      "properties": {
+        "mime": { "enum": ["image/png", "image/jpeg", "image/webp"] },
+        "content_base64": { "type": "string", "minLength": 1, "maxLength": 22369624, "contentEncoding": "base64" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "assetSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "prompt", "role", "note", "size", "needs_alpha"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "prompt": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "role": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "note": { "type": "string", "maxLength": 1000 },
+        "size": { "enum": ["1024x1024", "1536x1024", "1024x1536"] },
+        "needs_alpha": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "profile": "layout-snapshot-delta-v1",
+  "change_id": "attach-browser-validation",
+  "reason": "Attach passed browser geometry validation.",
+  "operations": [
+    {
+      "sequence": 1,
+      "operation": "attach_validation",
+      "target": {
+        "kind": "snapshot",
+        "page_key": null
+      },
+      "before_digest": "81a9ca8348559d8c45fffc20fd09b1d60aad7edb1de7b23f8f662ef144ac0f4d",
+      "after_digest": "b828574dd5c3360b32277410fb5ef709b666ca5848c463417f93f096d3fd1208",
+      "summary": "Attach passed browser geometry validation."
+    }
+  ]
+}

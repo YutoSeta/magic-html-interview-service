@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/connection.json",
+  "title": "Channel connection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "tenant_id", "name", "provider", "account_ref", "configuration", "has_credentials", "version", "credential_version", "verification_status", "verified_at", "created_at", "updated_at"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 100},
+    "provider": {"enum": ["x", "threads", "instagram", "line", "youtube"]},
+    "account_ref": {"type": ["string", "null"], "maxLength": 255},
+    "configuration": {"type": "object", "maxProperties": 0, "additionalProperties": false},
+    "has_credentials": {"const": true},
+    "version": {"type": "integer", "minimum": 1},
+    "credential_version": {"type": "integer", "minimum": 1},
+    "verification_status": {"enum": ["unverified", "verified"]},
+    "verified_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

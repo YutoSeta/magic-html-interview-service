@@ -2,11 +2,250 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Magic HTML Tier 2 APIs",
-    "version": "1.3.0",
-    "description": "Immutable publication assembly, multi-page site composition, and deterministic presentation builders."
+    "version": "1.6.0",
+    "description": "Credential-isolated Knowledge source synchronization, immutable publication assembly, multi-page site composition, deterministic presentation builders, and approval-gated GitHub site changes."
   },
   "servers": [{"url": "/api"}],
   "paths": {
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/source-connections": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/KnowledgeBase"}],
+      "get": {
+        "tags": ["Knowledge Source"], "operationId": "listKnowledgeSourceConnections", "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Credential-free source connections", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/connection-list.json"}}}},
+          "401": {"$ref": "#/components/responses/KnowledgeSourceProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Knowledge Source"], "operationId": "createKnowledgeSourceConnection", "security": [{"serviceBearer": []}],
+        "description": "Register a Drive, RSS, WordPress, S3-compatible Storage, or LINE WORKS source. Credentials are write-only and encrypted at rest.",
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/connection-create-request.json"}}}},
+        "responses": {
+          "201": {"description": "Credential-free source connection", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/connection.json"}}}},
+          "401": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "409": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "422": {"$ref": "#/components/responses/KnowledgeSourceProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/source-connections/{connection}": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/KnowledgeBase"}, {"$ref": "#/components/parameters/KnowledgeSourceConnection"}],
+      "get": {
+        "tags": ["Knowledge Source"], "operationId": "getKnowledgeSourceConnection", "security": [{"serviceBearer": []}],
+        "responses": {"200": {"description": "Credential-free source connection", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/connection.json"}}}}, "401": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "404": {"$ref": "#/components/responses/KnowledgeSourceProblem"}}
+      },
+      "patch": {
+        "tags": ["Knowledge Source"], "operationId": "updateKnowledgeSourceConnection", "security": [{"serviceBearer": []}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/connection-update-request.json"}}}},
+        "responses": {"200": {"description": "Updated credential-free source connection", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/connection.json"}}}}, "401": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "404": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "409": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "422": {"$ref": "#/components/responses/KnowledgeSourceProblem"}}
+      },
+      "delete": {
+        "tags": ["Knowledge Source"], "operationId": "deleteKnowledgeSourceConnection", "security": [{"serviceBearer": []}],
+        "description": "Delete a source only after pending ingestion is reconciled; indexed documents are deleted through the fixed Knowledge service connection.",
+        "responses": {"204": {"description": "Source and its indexed documents deleted"}, "401": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "404": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "409": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "502": {"$ref": "#/components/responses/KnowledgeSourceProblem"}}
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/source-connections/{connection}/sync-runs": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/KnowledgeBase"}, {"$ref": "#/components/parameters/KnowledgeSourceConnection"}],
+      "post": {
+        "tags": ["Knowledge Source"], "operationId": "createKnowledgeSourceSyncRun", "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/KnowledgeSourceIdempotencyKey"}],
+        "x-magic-html-source-boundary": {"drivers": ["google_drive", "rss", "wordpress", "storage", "line_works"], "credentials_encrypted": true, "public_https_egress_only": true, "knowledge_input": "multipart_file_bytes_and_bounded_metadata", "knowledge_url_from_service_config": true},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/sync-request.json"}}}},
+        "responses": {
+          "202": {"description": "Source sync queued or exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/sync-run.json"}}}},
+          "401": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "404": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "409": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "422": {"$ref": "#/components/responses/KnowledgeSourceProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/knowledge-bases/{knowledgeBase}/source-connections/{connection}/sync-runs/{syncRun}": {
+      "parameters": [{"$ref": "#/components/parameters/Tenant"}, {"$ref": "#/components/parameters/KnowledgeBase"}, {"$ref": "#/components/parameters/KnowledgeSourceConnection"}, {"$ref": "#/components/parameters/KnowledgeSourceSyncRun"}],
+      "get": {
+        "tags": ["Knowledge Source"], "operationId": "getKnowledgeSourceSyncRun", "security": [{"serviceBearer": []}],
+        "responses": {"200": {"description": "Current source sync state", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/sync-run.json"}}}}, "401": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "404": {"$ref": "#/components/responses/KnowledgeSourceProblem"}}
+      }
+    },
+    "/v1/source-connections/{connection}/webhooks/line-works": {
+      "parameters": [{"$ref": "#/components/parameters/KnowledgeSourceConnection"}],
+      "post": {
+        "tags": ["Knowledge Source"], "operationId": "ingestLineWorksKnowledgeSourceCallback",
+        "description": "Accept a bounded text-message callback only after exact-body HMAC-SHA256 verification, bot-ID matching, freshness validation, and digest deduplication. Processing is asynchronous.",
+        "security": [],
+        "parameters": [
+          {"name": "X-WORKS-BotId", "in": "header", "required": true, "schema": {"type": "string", "maxLength": 100}},
+          {"name": "X-WORKS-Signature", "in": "header", "required": true, "schema": {"type": "string", "maxLength": 200}}
+        ],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "description": "LINE WORKS callback envelope, bounded to 262144 bytes before parsing."}}}},
+        "responses": {
+          "202": {"description": "Signed callback accepted or deduplicated", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/knowledge-source/webhook-accepted.json"}}}},
+          "401": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "404": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "413": {"$ref": "#/components/responses/KnowledgeSourceProblem"}, "422": {"$ref": "#/components/responses/KnowledgeSourceProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/site-change-repositories": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"}
+      ],
+      "post": {
+        "tags": ["Site Change"],
+        "operationId": "registerOrProvisionSiteChangeRepository",
+        "description": "Register an existing repository or provision a new repository through a tenant-authorized GitHub App installation. The request never accepts a URL, host, token, installation token, or credential reference; GitHub and its API endpoint are fixed by the service.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/SiteChangeIdempotencyKey"}],
+        "x-magic-html-provider-boundary": {"providers": ["github"], "caller_selected_url": false, "caller_credentials": false, "fixed_api_endpoint": true},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/repository-request.json"}}}},
+        "responses": {
+          "201": {"description": "Tenant/site-scoped repository binding created, or the exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/repository.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "409": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "422": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "429": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "502": {"$ref": "#/components/responses/SiteChangeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/site-change-repositories/{repository}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteChangeRepository"}
+      ],
+      "get": {
+        "tags": ["Site Change"],
+        "operationId": "getSiteChangeRepository",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Credential-free repository binding", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/repository.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "404": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "429": {"$ref": "#/components/responses/SiteChangeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/site-change-repositories/{repository}/change-runs": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteChangeRepository"}
+      ],
+      "post": {
+        "tags": ["Site Change"],
+        "operationId": "claimAndRunSiteChange",
+        "description": "Atomically claim an exact base SHA and queue one isolated, disposable workspace run. Branch naming, Git operations, Codex invocation, and checks are service-owned. No arbitrary command, executable, ref, remote URL, provider option, or credential is accepted.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/SiteChangeIdempotencyKey"}],
+        "x-magic-html-execution-boundary": {"execution_profiles": ["site_content_v1"], "caller_selected_command": false, "caller_selected_ref": false, "caller_selected_url": false, "disposable_workspace": true},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/change-run-request.json"}}}},
+        "responses": {
+          "202": {"description": "Change run queued, or the exact run replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/change-run.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "404": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "409": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "422": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "429": {"$ref": "#/components/responses/SiteChangeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteChange"}
+      ],
+      "get": {
+        "tags": ["Site Change"],
+        "operationId": "getSiteChangeRun",
+        "description": "Poll the redacted state of an asynchronous workspace run.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Current change state", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/change-run.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "404": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "429": {"$ref": "#/components/responses/SiteChangeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/diff-manifest": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteChange"}
+      ],
+      "get": {
+        "tags": ["Site Change"],
+        "operationId": "getSiteChangeDiffManifest",
+        "description": "Read the immutable manifest and canonical digest for a succeeded change. A credential finding fails the run, so review identity is never produced by masking a change.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Immutable diff review identity", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/diff-manifest.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "404": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "409": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "429": {"$ref": "#/components/responses/SiteChangeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/submissions": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteChange"}
+      ],
+      "post": {
+        "tags": ["Site Change"],
+        "operationId": "submitSiteChange",
+        "description": "Push the service-owned branch and optionally create a GitHub pull request only if the supplied base SHA, head SHA, and immutable diff digest still match the succeeded run.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/SiteChangeIdempotencyKey"}],
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/submission-request.json"}}}},
+        "responses": {
+          "201": {"description": "Branch or pull request submitted, or the exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/submission.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "404": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "409": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "422": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "429": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "502": {"$ref": "#/components/responses/SiteChangeProblem"}
+        }
+      }
+    },
+    "/v1/tenants/{tenant}/sites/{site}/site-change-runs/{change}/merges": {
+      "parameters": [
+        {"$ref": "#/components/parameters/Tenant"},
+        {"$ref": "#/components/parameters/Site"},
+        {"$ref": "#/components/parameters/SiteChange"}
+      ],
+      "get": {
+        "tags": ["Site Change"],
+        "operationId": "getSiteChangeMergeResult",
+        "description": "Read the immutable result of a completed merge. This operation performs no provider call and lets another orchestrator safely recover merge_sha and merged_at after the merge response was lost or the merge was initiated by another trusted client.",
+        "security": [{"serviceBearer": []}],
+        "responses": {
+          "200": {"description": "Immutable completed merge result", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/merge-result.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "404": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "429": {"$ref": "#/components/responses/SiteChangeProblem"}
+        }
+      },
+      "post": {
+        "tags": ["Site Change"],
+        "operationId": "mergeApprovedSiteChange",
+        "description": "Execute a technically eligible merge after external review. Approval decides artifact approval but not technical merge eligibility. Site Change re-resolves Approval through a fixed service endpoint, verifies an approved and integrity-valid site_change artifact matching this tenant, site, change ID, head SHA version, and diff digest, then independently requires GitHub's live default branch to equal expected_base_sha. No automatic rebase, conflict resolution, or merge retry is permitted.",
+        "security": [{"serviceBearer": []}],
+        "parameters": [{"$ref": "#/components/parameters/SiteChangeIdempotencyKey"}],
+        "x-magic-html-approval-boundary": {"review_decision_owner": "approval", "technical_merge_eligibility_owner": "site_change", "approval_url_from_service_config": true, "revalidate_on_merge": true, "automatic_rebase": false, "automatic_conflict_resolution": false},
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/merge-request.json"}}}},
+        "responses": {
+          "200": {"description": "Approved immutable change merged, or the exact response replayed", "headers": {"Idempotent-Replayed": {"$ref": "#/components/headers/IdempotentReplayed"}}, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/site-change/merge-result.json"}}}},
+          "401": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "404": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "409": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "422": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "429": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "502": {"$ref": "#/components/responses/SiteChangeProblem"},
+          "503": {"$ref": "#/components/responses/SiteChangeProblem"}
+        }
+      }
+    },
     "/v1/sites/{site}/publication-snapshots": {
       "post": {
         "operationId": "createPublicationSnapshot",
@@ -53,6 +292,29 @@
         "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/email-builder/request.json"}}}},
         "responses": {"200": {"description": "Deterministically composed email-safe HTML", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/email-builder/result.json"}}}}}
       }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "serviceBearer": {"type": "http", "scheme": "bearer"}
+    },
+    "parameters": {
+      "Tenant": {"name": "tenant", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
+      "KnowledgeBase": {"name": "knowledgeBase", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "KnowledgeSourceConnection": {"name": "connection", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "KnowledgeSourceSyncRun": {"name": "syncRun", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "KnowledgeSourceIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
+      "Site": {"name": "site", "in": "path", "required": true, "schema": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"}},
+      "SiteChangeRepository": {"name": "repository", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "SiteChange": {"name": "change", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}},
+      "SiteChangeIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "schema": {"type": "string", "minLength": 8, "maxLength": 200}}
+    },
+    "headers": {
+      "IdempotentReplayed": {"schema": {"type": "boolean"}, "description": "True when the stored response for an exact operation and payload retry is returned."}
+    },
+    "responses": {
+      "KnowledgeSourceProblem": {"description": "Credential-redacted Knowledge Source problem", "content": {"application/problem+json": {"schema": {"$ref": "../schemas/v1/knowledge-source/problem.json"}}}},
+      "SiteChangeProblem": {"description": "Credential-redacted Site Change problem", "content": {"application/problem+json": {"schema": {"$ref": "../schemas/v1/site-change/problem.json"}}}}
     }
   }
 }

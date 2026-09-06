@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/browser-evidence.json",
+  "title": "Signed same-run browser evidence",
+  "description": "Preview-issued, short-lived evidence binding the reviewed subject and exact screenshots to raw deterministic CDP measurements. standalone_approval is always false: this source cannot approve a stage without screenshot-reviewer and objective-bound agentic evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "profile", "subject", "provenance", "viewports", "accessibility", "gates", "evidence_digest", "issued_at", "expires_at", "receipt"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "profile": {"const": "magic-html-browser-evidence-v1"},
+    "subject": {"$ref": "#/$defs/subject"},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "viewports": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/viewportEvidence"},
+      "allOf": [
+        {"contains": {"$ref": "#/$defs/rest390"}, "minContains": 1},
+        {"contains": {"$ref": "#/$defs/rest768"}, "minContains": 1},
+        {"contains": {"$ref": "#/$defs/rest1440"}, "minContains": 1}
+      ]
+    },
+    "accessibility": {"$ref": "#/$defs/accessibility"},
+    "gates": {"$ref": "#/$defs/gates"},
+    "evidence_digest": {"$ref": "#/$defs/digest"},
+    "issued_at": {"type": "integer", "minimum": 0},
+    "expires_at": {"type": "integer", "minimum": 1},
+    "receipt": {"type": "string", "minLength": 16, "maxLength": 32768, "pattern": "^v1\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "entryPath": {"type": "string", "minLength": 1, "maxLength": 1000, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))[A-Za-z0-9._@+ -]+(?:/[A-Za-z0-9._@+ -]+)*\\.[Hh][Tt][Mm][Ll]?$"},
+    "outcome": {"enum": ["passed", "failed", "not_applicable", "insufficient_evidence"]},
+    "counter": {"type": "integer", "minimum": 0, "maximum": 100000},
+    "metric": {"oneOf": [{"type": "null"}, {"type": "number", "minimum": 0, "maximum": 32768}]},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preview_id", "preview_snapshot_id", "entry_path", "subject_digest", "screenshot_digests"],
+      "properties": {
+        "preview_id": {"type": "string", "format": "uuid"},
+        "preview_snapshot_id": {"type": "string", "minLength": 1, "maxLength": 255},
+        "entry_path": {"$ref": "#/$defs/entryPath"},
+        "subject_digest": {"$ref": "#/$defs/digest"},
+        "screenshot_digests": {"type": "array", "minItems": 1, "maxItems": 10, "uniqueItems": true, "items": {"$ref": "#/$defs/digest"}}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["measurement_protocol", "automation_driver", "provider", "standalone_approval"],
+      "properties": {
+        "measurement_protocol": {"const": "chromium-devtools-protocol"},
+        "automation_driver": {"const": "puppeteer"},
+        "provider": {"enum": ["local_puppeteer", "cloudflare_browser_run_cdp"]},
+        "standalone_approval": {"const": false}
+      }
+    },
+    "captureState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target_id", "elapsed_ms"],
+      "properties": {
+        "kind": {"enum": ["rest", "enter"]},
+        "target_id": {"type": "null"},
+        "elapsed_ms": {"type": "integer", "minimum": 0, "maximum": 5000}
+      },
+      "allOf": [
+        {"if": {"properties": {"kind": {"const": "rest"}}, "required": ["kind"]}, "then": {"properties": {"elapsed_ms": {"const": 0}}}}
+      ]
+    },
+    "viewportChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readability", "responsive_integrity", "operability"],
+      "properties": {"readability": {"$ref": "#/$defs/outcome"}, "responsive_integrity": {"$ref": "#/$defs/outcome"}, "operability": {"$ref": "#/$defs/outcome"}}
+    },
+    "viewportSamples": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["body_text_blocks", "body_line_lengths", "visible_elements", "operable_targets"],
+      "properties": {"body_text_blocks": {"$ref": "#/$defs/counter"}, "body_line_lengths": {"$ref": "#/$defs/counter"}, "visible_elements": {"$ref": "#/$defs/counter"}, "operable_targets": {"$ref": "#/$defs/counter"}}
+    },
+    "viewportViolations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["body_line_length", "horizontal_overflow", "zero_dimensions", "target_dimensions"],
+      "properties": {"body_line_length": {"$ref": "#/$defs/counter"}, "horizontal_overflow": {"$ref": "#/$defs/counter"}, "zero_dimensions": {"$ref": "#/$defs/counter"}, "target_dimensions": {"$ref": "#/$defs/counter"}}
+    },
+    "viewportMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["body_line_length_min_ch", "body_line_length_max_ch", "horizontal_overflow_px", "minimum_target_width_px", "minimum_target_height_px"],
+      "properties": {"body_line_length_min_ch": {"$ref": "#/$defs/metric"}, "body_line_length_max_ch": {"$ref": "#/$defs/metric"}, "horizontal_overflow_px": {"$ref": "#/$defs/metric"}, "minimum_target_width_px": {"$ref": "#/$defs/metric"}, "minimum_target_height_px": {"$ref": "#/$defs/metric"}}
+    },
+    "viewportEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["screenshot_digest", "width_px", "height_px", "capture_state", "checks", "samples", "violations", "metrics"],
+      "properties": {
+        "screenshot_digest": {"$ref": "#/$defs/digest"},
+        "width_px": {"type": "integer", "minimum": 320, "maximum": 3840},
+        "height_px": {"type": "integer", "minimum": 240, "maximum": 2160},
+        "capture_state": {"$ref": "#/$defs/captureState"},
+        "checks": {"$ref": "#/$defs/viewportChecks"},
+        "samples": {"$ref": "#/$defs/viewportSamples"},
+        "violations": {"$ref": "#/$defs/viewportViolations"},
+        "metrics": {"$ref": "#/$defs/viewportMetrics"}
+      }
+    },
+    "accessibilityNames": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accessible_names", "form_labels", "landmarks", "focusable_targets", "document_language", "document_title", "heading_structure", "text_contrast"],
+      "properties": {
+        "accessible_names": {"$ref": "#/$defs/outcome"}, "form_labels": {"$ref": "#/$defs/outcome"}, "landmarks": {"$ref": "#/$defs/outcome"}, "focusable_targets": {"$ref": "#/$defs/outcome"},
+        "document_language": {"$ref": "#/$defs/outcome"}, "document_title": {"$ref": "#/$defs/outcome"}, "heading_structure": {"$ref": "#/$defs/outcome"}, "text_contrast": {"$ref": "#/$defs/outcome"}
+      }
+    },
+    "accessibilityCounters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accessible_names", "form_labels", "landmarks", "focusable_targets", "document_language", "document_title", "heading_structure", "text_contrast"],
+      "properties": {
+        "accessible_names": {"$ref": "#/$defs/counter"}, "form_labels": {"$ref": "#/$defs/counter"}, "landmarks": {"$ref": "#/$defs/counter"}, "focusable_targets": {"$ref": "#/$defs/counter"},
+        "document_language": {"$ref": "#/$defs/counter"}, "document_title": {"$ref": "#/$defs/counter"}, "heading_structure": {"$ref": "#/$defs/counter"}, "text_contrast": {"$ref": "#/$defs/counter"}
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "checks", "samples", "violations", "inconclusive"],
+      "properties": {
+        "score": {"type": "number", "minimum": 0, "maximum": 100},
+        "checks": {"$ref": "#/$defs/accessibilityNames"},
+        "samples": {"$ref": "#/$defs/accessibilityCounters"},
+        "violations": {"$ref": "#/$defs/accessibilityCounters"},
+        "inconclusive": {"$ref": "#/$defs/accessibilityCounters"}
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readability", "accessibility", "responsive_integrity", "operability"],
+      "properties": {"readability": {"$ref": "#/$defs/outcome"}, "accessibility": {"$ref": "#/$defs/outcome"}, "responsive_integrity": {"$ref": "#/$defs/outcome"}, "operability": {"$ref": "#/$defs/outcome"}}
+    },
+    "rest390": {"properties": {"width_px": {"const": 390}, "capture_state": {"properties": {"kind": {"const": "rest"}, "elapsed_ms": {"const": 0}}, "required": ["kind", "elapsed_ms"]}}, "required": ["width_px", "capture_state"]},
+    "rest768": {"properties": {"width_px": {"const": 768}, "capture_state": {"properties": {"kind": {"const": "rest"}, "elapsed_ms": {"const": 0}}, "required": ["kind", "elapsed_ms"]}}, "required": ["width_px", "capture_state"]},
+    "rest1440": {"properties": {"width_px": {"const": 1440}, "capture_state": {"properties": {"kind": {"const": "rest"}, "elapsed_ms": {"const": 0}}, "required": ["kind", "elapsed_ms"]}}, "required": ["width_px", "capture_state"]}
+  }
+}

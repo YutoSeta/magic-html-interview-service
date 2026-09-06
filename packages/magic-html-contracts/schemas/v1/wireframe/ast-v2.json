@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/wireframe/ast-v2.json",
+  "title": "Magic HTML Wireframe AST v2",
+  "description": "Opt-in, content-bearing semantic wireframe tree. The owning Wireframe service additionally enforces page identity against the supplied Site AST, unique page paths and node IDs, document/main/section ancestry, one page heading, list and form ancestry, resolvable local links, bounded total node counts, and exactly one submit action per form.",
+  "type": "object",
+  "required": ["version", "locale", "pages"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 2 },
+    "locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 20,
+      "pattern": "^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$"
+    },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/page" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "fieldName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "nullableShortText": {
+      "oneOf": [
+        { "type": "string", "minLength": 1, "maxLength": 300 },
+        { "type": "null" }
+      ]
+    },
+    "page": {
+      "type": "object",
+      "required": ["key", "path", "title", "root"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "path": { "$ref": "#/$defs/sitePath" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "root": { "$ref": "#/$defs/documentRegion" }
+      }
+    },
+    "sitePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^/(?:[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*)?$"
+    },
+    "documentRegion": {
+      "type": "object",
+      "required": ["type", "id", "semantic", "layout", "journey_stage", "emphasis", "children"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Region" },
+        "id": { "$ref": "#/$defs/id" },
+        "semantic": { "const": "document" },
+        "layout": { "$ref": "#/$defs/layout" },
+        "journey_stage": { "$ref": "#/$defs/journeyStage" },
+        "emphasis": { "$ref": "#/$defs/regionEmphasis" },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/documentChild" },
+          "allOf": [
+            {
+              "contains": { "$ref": "#/$defs/mainRegion" },
+              "minContains": 1,
+              "maxContains": 1
+            },
+            {
+              "contains": { "$ref": "#/$defs/headerRegion" },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "$ref": "#/$defs/footerRegion" },
+              "minContains": 0,
+              "maxContains": 1
+            }
+          ]
+        }
+      }
+    },
+    "documentChild": {
+      "oneOf": [
+        { "$ref": "#/$defs/headerRegion" },
+        { "$ref": "#/$defs/mainRegion" },
+        { "$ref": "#/$defs/footerRegion" }
+      ]
+    },
+    "headerRegion": {
+      "allOf": [
+        { "$ref": "#/$defs/region" },
+        {
+          "properties": {
+            "semantic": { "const": "header" }
+          }
+        }
+      ]
+    },
+    "mainRegion": {
+      "allOf": [
+        { "$ref": "#/$defs/region" },
+        {
+          "properties": {
+            "semantic": { "const": "main" },
+            "children": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 12,
+              "items": { "$ref": "#/$defs/sectionRegion" }
+            }
+          }
+        }
+      ]
+    },
+    "footerRegion": {
+      "allOf": [
+        { "$ref": "#/$defs/region" },
+        {
+          "properties": {
+            "semantic": { "const": "footer" }
+          }
+        }
+      ]
+    },
+    "sectionRegion": {
+      "allOf": [
+        { "$ref": "#/$defs/region" },
+        {
+          "properties": {
+            "semantic": { "const": "section" }
+          }
+        }
+      ]
+    },
+    "region": {
+      "type": "object",
+      "required": ["type", "id", "semantic", "layout", "journey_stage", "emphasis", "children"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Region" },
+        "id": { "$ref": "#/$defs/id" },
+        "semantic": {
+          "enum": [
+            "header",
+            "navigation",
+            "main",
+            "section",
+            "article",
+            "aside",
+            "footer",
+            "group",
+            "ordered-list",
+            "unordered-list",
+            "list-item",
+            "form",
+            "field-group"
+          ]
+        },
+        "layout": { "$ref": "#/$defs/layout" },
+        "journey_stage": { "$ref": "#/$defs/journeyStage" },
+        "emphasis": { "$ref": "#/$defs/regionEmphasis" },
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 40,
+          "items": { "$ref": "#/$defs/node" }
+        }
+      }
+    },
+    "layout": {
+      "enum": [
+        "stack",
+        "cluster",
+        "grid-2",
+        "grid-3",
+        "grid-4",
+        "split",
+        "split-wide-start",
+        "split-wide-end",
+        "centered"
+      ]
+    },
+    "journeyStage": {
+      "enum": ["none", "attention", "interest", "desire", "memory", "action"]
+    },
+    "regionEmphasis": {
+      "enum": ["neutral", "supporting", "standard", "strong", "primary"]
+    },
+    "actionEmphasis": {
+      "enum": ["plain", "secondary", "primary"]
+    },
+    "node": {
+      "oneOf": [
+        { "$ref": "#/$defs/region" },
+        { "$ref": "#/$defs/text" },
+        { "$ref": "#/$defs/image" },
+        { "$ref": "#/$defs/link" },
+        { "$ref": "#/$defs/button" },
+        { "$ref": "#/$defs/input" },
+        { "$ref": "#/$defs/textarea" },
+        { "$ref": "#/$defs/select" },
+        { "$ref": "#/$defs/checkbox" }
+      ]
+    },
+    "text": {
+      "type": "object",
+      "required": ["type", "id", "role", "content"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Text" },
+        "id": { "$ref": "#/$defs/id" },
+        "role": {
+          "enum": [
+            "eyebrow",
+            "heading-1",
+            "heading-2",
+            "heading-3",
+            "body",
+            "small",
+            "label",
+            "price",
+            "step-number",
+            "summary"
+          ]
+        },
+        "content": { "type": "string", "minLength": 1, "maxLength": 8000 }
+      }
+    },
+    "image": {
+      "type": "object",
+      "required": ["type", "id", "alt", "caption", "aspect"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Image" },
+        "id": { "$ref": "#/$defs/id" },
+        "alt": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "caption": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 1000 },
+            { "type": "null" }
+          ]
+        },
+        "aspect": { "enum": ["16:9", "4:3", "3:2", "1:1", "2:3"] }
+      }
+    },
+    "link": {
+      "type": "object",
+      "required": ["type", "id", "label", "href", "emphasis"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Link" },
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "href": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "oneOf": [
+            { "pattern": "^#[a-z0-9][a-z0-9-]*$" },
+            { "$ref": "#/$defs/sitePath" }
+          ]
+        },
+        "emphasis": { "$ref": "#/$defs/actionEmphasis" }
+      }
+    },
+    "button": {
+      "type": "object",
+      "required": ["type", "id", "label", "button_type", "emphasis"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Button" },
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "button_type": { "enum": ["button", "submit", "reset"] },
+        "emphasis": { "enum": ["secondary", "primary"] }
+      }
+    },
+    "input": {
+      "type": "object",
+      "required": ["type", "id", "input_type", "label", "name", "placeholder", "required"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Input" },
+        "id": { "$ref": "#/$defs/id" },
+        "input_type": { "enum": ["text", "email", "tel", "url"] },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "name": { "$ref": "#/$defs/fieldName" },
+        "placeholder": { "$ref": "#/$defs/nullableShortText" },
+        "required": { "type": "boolean" }
+      }
+    },
+    "textarea": {
+      "type": "object",
+      "required": ["type", "id", "label", "name", "placeholder", "required"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Textarea" },
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "name": { "$ref": "#/$defs/fieldName" },
+        "placeholder": { "$ref": "#/$defs/nullableShortText" },
+        "required": { "type": "boolean" }
+      }
+    },
+    "select": {
+      "type": "object",
+      "required": ["type", "id", "label", "name", "placeholder", "required", "options"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Select" },
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "name": { "$ref": "#/$defs/fieldName" },
+        "placeholder": { "$ref": "#/$defs/nullableShortText" },
+        "required": { "type": "boolean" },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "$ref": "#/$defs/selectOption" }
+        }
+      }
+    },
+    "selectOption": {
+      "type": "object",
+      "required": ["label", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "value": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "checkbox": {
+      "type": "object",
+      "required": ["type", "id", "label", "name", "value", "required"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "Checkbox" },
+        "id": { "$ref": "#/$defs/id" },
+        "label": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "name": { "$ref": "#/$defs/fieldName" },
+        "value": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "required": { "type": "boolean" }
+      }
+    }
+  }
+}

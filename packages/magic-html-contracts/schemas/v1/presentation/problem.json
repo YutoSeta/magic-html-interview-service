@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/presentation/problem.json",
+  "title": "Magic HTML Presentation Problem",
+  "type": "object",
+  "required": ["contract_version", "type", "message", "errors"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"enum": ["unauthenticated", "invalid_request", "unsupported_adapter", "invalid_component_ast", "asset_resolution_failed", "materialization_failed"]},
+    "message": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "errors": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": ["field", "messages"],
+        "additionalProperties": false,
+        "properties": {
+          "field": {"type": "string", "minLength": 1, "maxLength": 500},
+          "messages": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {"type": "string", "minLength": 1, "maxLength": 1000}
+          }
+        }
+      }
+    }
+  }
+}

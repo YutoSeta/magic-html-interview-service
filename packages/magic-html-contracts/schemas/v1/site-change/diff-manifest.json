@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/diff-manifest.json",
+  "title": "Immutable Site Change diff manifest",
+  "description": "The exact review identity later supplied to Approval. Sort files by path in bytewise ascending order, then hash base_sha + NUL + head_sha + NUL followed for each file by status + NUL + path + NUL + (previous_path or empty) + NUL + (before_blob_sha or empty) + NUL + (after_blob_sha or empty) + NUL + (before_mode or empty) + NUL + (after_mode or empty) + NUL + patch_sha256 + NUL. Encode the SHA-256 as lowercase hexadecimal. The response contains the corresponding normalized text patches, is capped at 5,000,000 bytes, and rejects a detected credential instead of masking a change from reviewers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "change_id", "repository_id", "base_sha", "head_sha", "branch", "files", "diff_digest", "generated_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "change_id": {"type": "string", "format": "uuid"},
+    "repository_id": {"type": "string", "format": "uuid"},
+    "base_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "head_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "branch": {"type": "string", "pattern": "^magic-html/change/[0-9a-f-]{36}$", "description": "Server-owned branch name; callers cannot choose a ref."},
+    "files": {"type": "array", "minItems": 1, "maxItems": 200, "items": {"$ref": "diff-file.json"}},
+    "diff_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "generated_at": {"type": "string", "format": "date-time"}
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge-source/connection.json",
+  "title": "Knowledge source connection",
+  "type": "object",
+  "required": ["contract_version", "id", "tenant_id", "knowledge_base_id", "name", "driver", "configuration", "credential_version", "credentials_configured", "version", "active", "webhook_path", "item_count", "last_synced_at", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "minLength": 1, "maxLength": 100},
+    "knowledge_base_id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "driver": {"enum": ["google_drive", "rss", "wordpress", "storage", "line_works"]},
+    "configuration": {"$ref": "configuration.json"},
+    "credential_version": {"type": "integer", "minimum": 1},
+    "credentials_configured": {"type": "boolean"},
+    "version": {"type": "integer", "minimum": 1},
+    "active": {"type": "boolean"},
+    "webhook_path": {"type": ["string", "null"], "maxLength": 500},
+    "item_count": {"type": "integer", "minimum": 0, "maximum": 500},
+    "last_synced_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

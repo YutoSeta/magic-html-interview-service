@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/freeze-snapshot-request.json",
+  "title": "Freeze Layout Snapshot request",
+  "description": "Freezes the candidate identified by the route only when its digest still matches and Preview Service supplies a passed 390/768/1440 browser-validation result.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "candidate_snapshot_digest", "validation"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "candidate_snapshot_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "validation": {
+      "allOf": [
+        {"$ref": "validation-result.json"},
+        {
+          "properties": {
+            "status": {"const": "passed"},
+            "validator": {"const": "magic-html-preview-service"}
+          }
+        }
+      ]
+    }
+  }
+}

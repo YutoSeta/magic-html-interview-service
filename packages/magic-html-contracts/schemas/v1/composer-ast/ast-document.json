@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/ast-document.json",
+  "title": "Composer authoring AST document",
+  "description": "An open Vocabulary AST object. The owning Composer host applies its finite vocabulary, root, realization, and HTML grammar validation; this transport contract does not encode a product-specific vocabulary.",
+  "type": "object",
+  "minProperties": 1
+}

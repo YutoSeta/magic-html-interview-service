@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/create-snapshot-request.json",
+  "title": "Create Layout Snapshot candidate request",
+  "description": "Creates and write-once stores a candidate/pending site-level Layout Snapshot from a validated Wireframe AST v2. Browser validation and freezing are separate operations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "wireframe_ast", "validation_viewports"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "wireframe_ast": {"$ref": "../wireframe/ast-v2.json"},
+    "validation_viewports": {
+      "type": "array",
+      "const": [390, 768, 1440],
+      "description": "The mandatory ordered browser-validation widths in CSS pixels."
+    }
+  }
+}

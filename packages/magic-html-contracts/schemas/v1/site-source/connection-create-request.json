@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-source/connection-create-request.json",
+  "title": "Site Source Connection Create Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "name", "driver", "configuration", "credentials"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "name": {"type": "string", "minLength": 1, "maxLength": 100},
+    "driver": {"enum": ["github", "sftp", "ftps", "ftp"]},
+    "configuration": {"type": "object"},
+    "credentials": {"type": "object"}
+  },
+  "oneOf": [
+    {"properties": {"driver": {"const": "github"}, "configuration": {"$ref": "#/$defs/github_configuration"}, "credentials": {"$ref": "#/$defs/github_credentials"}}},
+    {"properties": {"driver": {"const": "sftp"}, "configuration": {"$ref": "#/$defs/sftp_configuration"}, "credentials": {"$ref": "#/$defs/sftp_credentials"}}},
+    {"properties": {"driver": {"const": "ftps"}, "configuration": {"$ref": "#/$defs/ftps_configuration"}, "credentials": {"$ref": "#/$defs/password_credentials"}}},
+    {"properties": {"driver": {"const": "ftp"}, "configuration": {"$ref": "#/$defs/ftp_configuration"}, "credentials": {"$ref": "#/$defs/password_credentials"}}}
+  ],
+  "$defs": {
+    "root_path": {"type": "string", "maxLength": 1700, "pattern": "^[^\\u0000-\\u001F\\u007F\\\\]*$"},
+    "remote_root_path": {"type": "string", "minLength": 2, "maxLength": 1700, "pattern": "^/[^\\u0000-\\u001F\\u007F\\\\]*$"},
+    "host": {"type": "string", "minLength": 1, "maxLength": 253, "description": "The service resolves every address and accepts only public, non-reserved destinations."},
+    "github_configuration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["owner", "repository", "ref", "root_path"],
+      "properties": {
+        "owner": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$"},
+        "repository": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,100}$"},
+        "ref": {"type": "string", "minLength": 1, "maxLength": 255},
+        "root_path": {"$ref": "#/$defs/root_path"}
+      }
+    },
+    "sftp_configuration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["host", "port", "root_path", "host_key_fingerprint"],
+      "properties": {
+        "host": {"$ref": "#/$defs/host"},
+        "port": {"const": 22},
+        "root_path": {"$ref": "#/$defs/remote_root_path"},
+        "host_key_fingerprint": {"type": "string", "pattern": "^SHA256:[A-Za-z0-9+/]{43}$"}
+      }
+    },
+    "ftps_configuration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["host", "port", "root_path", "tls_mode", "verify_peer", "peer_name"],
+      "properties": {
+        "host": {"$ref": "#/$defs/host"},
+        "port": {"enum": [21, 990]},
+        "root_path": {"$ref": "#/$defs/remote_root_path"},
+        "tls_mode": {"enum": ["explicit", "implicit"]},
+        "verify_peer": {"const": true},
+        "peer_name": {"type": "string", "minLength": 1, "maxLength": 253}
+      },
+      "allOf": [
+        {"if": {"properties": {"tls_mode": {"const": "explicit"}}}, "then": {"properties": {"port": {"const": 21}}}},
+        {"if": {"properties": {"tls_mode": {"const": "implicit"}}}, "then": {"properties": {"port": {"const": 990}}}}
+      ]
+    },
+    "ftp_configuration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["host", "port", "root_path"],
+      "properties": {
+        "host": {"$ref": "#/$defs/host"},
+        "port": {"const": 21},
+        "root_path": {"$ref": "#/$defs/remote_root_path"}
+      }
+    },
+    "github_credentials": {
+      "type": "object", "additionalProperties": false,
+      "required": ["token"],
+      "properties": {"token": {"type": "string", "minLength": 1, "maxLength": 4096}}
+    },
+    "password_credentials": {
+      "type": "object", "additionalProperties": false,
+      "required": ["username", "password"],
+      "properties": {
+        "username": {"type": "string", "minLength": 1, "maxLength": 255},
+        "password": {"type": "string", "minLength": 1, "maxLength": 4096}
+      }
+    },
+    "sftp_credentials": {
+      "type": "object", "additionalProperties": false,
+      "required": ["username"],
+      "properties": {
+        "username": {"type": "string", "minLength": 1, "maxLength": 255},
+        "password": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "private_key": {"type": "string", "minLength": 1, "maxLength": 65536},
+        "private_key_passphrase": {"type": "string", "minLength": 1, "maxLength": 4096}
+      },
+      "oneOf": [
+        {"required": ["password"], "not": {"required": ["private_key", "private_key_passphrase"]}},
+        {"required": ["private_key"], "not": {"required": ["password"]}}
+      ]
+    }
+  }
+}

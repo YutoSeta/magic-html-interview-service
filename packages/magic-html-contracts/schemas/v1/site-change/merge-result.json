@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/merge-result.json",
+  "title": "Merged Site Change",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "change_id", "repository_id", "base_sha", "head_sha", "diff_digest", "approval_request_id", "strategy", "merge_sha", "merged_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "change_id": {"type": "string", "format": "uuid"},
+    "repository_id": {"type": "string", "format": "uuid"},
+    "base_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "head_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "diff_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "approval_request_id": {"type": "string", "format": "uuid"},
+    "strategy": {"const": "merge_commit", "description": "The server-owned v1 merge strategy; callers cannot select squash, rebase, or another strategy."},
+    "merge_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "merged_at": {"type": "string", "format": "date-time"}
+  }
+}

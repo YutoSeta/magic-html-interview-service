@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/review-result.json",
+  "title": "Visual stage review job result",
+  "description": "The result value embedded in the service's asynchronous job envelope. The deterministic Design Core scorecard and bounded-loop decision are returned verbatim; verdict must equal decision.verdict.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "verdict", "scorecard", "decision", "patch_plan", "diagnostics"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "verdict": {"enum": ["passed", "patch_required", "human_review_required"]},
+    "scorecard": {"$ref": "quality-result.json"},
+    "decision": {"$ref": "loop-result.json"},
+    "patch_plan": {"$ref": "patch-plan.json"},
+    "diagnostics": {
+      "type": "object",
+      "maxProperties": 50,
+      "properties": {
+        "next_loop_state_digest": {
+          "oneOf": [{"type": "null"}, {"type": "string", "pattern": "^[a-f0-9]{64}$"}]
+        },
+        "next_loop_context": {
+          "oneOf": [{"type": "null"}, {"$ref": "loop-context.json"}],
+          "description": "Exact server-owned continuation state. It is non-null only for patch_required and must be replayed unchanged after the accepted finite patch."
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"verdict": {"const": "passed"}}, "required": ["verdict"]},
+      "then": {
+        "properties": {
+          "decision": {"properties": {"verdict": {"const": "passed"}, "stop": {"const": true}}},
+          "patch_plan": {"properties": {"issues": {"maxItems": 0}}}
+        }
+      },
+      "else": {
+        "if": {"properties": {"verdict": {"const": "patch_required"}}, "required": ["verdict"]},
+        "then": {
+          "properties": {
+            "decision": {"properties": {"verdict": {"const": "patch_required"}, "stop": {"const": false}}},
+            "patch_plan": {"properties": {"issues": {"minItems": 1}}}
+          }
+        },
+        "else": {"properties": {"decision": {"properties": {"verdict": {"const": "human_review_required"}, "stop": {"const": true}}}}}
+      }
+    }
+  ]
+}

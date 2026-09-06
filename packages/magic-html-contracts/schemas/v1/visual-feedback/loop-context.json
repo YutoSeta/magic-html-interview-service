@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/loop-context.json",
+  "title": "Sealed server-owned visual feedback loop state",
+  "description": "Exact Design Core policy 1.1 state. The service persists this state or authenticates its transport and must never trust a caller-authored copy. state_digest provides canonical integrity, not authentication. Runtime validation also requires evaluations_used = history length + 1 and active rubric/policy digests.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "run_id", "stage", "objective_digest", "rubric_digest", "policy_digest", "evaluations_used", "max_evaluations", "accepted_patches", "max_accepted_patches", "model_calls_used", "max_model_calls", "elapsed_ms", "max_elapsed_ms", "history", "state_digest"],
+  "properties": {
+    "profile": {"const": "bounded-visual-feedback-v1"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$"},
+    "stage": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,31}$"},
+    "objective_digest": {"$ref": "#/$defs/digest"},
+    "rubric_digest": {"$ref": "#/$defs/digest"},
+    "policy_digest": {"$ref": "#/$defs/digest"},
+    "evaluations_used": {"type": "integer", "minimum": 1, "maximum": 4},
+    "max_evaluations": {"type": "integer", "minimum": 1, "maximum": 4, "default": 4},
+    "accepted_patches": {"type": "integer", "minimum": 0, "maximum": 3},
+    "max_accepted_patches": {"type": "integer", "minimum": 0, "maximum": 3, "default": 3},
+    "model_calls_used": {"type": "integer", "minimum": 0, "maximum": 100},
+    "max_model_calls": {"type": "integer", "minimum": 1, "maximum": 100, "default": 12},
+    "elapsed_ms": {"type": "integer", "minimum": 0},
+    "max_elapsed_ms": {"type": "integer", "minimum": 1, "maximum": 3600000, "default": 900000},
+    "history": {"type": "array", "maxItems": 3, "items": {"$ref": "#/$defs/historyEntry"}},
+    "state_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "historyEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evaluation", "subject_digest", "scorecard_digest", "evidence_digest", "evidence_complete", "automation_ready", "final_score_bp", "failed_gate_count", "failed_floor_count", "issue_count", "issue_fingerprint"],
+      "properties": {
+        "evaluation": {"type": "integer", "minimum": 1, "maximum": 4},
+        "subject_digest": {"$ref": "#/$defs/digest"},
+        "scorecard_digest": {"$ref": "#/$defs/digest"},
+        "evidence_digest": {"$ref": "#/$defs/digest"},
+        "evidence_complete": {"type": "boolean"},
+        "automation_ready": {"type": "boolean"},
+        "final_score_bp": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "failed_gate_count": {"type": "integer", "minimum": 0, "maximum": 7},
+        "failed_floor_count": {"type": "integer", "minimum": 0, "maximum": 5},
+        "issue_count": {"type": "integer", "minimum": 0, "maximum": 20},
+        "issue_fingerprint": {"$ref": "#/$defs/digest"}
+      }
+    }
+  }
+}

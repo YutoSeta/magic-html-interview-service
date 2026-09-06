@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/presentation/font-policy-check-request.json",
+  "title": "Magic HTML Font Policy Check Request",
+  "description": "Side-effect-free policy check for a licensed Google Fonts asset set and the immutable WOFF2 assets it governs.",
+  "type": "object",
+  "required": ["contract_version", "font_asset_set", "font_assets"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "font_asset_set": {"$ref": "./font-asset-set.json"},
+    "font_assets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {"$ref": "./materialize-request.json#/$defs/fontAsset"}
+    }
+  }
+}

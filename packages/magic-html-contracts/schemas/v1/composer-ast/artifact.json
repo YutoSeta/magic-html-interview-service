@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/artifact.json",
+  "title": "Composer authoring artifact metadata",
+  "description": "Bounded metadata for one site-scoped authoring artifact. public_id is opaque to consumers and is never a database identifier.",
+  "type": "object",
+  "required": ["public_id", "key", "name", "kind", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "public_id": {"type": "string", "minLength": 8, "maxLength": 200},
+    "key": {"type": "string", "minLength": 1, "maxLength": 120},
+    "name": {"type": "string", "minLength": 1, "maxLength": 180},
+    "kind": {"enum": ["page", "section", "component"]},
+    "status": {"enum": ["draft", "published"]}
+  }
+}

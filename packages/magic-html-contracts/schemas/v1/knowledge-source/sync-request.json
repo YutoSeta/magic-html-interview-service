@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge-source/sync-request.json",
+  "title": "Start Knowledge source sync",
+  "type": "object",
+  "required": ["contract_version"],
+  "additionalProperties": false,
+  "properties": {"contract_version": {"const": "1.0"}}
+}

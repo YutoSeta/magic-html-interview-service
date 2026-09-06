@@ -1,0 +1,7 @@
+{
+  "contract_version": "1.0",
+  "base_revision": 3,
+  "operations": [
+    {"op": "undo", "target": "/children/0"}
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "contract_version": "1.0",
+  "data": {
+    "artifact": {
+      "public_id": "2dd02bc9-19b5-4824-b983-cde9b52875d4",
+      "key": "home",
+      "name": "Home",
+      "kind": "page",
+      "status": "published"
+    },
+    "operation_id": "restore-001",
+    "action": "restore",
+    "base_revision": 4,
+    "revision": 5,
+    "etag": "\"5\"",
+    "head_revision": 5,
+    "head_etag": "\"5\"",
+    "document_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+    "restored_from_revision": 1,
+    "applied": [],
+    "document": {
+      "role": "Page",
+      "children": [
+        {"role": "Title", "text": "Restored", "attrs": {"data-design-key": "title-primary"}, "children": []}
+      ]
+    },
+    "created_at": "2026-08-30T03:02:00+00:00"
+  }
+}

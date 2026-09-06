@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/review-request.json",
+  "title": "Create visual stage review request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "stage", "base_ast_digest", "screenshots"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "stage": {"enum": ["layout", "skin", "decor", "motion"]},
+    "base_ast_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "layout_snapshot_ref": {"$ref": "../layout/reference.json"},
+    "stage_subject_ref": {"$ref": "../styler/stage-subject-reference.json"},
+    "screenshots": {
+      "description": "Digest-bound browser evidence. The service verifies decoded image dimensions against viewport, requires each viewport plus capture_state signature to be unique, requires Layout evidence preview_snapshot_id to equal the Layout Snapshot ID, and requires later-stage evidence preview_snapshot_id to equal ast_<base_ast_digest>.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {"$ref": "#/$defs/screenshot"}
+    },
+    "geometry_reports": {
+      "description": "Layout-only candidate-bound deterministic geometry envelopes. New automated reviews use signed contract 1.2 envelopes; this structural signal never authorizes approval without the browser-evidence, screenshot-reviewer, and agentic sources.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "allOf": [
+          {"$ref": "../preview/layout-validation-result.json"},
+          {"properties": {"contract_version": {"const": "1.2"}}}
+        ]
+      }
+    },
+    "browser_evidence": {
+      "$ref": "browser-evidence.json",
+      "description": "Preview-signed same-run DOM/geometry/accessibility evidence for the exact screenshots and base_ast_digest. It is optional only for compatibility; omission fails automated evidence coverage closed and therefore cannot produce verdict=passed."
+    },
+    "loop_context": {
+      "$ref": "loop-context.json",
+      "description": "Omit only for the first evaluation, when the service creates and seals policy state. On later evaluations this must be the exact server-owned state loaded by the service or transported in a service-authenticated token. A caller-authored state is rejected; state_digest provides canonical integrity but is not authentication. The shared policy permits at most four evaluations and three accepted finite patches."
+    },
+    "execution_profile": {"$ref": "../design-context/common.json#/$defs/executionProfile"}
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "stage": {"const": "layout"},
+        "screenshots": {
+          "items": {"properties": {"preview_snapshot_id": {"pattern": "^ls_[a-f0-9]{64}$"}}}
+        }
+      },
+      "required": ["layout_snapshot_ref"],
+      "not": {"required": ["stage_subject_ref"]}
+    },
+    {
+      "properties": {
+        "stage": {"enum": ["skin", "decor", "motion"]},
+        "screenshots": {
+          "items": {"properties": {"preview_snapshot_id": {"pattern": "^ast_[a-f0-9]{64}$"}}}
+        }
+      },
+      "required": ["stage_subject_ref"],
+      "not": {"required": ["layout_snapshot_ref"]},
+      "allOf": [
+        {
+          "if": {"properties": {"stage": {"const": "skin"}}, "required": ["stage"]},
+          "then": {"properties": {"stage_subject_ref": {"properties": {"stage": {"const": "skin"}}}}}
+        },
+        {
+          "if": {"properties": {"stage": {"const": "decor"}}, "required": ["stage"]},
+          "then": {"properties": {"stage_subject_ref": {"properties": {"stage": {"const": "decor"}}}}}
+        },
+        {
+          "if": {"properties": {"stage": {"const": "motion"}}, "required": ["stage"]},
+          "then": {"properties": {"stage_subject_ref": {"properties": {"stage": {"const": "motion"}}}}}
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "screenshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "preview_id", "preview_snapshot_id", "entry_path", "viewport", "full_page", "capture_state", "mime", "sha256", "content_base64", "capture_receipt"],
+      "properties": {
+        "source": {"enum": ["local", "cloudflare"]},
+        "preview_id": {"type": "string", "format": "uuid"},
+        "preview_snapshot_id": {"type": "string", "minLength": 1, "maxLength": 255},
+        "entry_path": {"$ref": "#/$defs/entryPath"},
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": {"type": "integer", "minimum": 320, "maximum": 3840},
+            "height": {"type": "integer", "minimum": 240, "maximum": 2160}
+          }
+        },
+        "full_page": {"type": "boolean"},
+        "capture_state": {"$ref": "#/$defs/captureState"},
+        "mime": {"enum": ["image/png", "image/jpeg"]},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "content_base64": {"type": "string", "minLength": 4, "maxLength": 11184812, "contentEncoding": "base64", "description": "At most 8 MiB after strict base64 decoding. The service also enforces a 16 MiB decoded total across all screenshots."},
+        "capture_receipt": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 4096,
+          "pattern": "^v1\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
+          "description": "Short-lived Preview-issued HMAC receipt for this exact image and capture declaration."
+        }
+      }
+    },
+    "entryPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))[A-Za-z0-9._@+ -]+(?:/[A-Za-z0-9._@+ -]+)*\\.[Hh][Tt][Mm][Ll]?$",
+      "description": "A canonical safe relative HTML path with no empty, dot, or parent segment."
+    },
+    "captureState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target_id", "elapsed_ms"],
+      "properties": {
+        "kind": {"enum": ["rest", "enter"]},
+        "target_id": {"type": "null"},
+        "elapsed_ms": {"type": "integer", "minimum": 0, "maximum": 5000}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "rest"}}, "required": ["kind"]},
+          "then": {"properties": {"elapsed_ms": {"const": 0}}}
+        }
+      ]
+    }
+  }
+}

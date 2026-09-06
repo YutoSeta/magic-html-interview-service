@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/media-artifact.json",
+  "title": "Private Channel media artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "tenant_id", "mime_type", "extension", "size_bytes", "sha256", "status", "expires_at", "claimed_at", "deleted_at", "created_at"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "mime_type": {"const": "video/mp4"},
+    "extension": {"const": "mp4"},
+    "size_bytes": {"type": "integer", "minimum": 1, "maximum": 536870912},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "status": {"enum": ["available", "claimed", "retained", "deleted"]},
+    "expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "claimed_at": {"type": ["string", "null"], "format": "date-time"},
+    "deleted_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

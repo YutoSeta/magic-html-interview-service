@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/snapshot.json",
+  "title": "Composer authoring AST snapshot",
+  "type": "object",
+  "required": ["contract_version", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "data": {
+      "type": "object",
+      "required": ["artifact", "revision", "etag", "document_hash", "document", "created_at"],
+      "additionalProperties": false,
+      "properties": {
+        "artifact": {"$ref": "artifact.json"},
+        "revision": {"type": "integer", "minimum": 0},
+        "etag": {"type": "string", "pattern": "^\"(0|[1-9][0-9]*)\"$"},
+        "document_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "document": {"$ref": "ast-document.json"},
+        "created_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "profile": "bounded-visual-feedback-v1",
+  "run_id": "visual-run-001",
+  "stage": "layout",
+  "objective_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+  "rubric_digest": "33993231fc66fd321d37cdb7187c2e0017a311eed9acfab31c31b75adf69c44d",
+  "policy_digest": "992b41f2a38a5ed97b4fc6002e12a3dbf7812162a273d9814a7135036f46e9c0",
+  "evaluations_used": 2,
+  "max_evaluations": 4,
+  "accepted_patches": 1,
+  "max_accepted_patches": 3,
+  "model_calls_used": 4,
+  "max_model_calls": 12,
+  "elapsed_ms": 42000,
+  "max_elapsed_ms": 900000,
+  "history": [
+    {
+      "evaluation": 1,
+      "subject_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "scorecard_digest": "9999999999999999999999999999999999999999999999999999999999999999",
+      "evidence_digest": "4444444444444444444444444444444444444444444444444444444444444444",
+      "evidence_complete": true,
+      "automation_ready": false,
+      "final_score_bp": 6300,
+      "failed_gate_count": 0,
+      "failed_floor_count": 1,
+      "issue_count": 1,
+      "issue_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ],
+  "state_digest": "87d02d20eec4c8c3f58c1535729157181d4bbdbf8e4dcd8abfc428139e67fde5"
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-source/verification.json",
+  "title": "Site Source Connection Verification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "connection_id", "status", "checks", "checked_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "connection_id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["verified", "failed"]},
+    "checks": {
+      "type": "array", "minItems": 3, "maxItems": 4,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["name", "status", "detail"],
+        "properties": {
+          "name": {"enum": ["destination", "transport_security", "credentials", "read_access"]},
+          "status": {"enum": ["passed", "failed"]},
+          "detail": {"type": "string", "minLength": 1, "maxLength": 500}
+        }
+      }
+    },
+    "checked_at": {"type": "string", "format": "date-time"}
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/problem.json",
+  "title": "Site Change API problem",
+  "description": "Problem details are credential-redacted and never include raw Git, Codex, command, environment, or provider output.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "type", "title", "status", "detail", "request_id"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"enum": ["validation_failed", "unauthenticated", "rate_limited", "repository_not_found", "repository_conflict", "change_not_found", "change_not_ready", "base_changed", "head_changed", "diff_digest_mismatch", "idempotency_conflict", "idempotency_in_progress", "approval_unavailable", "approval_not_found", "approval_not_approved", "approval_artifact_mismatch", "approval_integrity_invalid", "merge_conflict", "provider_failed"]},
+    "title": {"type": "string", "minLength": 1, "maxLength": 255},
+    "status": {"enum": [401, 404, 409, 422, 429, 502, 503]},
+    "detail": {"type": "string", "minLength": 1, "maxLength": 500},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 100},
+    "repository_id": {"type": "string", "format": "uuid"},
+    "change_id": {"type": "string", "format": "uuid"},
+    "approval_request_id": {"type": "string", "format": "uuid"},
+    "errors": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string", "maxLength": 500}, "maxItems": 20}}
+  }
+}

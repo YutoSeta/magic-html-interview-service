@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/channel/publication-content.json",
+  "title": "Provider-specific Channel publication content",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "text": {"type": "string", "maxLength": 5000},
+    "caption": {"type": "string", "maxLength": 2200},
+    "media_type": {"enum": ["TEXT", "IMAGE"]},
+    "media_url": {"type": "string", "format": "uri", "pattern": "^https://", "maxLength": 2048},
+    "to": {"type": "string", "minLength": 1, "maxLength": 255},
+    "messages": {"type": "array", "minItems": 1, "maxItems": 5, "items": {"$ref": "#/definitions/line_message"}},
+    "media_artifact_id": {"type": "string", "format": "uuid"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 100},
+    "description": {"type": "string", "maxLength": 5000},
+    "privacy_status": {"enum": ["private", "unlisted", "public"], "default": "private"},
+    "category_id": {"type": "string", "pattern": "^[0-9]{1,3}$", "default": "22"}
+  },
+  "anyOf": [
+    {"$ref": "#/definitions/x_content"},
+    {"$ref": "#/definitions/threads_content"},
+    {"$ref": "#/definitions/instagram_content"},
+    {"$ref": "#/definitions/line_content"},
+    {"$ref": "#/definitions/youtube_content"}
+  ],
+  "definitions": {
+    "x_content": {"type": "object", "additionalProperties": false, "required": ["text"], "properties": {"text": {"type": "string", "maxLength": 280}}},
+    "threads_content": {"type": "object", "additionalProperties": false, "required": ["text"], "properties": {"text": {"type": "string", "maxLength": 5000}, "media_type": {"enum": ["TEXT", "IMAGE"]}, "media_url": {"type": "string", "format": "uri", "pattern": "^https://", "maxLength": 2048}}, "allOf": [{"if": {"properties": {"media_type": {"const": "IMAGE"}}, "required": ["media_type"]}, "then": {"required": ["media_url"]}}]},
+    "instagram_content": {"type": "object", "additionalProperties": false, "required": ["media_url"], "properties": {"caption": {"type": "string", "maxLength": 2200}, "media_url": {"type": "string", "format": "uri", "pattern": "^https://", "maxLength": 2048}, "media_type": {"const": "IMAGE"}}},
+    "line_content": {"type": "object", "additionalProperties": false, "required": ["to", "messages"], "properties": {"to": {"type": "string", "minLength": 1, "maxLength": 255}, "messages": {"type": "array", "minItems": 1, "maxItems": 5, "items": {"$ref": "#/definitions/line_message"}}}},
+    "line_message": {"oneOf": [{"$ref": "#/definitions/line_text_message"}, {"$ref": "#/definitions/line_image_message"}]},
+    "line_text_message": {"type": "object", "additionalProperties": false, "required": ["type", "text"], "properties": {"type": {"const": "text"}, "text": {"type": "string", "maxLength": 5000}}},
+    "line_image_message": {"type": "object", "additionalProperties": false, "required": ["type", "originalContentUrl", "previewImageUrl"], "properties": {"type": {"const": "image"}, "originalContentUrl": {"type": "string", "format": "uri", "pattern": "^https://", "maxLength": 2048}, "previewImageUrl": {"type": "string", "format": "uri", "pattern": "^https://", "maxLength": 2048}}},
+    "youtube_content": {"type": "object", "additionalProperties": false, "required": ["media_artifact_id", "title"], "properties": {"media_artifact_id": {"type": "string", "format": "uuid"}, "title": {"type": "string", "minLength": 1, "maxLength": 100}, "description": {"type": "string", "maxLength": 5000}, "privacy_status": {"enum": ["private", "unlisted", "public"], "default": "private"}, "category_id": {"type": "string", "pattern": "^[0-9]{1,3}$", "default": "22"}}}
+  }
+}

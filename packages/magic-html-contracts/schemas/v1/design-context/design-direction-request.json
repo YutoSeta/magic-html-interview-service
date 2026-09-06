@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/design-context/design-direction-request.json",
+  "title": "Generate Design Direction Request",
+  "description": "Renders Design DNA as two prose documents a model can read: the design direction (world view, palette, typography, shape and surface, rhythm and emphasis, motion and paths, things to avoid) that grounds page authoring, and the canvas brief (what the business is, what the first view says, image policy, what the page does not have, and a summary of the direction) that grounds canvas generation. Both use only what the DNA and interview text say; neither invents facts, colours, or copy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "interview_text", "design_dna"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "interview_text": { "type": "string", "minLength": 1, "maxLength": 30000 },
+    "design_dna": { "type": "object", "minProperties": 1, "maxProperties": 30 },
+    "framing": { "$ref": "./common.json#/$defs/canvasFraming" },
+    "locale": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$", "default": "ja" },
+    "execution_profile": { "$ref": "./common.json#/$defs/executionProfile" }
+  }
+}

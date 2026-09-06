@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/pointer.json",
+  "title": "Revision-pinned Composer AST pointer",
+  "description": "A positional pointer into the AST identified by base_revision and the matching strong If-Match header. The canonical root is the empty string; / is accepted as a root alias. Fetch a new snapshot after a committed structural batch.",
+  "type": "string",
+  "pattern": "^(|/|(/children/(0|[1-9][0-9]*))+)$"
+}

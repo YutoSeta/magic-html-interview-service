@@ -26,12 +26,57 @@
         },
         "assets": {
           "type": "array",
+          "maxItems": 10000,
           "items": {
             "type": "object",
             "required": ["path", "content_base64"],
             "properties": {
               "path": {"type": "string", "minLength": 1},
               "content_base64": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "asset_bindings": {
+          "type": "array",
+          "maxItems": 500,
+          "description": "Finite deterministic bindings from an existing image asset to an existing page element. The compiler does not accept arbitrary HTML, CSS, selectors, or AI placement decisions.",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "page_path", "target_element_id", "asset_path"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_-]{0,63}$"
+              },
+              "kind": {
+                "const": "decorative_background"
+              },
+              "page_path": {
+                "type": "string",
+                "pattern": "^/",
+                "maxLength": 2048
+              },
+              "target_element_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,127}$"
+              },
+              "asset_path": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,2047}\\.(?:png|jpe?g|webp|avif|gif)$"
+              },
+              "fit": {
+                "enum": ["cover", "contain", "auto"],
+                "default": "cover"
+              },
+              "position": {
+                "enum": ["center", "top", "right", "bottom", "left"],
+                "default": "center"
+              },
+              "repeat": {
+                "enum": ["no-repeat", "repeat", "repeat-x", "repeat-y"],
+                "default": "no-repeat"
+              }
             },
             "additionalProperties": false
           }

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-source/snapshot.json",
+  "title": "Immutable Site Source Snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "tenant_id", "site_id", "connection_id", "fetch_job_id", "driver", "resolved_revision", "digest", "file_count", "byte_size", "files", "created_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "maxLength": 100},
+    "site_id": {"type": "string", "maxLength": 100},
+    "connection_id": {"type": "string", "format": "uuid"},
+    "fetch_job_id": {"type": "string", "format": "uuid"},
+    "driver": {"enum": ["github", "sftp", "ftps", "ftp"]},
+    "resolved_revision": {"type": "string", "minLength": 1, "maxLength": 255},
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$", "description": "SHA-256 of path + NUL + lowercase file sha256 + NUL for files sorted by path in bytewise ascending order."},
+    "file_count": {"type": "integer", "minimum": 1, "maximum": 2000},
+    "byte_size": {"type": "integer", "minimum": 1, "maximum": 52428800},
+    "files": {
+      "type": "array", "minItems": 1, "maxItems": 2000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["path", "media_type", "byte_size", "sha256", "content_base64"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))[^\\u0000-\\u001F\\u007F\\\\]+$"},
+          "media_type": {"type": "string", "minLength": 1, "maxLength": 255},
+          "byte_size": {"type": "integer", "minimum": 0, "maximum": 10485760},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "content_base64": {"type": "string", "contentEncoding": "base64", "maxLength": 13981016}
+        }
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

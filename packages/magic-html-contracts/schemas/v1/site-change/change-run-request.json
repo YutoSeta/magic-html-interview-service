@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/change-run-request.json",
+  "title": "Claim and run a Site Change",
+  "description": "Atomically claims the exact base commit and queues one isolated Codex workspace run. No shell command, executable path, remote URL, Git ref, branch name, provider option, or credential is caller-selectable. The service owns its bounded site_content_v1 prompt and verification policy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "expected_base_sha", "instruction", "execution_profile"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "expected_base_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "instruction": {"type": "string", "minLength": 1, "maxLength": 20000, "writeOnly": true, "description": "Sensitive authoring input. Responses and ordinary audit payloads expose only instruction_digest."},
+    "execution_profile": {"const": "site_content_v1"}
+  }
+}

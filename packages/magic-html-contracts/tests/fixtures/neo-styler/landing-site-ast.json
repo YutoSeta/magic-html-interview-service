@@ -1,0 +1,46 @@
+{
+    "version": 1,
+    "site": {
+        "type": "landing",
+        "name": "ケアシン",
+        "short_name": "ケアシン",
+        "description": "介護保険の申請業務をクラウドで進める SaaS。",
+        "copyright": "(c) 2026 CareLink Inc.",
+        "top_label": "トップ",
+        "cv": {
+            "label": "資料を請求する",
+            "href": "#contact",
+            "text": "1 か月の無料試用つき"
+        }
+    },
+    "home": {
+        "cta": {
+            "path": "#contact"
+        },
+        "sub_cta": {
+            "path": "#features"
+        }
+    },
+    "pages": [
+        {
+            "key": "terms",
+            "slug": "terms",
+            "title": "利用規約",
+            "purpose": "サービスの利用条件を示す。",
+            "nav": {
+                "show_in_footer": true,
+                "footer_priority": 10
+            }
+        },
+        {
+            "key": "privacy",
+            "slug": "privacy",
+            "title": "プライバシーポリシー",
+            "purpose": "個人情報の取り扱いを示す。",
+            "nav": {
+                "show_in_footer": true,
+                "footer_priority": 20
+            }
+        }
+    ]
+}

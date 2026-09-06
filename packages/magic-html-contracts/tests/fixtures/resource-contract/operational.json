@@ -1,0 +1,371 @@
+{
+  "contract_version": "1.0",
+  "contract_kind": "magic_html_resource",
+  "status": "operational",
+  "sources": [
+    {
+      "source_id": "html:contact",
+      "kind": "html",
+      "locator": "contact.html",
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "digest_scope": "exact_input"
+    },
+    {
+      "source_id": "html:news",
+      "kind": "html",
+      "locator": "news/index.html",
+      "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "digest_scope": "exact_input"
+    },
+    {
+      "source_id": "metadata:host",
+      "kind": "metadata",
+      "locator": "resource-contract/site.json",
+      "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "digest_scope": "canonical_json"
+    }
+  ],
+  "resources": [
+    {
+      "resource_key": "form:contact",
+      "kind": "form",
+      "name": "contact",
+      "provenance": [
+        {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]", "attribute": "m-form"}
+      ],
+      "fields": [
+        {
+          "path": "email",
+          "value_type": "string",
+          "input": {
+            "control": "input",
+            "input_type": "email",
+            "name": "email",
+            "required": true,
+            "readonly": false,
+            "disabled": false,
+            "multiple": false,
+            "min": null,
+            "max": null,
+            "step": null,
+            "min_length": null,
+            "max_length": 254,
+            "pattern": null,
+            "accept": null,
+            "options": [],
+            "provenance": [
+              {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]/input[1]", "attribute": "maxlength"},
+              {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]/input[1]", "attribute": "name"},
+              {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]/input[1]", "attribute": "required"},
+              {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]/input[1]", "attribute": "type"}
+            ]
+          },
+          "bindings": [
+            {
+              "kind": "control",
+              "attribute": "name",
+              "provenance": [
+                {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]/input[1]", "attribute": "name"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]/input[1]", "attribute": "name"}
+          ]
+        }
+      ],
+      "item": null,
+      "capabilities": [
+        {
+          "name": "submit",
+          "provenance": [
+            {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]", "attribute": "m-form"}
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "form.contact.submit",
+          "purpose": "submit",
+          "target": "/api/forms/contact",
+          "http_method": "POST",
+          "confirmation": "not_required",
+          "provenance": [
+            {"source_id": "html:contact", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/form[1]", "attribute": "action"},
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/bindings/form.contact.submit/confirmation", "attribute": null}
+          ]
+        }
+      ],
+      "policies": {
+        "authentication": {
+          "status": "explicit",
+          "reference": "policy:contact/authentication",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/policies/authentication", "attribute": null}
+          ]
+        },
+        "authorization": {
+          "status": "explicit",
+          "reference": "policy:contact/authorization",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/policies/authorization", "attribute": null}
+          ]
+        },
+        "tenant_scope": {
+          "status": "explicit",
+          "reference": "policy:contact/tenant-scope",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/policies/tenant_scope", "attribute": null}
+          ]
+        },
+        "storage": {
+          "status": "explicit",
+          "reference": "policy:contact/storage",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/policies/storage", "attribute": null}
+          ]
+        },
+        "validation": {
+          "status": "explicit",
+          "reference": "policy:contact/validation",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/policies/validation", "attribute": null}
+          ]
+        },
+        "audit": {
+          "status": "explicit",
+          "reference": "policy:contact/audit",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/policies/audit", "attribute": null}
+          ]
+        },
+        "write_semantics": {
+          "status": "explicit",
+          "reference": "policy:contact/write-semantics",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/policies/write_semantics", "attribute": null}
+          ]
+        },
+        "concurrency": {
+          "status": "explicit",
+          "reference": "policy:contact/concurrency",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/policies/concurrency", "attribute": null}
+          ]
+        }
+      }
+    },
+    {
+      "resource_key": "collection:news",
+      "kind": "collection",
+      "name": "news",
+      "provenance": [
+        {"source_id": "html:news", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]", "attribute": "m-post"}
+      ],
+      "fields": [
+        {
+          "path": "title",
+          "value_type": "string",
+          "input": {
+            "control": "input",
+            "input_type": "text",
+            "name": "title",
+            "required": true,
+            "readonly": false,
+            "disabled": false,
+            "multiple": false,
+            "min": null,
+            "max": null,
+            "step": null,
+            "min_length": 1,
+            "max_length": 120,
+            "pattern": null,
+            "accept": null,
+            "options": [],
+            "provenance": [
+              {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/fields/title/input", "attribute": null}
+            ]
+          },
+          "bindings": [
+            {
+              "kind": "text",
+              "attribute": null,
+              "provenance": [
+                {"source_id": "html:news", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]/article[1]/h2[1]", "attribute": "m-field"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:news", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]/article[1]/h2[1]", "attribute": "m-field"}
+          ]
+        },
+        {
+          "path": "id",
+          "value_type": "string",
+          "input": null,
+          "bindings": [
+            {
+              "kind": "text",
+              "attribute": null,
+              "provenance": [
+                {"source_id": "html:news", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]/article[1]/span[1]", "attribute": "m-field"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:news", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]/article[1]/span[1]", "attribute": "m-field"}
+          ]
+        }
+      ],
+      "item": {
+        "key_path": "id",
+        "provenance": [
+          {"source_id": "html:news", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]/article[1]", "attribute": "m-key"}
+        ]
+      },
+      "capabilities": [
+        {
+          "name": "create",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/capabilities/create", "attribute": null}
+          ]
+        },
+        {
+          "name": "delete",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/capabilities/delete", "attribute": null}
+          ]
+        },
+        {
+          "name": "list",
+          "provenance": [
+            {"source_id": "html:news", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]", "attribute": "m-post"}
+          ]
+        },
+        {
+          "name": "update",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/capabilities/update", "attribute": null}
+          ]
+        },
+        {
+          "name": "upsert",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/capabilities/upsert", "attribute": null}
+          ]
+        }
+      ],
+      "bindings": [
+        {
+          "binding_id": "collection.news.list",
+          "purpose": "list",
+          "target": "/api/collections/news",
+          "http_method": "GET",
+          "confirmation": "not_required",
+          "provenance": [
+            {"source_id": "html:news", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]", "attribute": "m-source"}
+          ]
+        },
+        {
+          "binding_id": "collection.news.create",
+          "purpose": "create",
+          "target": "/api/admin/collections/news/items",
+          "http_method": "POST",
+          "confirmation": "required",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/bindings/create", "attribute": null}
+          ]
+        },
+        {
+          "binding_id": "collection.news.update",
+          "purpose": "update",
+          "target": "/api/admin/collections/news/items/{id}",
+          "http_method": "PATCH",
+          "confirmation": "not_required",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/bindings/update", "attribute": null}
+          ]
+        },
+        {
+          "binding_id": "collection.news.delete",
+          "purpose": "delete",
+          "target": "/api/admin/collections/news/items/{id}",
+          "http_method": "DELETE",
+          "confirmation": "required",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/bindings/delete", "attribute": null}
+          ]
+        },
+        {
+          "binding_id": "collection.news.upsert",
+          "purpose": "upsert",
+          "target": "/api/admin/collections/news/items/{id}",
+          "http_method": "PUT",
+          "confirmation": "not_required",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/bindings/upsert", "attribute": null}
+          ]
+        }
+      ],
+      "policies": {
+        "authentication": {
+          "status": "explicit",
+          "reference": "policy:news/authentication",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/policies/authentication", "attribute": null}
+          ]
+        },
+        "authorization": {
+          "status": "explicit",
+          "reference": "policy:news/authorization",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/policies/authorization", "attribute": null}
+          ]
+        },
+        "tenant_scope": {
+          "status": "explicit",
+          "reference": "policy:news/tenant-scope",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/policies/tenant_scope", "attribute": null}
+          ]
+        },
+        "storage": {
+          "status": "explicit",
+          "reference": "policy:news/storage",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/policies/storage", "attribute": null}
+          ]
+        },
+        "validation": {
+          "status": "explicit",
+          "reference": "policy:news/validation",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/policies/validation", "attribute": null}
+          ]
+        },
+        "audit": {
+          "status": "explicit",
+          "reference": "policy:news/audit",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/policies/audit", "attribute": null}
+          ]
+        },
+        "write_semantics": {
+          "status": "explicit",
+          "reference": "policy:news/write-semantics",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/policies/write_semantics", "attribute": null}
+          ]
+        },
+        "concurrency": {
+          "status": "explicit",
+          "reference": "policy:news/concurrency",
+          "provenance": [
+            {"source_id": "metadata:host", "pointer_kind": "json_pointer", "pointer": "/resources/collection:news/policies/concurrency", "attribute": null}
+          ]
+        }
+      }
+    }
+  ],
+  "diagnostics": []
+}

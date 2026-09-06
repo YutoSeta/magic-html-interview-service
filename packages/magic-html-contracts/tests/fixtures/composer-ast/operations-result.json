@@ -1,0 +1,43 @@
+{
+  "contract_version": "1.0",
+  "data": {
+    "artifact": {
+      "public_id": "2dd02bc9-19b5-4824-b983-cde9b52875d4",
+      "key": "home",
+      "name": "Home",
+      "kind": "page",
+      "status": "published"
+    },
+    "operation_id": "edit-001",
+    "action": "operations",
+    "base_revision": 3,
+    "revision": 4,
+    "etag": "\"4\"",
+    "head_revision": 4,
+    "head_etag": "\"4\"",
+    "document_hash": "4444444444444444444444444444444444444444444444444444444444444444",
+    "restored_from_revision": null,
+    "applied": [
+      {"operation_index": 0, "op": "duplicate", "pointer": "/children/1"},
+      {"operation_index": 1, "op": "update", "pointer": "/children/1"},
+      {"operation_index": 2, "op": "move", "pointer": "/children/2/children/1"},
+      {"operation_index": 3, "op": "insert", "pointer": "/children/2/children/0"},
+      {"operation_index": 4, "op": "remove", "pointer": null}
+    ],
+    "document": {
+      "role": "Page",
+      "children": [
+        {"role": "Title", "text": "Before", "attrs": {"data-design-key": "title-primary"}, "children": []},
+        {
+          "role": "Box",
+          "children": [
+            {"role": "Title", "text": "Inserted", "children": []},
+            {"role": "Title", "text": "Nested", "children": []},
+            {"role": "Title", "text": "Second", "children": []}
+          ]
+        }
+      ]
+    },
+    "created_at": "2026-08-30T03:01:00+00:00"
+  }
+}

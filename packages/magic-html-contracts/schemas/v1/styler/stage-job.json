@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/styler/stage-job.json",
+  "title": "Styler stage job",
+  "description": "The asynchronous Skin, Decor, or Motion job envelope. A succeeded job exposes the server-owned stage_subject_ref inside result for an exact non-Layout Visual Feedback review.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "status", "created_at", "updated_at"],
+  "properties": {
+    "contract_version": {"const": "1.1"},
+    "id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "result": {"$ref": "stage-result.json"},
+    "error": {"type": ["object", "null"], "maxProperties": 30},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "succeeded"}}, "required": ["status"]},
+      "then": {"required": ["result", "error"], "properties": {"error": {"const": null}}}
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}, "required": ["status"]},
+      "then": {"required": ["error"]}
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://magic-html.example/schemas/v1/styler/pipeline-result.json",
+  "title": "Styler Pipeline Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["annotated_html", "design_ast", "css", "stage_bundle", "diagnostics", "refinement"],
+  "properties": {
+    "annotated_html": { "type": "string", "minLength": 1, "maxLength": 2000000 },
+    "design_ast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "stages", "context_digest"],
+      "properties": {
+        "version": { "const": 2 },
+        "stages": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["layout", "skin", "decor", "motion"],
+          "properties": {
+            "layout": { "type": "object" },
+            "skin": { "type": "object" },
+            "decor": { "type": "object" },
+            "motion": { "type": "object" }
+          }
+        },
+        "context_digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "css": { "type": "string", "minLength": 1, "maxLength": 8000000 },
+    "stage_bundle": { "$ref": "./stage-bundle.json" },
+    "diagnostics": { "type": "object" },
+    "refinement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["used", "limit"],
+      "properties": {
+        "used": { "type": "integer", "minimum": 0, "maximum": 5 },
+        "limit": { "type": "integer", "minimum": 0, "maximum": 5 }
+      }
+    }
+  }
+}

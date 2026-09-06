@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/template/markdown-request.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "markdown"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "markdown": {"type": "string", "minLength": 1, "maxLength": 524288},
+    "title": {"type": "string", "maxLength": 200}
+  }
+}

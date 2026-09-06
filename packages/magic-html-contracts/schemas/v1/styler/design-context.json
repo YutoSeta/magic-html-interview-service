@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://magic-html.example/schemas/v1/styler/design-context.json",
+  "title": "Styler Design Context",
+  "description": "Immutable Design DNA plus one or more digest-bound visual references. A design-canvas reference is required so staged styling is grounded in both structured intent and an approved visual direction.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dna", "visual_references"],
+  "properties": {
+    "dna": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 64
+    },
+    "visual_references": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "contains": {
+        "type": "object",
+        "required": ["kind"],
+        "properties": { "kind": { "const": "design-canvas" } }
+      },
+      "minContains": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "mime", "base64", "sha256", "caption"],
+        "properties": {
+          "kind": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "mime": { "enum": ["image/png", "image/jpeg", "image/webp"] },
+          "base64": { "type": "string", "minLength": 4, "maxLength": 8388608, "contentEncoding": "base64" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "caption": { "type": "string", "maxLength": 500 }
+        }
+      }
+    }
+  }
+}

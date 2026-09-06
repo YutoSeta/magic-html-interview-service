@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/merge-request.json",
+  "title": "Merge an approved immutable Site Change",
+  "description": "Requests merge execution after an external review decision. Approval decides only whether the immutable artifact is approved; it does not decide technical merge eligibility. Site Change re-resolves Approval from fixed service configuration, requires an approved, integrity-valid, tenant/site-matching site_change artifact whose id, head version, and digest match this change, and independently verifies that GitHub's default branch still equals expected_base_sha. It never rebases or resolves conflicts automatically.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "expected_base_sha", "expected_head_sha", "expected_diff_digest", "approval_request_id"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "expected_base_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "expected_head_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "expected_diff_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "approval_request_id": {"type": "string", "format": "uuid"}
+  }
+}

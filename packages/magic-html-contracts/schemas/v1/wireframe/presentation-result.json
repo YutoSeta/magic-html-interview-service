@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/wireframe/presentation-result.json",
+  "title": "Wireframe presentation result",
+  "description": "One deterministic review HTML file containing the exact referenced Layout CSS plus server-owned paint-only Wireframe Skin and Decor. The semantic body and geometry remain unchanged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "snapshot_id", "entry_path", "files", "file_manifest", "layout_snapshot_reference", "presentation_snapshot", "wireframe_skin_ast", "wireframe_decor_ast", "telemetry"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "snapshot_id": {"$ref": "#/$defs/presentationId"},
+    "entry_path": {"$ref": "#/$defs/artifactPath"},
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {"$ref": "#/$defs/file"}
+    },
+    "file_manifest": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {"$ref": "#/$defs/manifestEntry"}
+    },
+    "layout_snapshot_reference": {"$ref": "../layout/reference.json"},
+    "presentation_snapshot": {"$ref": "#/$defs/presentationSnapshot"},
+    "wireframe_skin_ast": {"$ref": "#/$defs/wireframeSkin"},
+    "wireframe_decor_ast": {"$ref": "#/$defs/wireframeDecor"},
+    "telemetry": {"$ref": "#/$defs/telemetry"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "presentationId": {"type": "string", "pattern": "^wps_[a-f0-9]{64}$"},
+    "pageKey": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"},
+    "artifactPath": {"type": "string", "pattern": "^(?:[a-z0-9][a-z0-9-]*/)*[a-z0-9][a-z0-9-]*\\.html$", "maxLength": 200},
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "mime", "content_base64"],
+      "properties": {
+        "path": {"$ref": "#/$defs/artifactPath"},
+        "mime": {"const": "text/html; charset=UTF-8"},
+        "content_base64": {"type": "string", "minLength": 4, "maxLength": 8000000, "contentEncoding": "base64", "contentMediaType": "text/html"}
+      }
+    },
+    "manifestEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["page_key", "path", "size", "sha256"],
+      "properties": {
+        "page_key": {"$ref": "#/$defs/pageKey"},
+        "path": {"$ref": "#/$defs/artifactPath"},
+        "size": {"type": "integer", "minimum": 1, "maximum": 6000000},
+        "sha256": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "presentationSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "profile", "presenter_version", "layout_snapshot_id", "layout_snapshot_digest", "source_snapshot_status", "source_validation_status", "page_key", "source_html_digest", "layout_ast_digest", "layout_css_digest", "wireframe_presentation_css_digest", "file_digest", "snapshot_id", "snapshot_digest"],
+      "properties": {
+        "version": {"const": 1},
+        "profile": {"const": "wireframe-presentation-v1"},
+        "presenter_version": {"const": "1.0"},
+        "layout_snapshot_id": {"type": "string", "pattern": "^ls_[a-f0-9]{64}$"},
+        "layout_snapshot_digest": {"$ref": "#/$defs/digest"},
+        "source_snapshot_status": {"enum": ["candidate", "frozen"]},
+        "source_validation_status": {"enum": ["pending", "passed"]},
+        "page_key": {"$ref": "#/$defs/pageKey"},
+        "source_html_digest": {"$ref": "#/$defs/digest"},
+        "layout_ast_digest": {"$ref": "#/$defs/digest"},
+        "layout_css_digest": {"$ref": "#/$defs/digest"},
+        "wireframe_presentation_css_digest": {"$ref": "#/$defs/digest"},
+        "file_digest": {"$ref": "#/$defs/digest"},
+        "snapshot_id": {"$ref": "#/$defs/presentationId"},
+        "snapshot_digest": {"$ref": "#/$defs/digest", "description": "SHA-256 lowercase hex of the canonical presentation payload before snapshot_id and snapshot_digest are appended."}
+      }
+    },
+    "paintValue": {"type": "string", "minLength": 1, "maxLength": 64},
+    "wireframeSkin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "preset", "canvas", "surfaces", "link"],
+      "properties": {
+        "version": {"const": 1},
+        "preset": {"const": "wireframe-neutral-skin-v2"},
+        "canvas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["background", "foreground"],
+          "properties": {"background": {"$ref": "#/$defs/paintValue"}, "foreground": {"$ref": "#/$defs/paintValue"}}
+        },
+        "surfaces": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["container", "leaf", "image", "input", "button"],
+          "properties": {
+            "container": {"$ref": "#/$defs/paintValue"},
+            "leaf": {"$ref": "#/$defs/paintValue"},
+            "image": {"$ref": "#/$defs/paintValue"},
+            "input": {"$ref": "#/$defs/paintValue"},
+            "button": {"$ref": "#/$defs/paintValue"}
+          }
+        },
+        "link": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["color", "text_decoration"],
+          "properties": {"color": {"$ref": "#/$defs/paintValue"}, "text_decoration": {"enum": ["none", "underline"]}}
+        }
+      }
+    },
+    "outline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width_px", "style", "color"],
+      "properties": {
+        "width_px": {"type": "integer", "minimum": 0, "maximum": 8},
+        "style": {"enum": ["solid", "dashed", "dotted"]},
+        "color": {"$ref": "#/$defs/paintValue"}
+      }
+    },
+    "wireframeDecor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "preset", "outlines", "geometry_mutation", "forbidden_properties"],
+      "properties": {
+        "version": {"const": 1},
+        "preset": {"const": "wireframe-structure-decor-v2"},
+        "outlines": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["region", "container", "primary_action"],
+          "properties": {
+            "region": {"$ref": "#/$defs/outline"},
+            "container": {"$ref": "#/$defs/outline"},
+            "primary_action": {"$ref": "#/$defs/outline"}
+          }
+        },
+        "geometry_mutation": {"const": false},
+        "forbidden_properties": {
+          "type": "array",
+          "const": ["font", "border", "padding", "margin", "display", "width", "height", "gap", "position", "inset", "transform", "animation", "transition"]
+        }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "renderer", "renderer_version", "provider", "model", "response_id", "input_tokens", "cached_input_tokens", "output_tokens", "reasoning_tokens", "estimated_cost", "provider_request_count", "render_duration_ms"],
+      "properties": {
+        "operation": {"const": "wireframes.present"},
+        "renderer": {"const": "layout-snapshot-wireframe-presenter"},
+        "renderer_version": {"const": "1.0"},
+        "provider": {"const": "deterministic"},
+        "model": {"type": "null"},
+        "response_id": {"type": "null"},
+        "input_tokens": {"const": 0},
+        "cached_input_tokens": {"const": 0},
+        "output_tokens": {"const": 0},
+        "reasoning_tokens": {"const": 0},
+        "estimated_cost": {"type": "null"},
+        "provider_request_count": {"const": 0},
+        "render_duration_ms": {"type": "integer", "minimum": 0, "maximum": 60000}
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/layout/reference.json",
+  "title": "Layout Snapshot page reference",
+  "description": "A portable reference that binds one site-level Layout Snapshot and one page to the exact source HTML, geometry AST, and compiled Layout CSS consumed downstream.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "snapshot_id", "snapshot_digest", "page_key", "source_html_digest", "layout_ast_digest", "layout_css_digest"],
+  "properties": {
+    "profile": {"const": "layout-snapshot-reference-v1"},
+    "snapshot_id": {"$ref": "#/$defs/snapshotId"},
+    "snapshot_digest": {"$ref": "#/$defs/digest"},
+    "page_key": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,99}$"},
+    "source_html_digest": {"$ref": "#/$defs/digest"},
+    "layout_ast_digest": {"$ref": "#/$defs/digest"},
+    "layout_css_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "snapshotId": {"type": "string", "pattern": "^ls_[a-f0-9]{64}$"}
+  }
+}

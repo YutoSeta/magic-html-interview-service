@@ -11,7 +11,7 @@
         "laravel/tinker": "^3.0",
         "yutoseta/interview-engine": "^0.3",
         "yutoseta/laravel-admin": "^0.1.1",
-        "yutoseta/magic-html-contracts": "^1.15"
+        "yutoseta/magic-html-contracts": "^1.29"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -109,7 +109,7 @@
             "options": {
                 "symlink": false,
                 "versions": {
-                    "yutoseta/magic-html-contracts": "1.15.0"
+                    "yutoseta/magic-html-contracts": "1.29.0"
                 }
             }
         }

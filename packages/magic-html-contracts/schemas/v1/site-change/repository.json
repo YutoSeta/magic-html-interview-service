@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/repository.json",
+  "title": "Site Change repository",
+  "description": "A tenant- and site-scoped GitHub repository binding. Clone URLs, access tokens, installation tokens, credential references, and provider response envelopes are never returned.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "tenant_id", "site_id", "provider", "provider_repository_id", "owner", "repository", "default_branch", "visibility", "status", "created_at", "updated_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "site_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
+    "provider": {"const": "github"},
+    "provider_repository_id": {"type": "integer", "minimum": 1},
+    "owner": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$"},
+    "repository": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,100}$"},
+    "default_branch": {"type": "string", "minLength": 1, "maxLength": 255},
+    "visibility": {"enum": ["private", "public"]},
+    "status": {"enum": ["active", "unavailable"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

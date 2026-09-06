@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/operation.json",
+  "title": "Finite Composer AST operation",
+  "description": "One deterministic structural operation. Operations in a batch run in order against an isolated clone, so a later pointer addresses the result of earlier operations in the same batch.",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["op", "parent", "node"],
+      "additionalProperties": false,
+      "properties": {
+        "op": {"const": "insert"},
+        "parent": {"$ref": "pointer.json"},
+        "index": {"type": "integer", "minimum": 0},
+        "node": {"$ref": "ast-item.json"}
+      }
+    },
+    {
+      "type": "object",
+      "required": ["op", "target", "parent"],
+      "additionalProperties": false,
+      "properties": {
+        "op": {"const": "move"},
+        "target": {"$ref": "non-root-pointer.json"},
+        "parent": {"$ref": "pointer.json"},
+        "index": {"type": "integer", "minimum": 0}
+      }
+    },
+    {
+      "type": "object",
+      "required": ["op", "target", "patch"],
+      "additionalProperties": false,
+      "properties": {
+        "op": {"const": "update"},
+        "target": {"$ref": "pointer.json"},
+        "patch": {
+          "type": "object",
+          "description": "A shallow patch of non-children fields. Structural changes use the other finite operations.",
+          "not": {"required": ["children"]}
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["op", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "op": {"const": "remove"},
+        "target": {"$ref": "non-root-pointer.json"}
+      }
+    },
+    {
+      "type": "object",
+      "required": ["op", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "op": {"const": "duplicate"},
+        "target": {"$ref": "non-root-pointer.json"}
+      }
+    }
+  ]
+}

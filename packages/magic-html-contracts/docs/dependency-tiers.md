@@ -11,11 +11,17 @@ Deploy release stage (Tier 3)
         |           |
         |           +--> Publication / Site Composer (Tier 2)
         |                       |
-        |                       +--> Content / Collection / Media / Styler / Illustration (Tier 1)
+        |                       +--> Content / Collection / Media / Design Context / Styler / Neo Styler / Illustration (Tier 1)
         |                                         |
-        |                                         +--> Image / Video / Slide / Document / Static Compiler (Tier 0)
+        |                                         +--> Image / Video / Slide / Wireframe / Document / Static Compiler (Tier 0)
         |
         +--> Approval (Tier 1)
+
+Site Change execution (Tier 2)
+        |
+        +--> Approval decision and integrity verification (Tier 1)
+        |
+        +--> GitHub / Codex providers (external)
 ```
 
 External AI providers and infrastructure are outside this graph. A Tier 0 adapter may call its declared provider, but it cannot call a Magic HTML service in Tier 1 or above.
@@ -46,6 +52,14 @@ Tier 3 has two ordered substages represented in one contract inventory: `build` 
 20. A Static Builder manifest digest is canonical across Builder, Approval, and Deploy. Sort `files` by `path` in bytewise ascending order, concatenate `path + NUL + lowercase sha256 + NUL` for each file, and encode the SHA-256 of those concatenated bytes as lowercase hexadecimal. File size, content, and JSON serialization are excluded from the digest input.
 21. Site Edit target inspection is a synchronous, side-effect-free Tier 1 transform over caller-supplied HTML. It performs no external communication or persistence, returns at most 200 finite text, image, and contact-link targets, and binds the response to the exact input bytes with a lowercase SHA-256 `base_digest`.
 22. Site Edit candidate IDs are request-local. Consumers must use the canonical XPath and `base_digest` from the same inspection when proposing a later edit, and must treat `truncated` as notice that candidates were omitted or display fields were shortened to their contract bounds.
+23. Measurement owns tenant-scoped Google connection credentials and always chooses provider endpoints from server configuration. Credentials are encrypted and write-only; token cache material, connection revisions, and raw provider errors never cross its public interface.
+24. Measurement reports and provider-resource reads are bounded and do not require idempotency. Only GTM/GBP provider mutations require canonical confirmation, the reviewed live version, and a tenant-and-connection-scoped `Idempotency-Key`; ambiguous outcomes are never retried automatically and remain blocked until reconciliation.
+25. Site Change is the Tier 2 owner of Git repository registration/provisioning, disposable Codex workspaces, server-owned change branches, immutable diff manifests, branch/PR submission, and merge execution. GitHub is the only v1 provider, selected by the closed contract rather than a caller URL.
+26. Site Change request bodies never accept GitHub tokens, credential references, clone/API URLs, arbitrary Git refs, workspace paths, executables, or shell commands. The service resolves a tenant-authorized GitHub App installation and fixed provider endpoints at runtime; returned resources, errors, and ordinary audit payloads redact credentials and raw provider/command output.
+27. Each Site Change run requires `expected_base_sha`, runs asynchronously in a disposable workspace, and exposes only the finite `site_content_v1` execution profile. Branch names are service-generated. Repository limits, content policy, workspace boundary, and credential scan are mandatory fixed checks; a credential finding fails the run rather than hiding part of the reviewed diff.
+28. A succeeded Site Change emits a canonical immutable diff digest. Sort files by path in bytewise ascending order, then hash `base_sha + NUL + head_sha + NUL` followed for each file by `status + NUL + path + NUL + previous_path_or_empty + NUL + before_blob_sha_or_empty + NUL + after_blob_sha_or_empty + NUL + before_mode_or_empty + NUL + after_mode_or_empty + NUL + patch_sha256 + NUL`. Only regular-file Git modes `100644` and `100755` are representable; symlink and submodule modes are forbidden. Approval identifies that artifact with type `site_change`, ID equal to the change UUID, version equal to the head SHA, and digest equal to the diff digest.
+29. Approval decides whether the immutable artifact is approved; it does not decide technical merge eligibility. A Site Change merge request supplies only the expected base SHA, head SHA, diff digest, and Approval request UUID. Immediately before merge, Site Change re-resolves Approval from a fixed service endpoint and requires an approved, integrity-valid, tenant/site-matching `site_change` artifact with the exact change ID, head SHA version, and diff digest. Site Change then independently re-resolves GitHub's default branch and requires the exact expected base SHA. A stale base or conflict fails closed; automatic rebase, conflict resolution, and ambiguous merge retry are forbidden.
+30. Wireframe is a stateless Tier 0 semantic transform. Wireframe AST v2 is opt-in and leaves the v1 compatibility default unchanged. It accepts bounded Site AST and brief context, returns a closed content-bearing semantic tree without styling or executable material, and relies on the owning service to enforce cross-node and cross-page invariants that JSON Schema alone cannot express.
 
 ## Tier calculation
 

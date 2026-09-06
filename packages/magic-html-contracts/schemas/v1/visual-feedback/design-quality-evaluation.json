@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/design-quality-evaluation.json",
+  "title": "Fused design quality evaluation input",
+  "description": "Digest-bound CDP/browser hard gates, screenshot observations, and objective-bound agentic assessment. Cross-digest, evidence coverage, and active-rubric checks are enforced by the shared Design Core scorer. CDP evidence is deterministic structural evidence but cannot approve a design by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "subject_digest", "objective_digest", "rubric_digest", "evidence_digest", "coverage", "browser", "screenshot_reviewer", "agentic"],
+  "properties": {
+    "profile": {"const": "balanced-order-richness-v1"},
+    "subject_digest": {"$ref": "#/$defs/digest"},
+    "objective_digest": {"$ref": "#/$defs/digest"},
+    "rubric_digest": {"$ref": "#/$defs/digest"},
+    "evidence_digest": {"$ref": "#/$defs/digest"},
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_ids", "observed_ids"],
+      "properties": {
+        "required_ids": {"$ref": "#/$defs/evidenceIds"},
+        "observed_ids": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/evidenceId"}}
+      }
+    },
+    "browser": {
+      "allOf": [
+        {"$ref": "#/$defs/source"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["subject_digest", "evidence_digest", "accessibility", "gates"],
+          "properties": {
+            "subject_digest": {"$ref": "#/$defs/digest"},
+            "evidence_digest": {"$ref": "#/$defs/digest"},
+            "accessibility": {"$ref": "#/$defs/observation"},
+            "gates": {"$ref": "#/$defs/browserGates"}
+          }
+        }
+      ]
+    },
+    "screenshot_reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject_digest", "evidence_digest", "order", "richness", "gates"],
+      "properties": {
+        "subject_digest": {"$ref": "#/$defs/digest"},
+        "evidence_digest": {"$ref": "#/$defs/digest"},
+        "order": {"$ref": "#/$defs/orderObservations"},
+        "richness": {"$ref": "#/$defs/richnessObservations"},
+        "gates": {"$ref": "#/$defs/reviewerGates"}
+      }
+    },
+    "agentic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject_digest", "objective_digest", "rubric_digest", "evidence_digest", "purpose_fit", "gates"],
+      "properties": {
+        "subject_digest": {"$ref": "#/$defs/digest"},
+        "objective_digest": {"$ref": "#/$defs/digest"},
+        "rubric_digest": {"$ref": "#/$defs/digest"},
+        "evidence_digest": {"$ref": "#/$defs/digest"},
+        "purpose_fit": {"$ref": "#/$defs/observation"},
+        "gates": {"$ref": "#/$defs/agenticGates"}
+      }
+    }
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "evidenceId": {"type": "string", "pattern": "^[a-z][a-z0-9._:-]{0,199}$"},
+    "evidenceIds": {"type": "array", "minItems": 1, "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/evidenceId"}},
+    "source": {"type": "object"},
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["score", "evidence_ids"],
+      "properties": {
+        "score": {"type": "number", "minimum": 0, "maximum": 100},
+        "evidence_ids": {"$ref": "#/$defs/evidenceIds"}
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "evidence_ids"],
+      "properties": {
+        "outcome": {"enum": ["passed", "failed", "not_applicable", "insufficient_evidence"]},
+        "evidence_ids": {"$ref": "#/$defs/evidenceIds"}
+      }
+    },
+    "browserGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readability", "accessibility", "responsive_integrity", "operability"],
+      "properties": {
+        "readability": {"$ref": "#/$defs/gate"},
+        "accessibility": {"$ref": "#/$defs/gate"},
+        "responsive_integrity": {"$ref": "#/$defs/gate"},
+        "operability": {"$ref": "#/$defs/gate"}
+      }
+    },
+    "reviewerGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["readability", "visual_hierarchy"],
+      "properties": {
+        "readability": {"$ref": "#/$defs/gate"},
+        "visual_hierarchy": {"$ref": "#/$defs/gate"}
+      }
+    },
+    "agenticGates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["information_priority", "primary_action_clarity"],
+      "properties": {
+        "information_priority": {"$ref": "#/$defs/gate"},
+        "primary_action_clarity": {"$ref": "#/$defs/gate"}
+      }
+    },
+    "orderObservations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hierarchy", "alignment", "spacing_rhythm", "component_consistency", "visual_system_consistency"],
+      "properties": {
+        "hierarchy": {"$ref": "#/$defs/observation"},
+        "alignment": {"$ref": "#/$defs/observation"},
+        "spacing_rhythm": {"$ref": "#/$defs/observation"},
+        "component_consistency": {"$ref": "#/$defs/observation"},
+        "visual_system_consistency": {"$ref": "#/$defs/observation"}
+      }
+    },
+    "richnessObservations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["useful_information_density", "focal_variety", "content_specificity", "brand_distinctiveness"],
+      "properties": {
+        "useful_information_density": {"$ref": "#/$defs/observation"},
+        "focal_variety": {"$ref": "#/$defs/observation"},
+        "content_specificity": {"$ref": "#/$defs/observation"},
+        "brand_distinctiveness": {"$ref": "#/$defs/observation"}
+      }
+    }
+  }
+}

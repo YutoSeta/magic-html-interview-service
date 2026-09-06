@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/revision.json",
+  "title": "Composer AST revision metadata",
+  "description": "Append-only metadata. Document bodies are intentionally excluded from history discovery.",
+  "type": "object",
+  "required": ["revision", "parent_revision", "action", "operation_id", "restored_from_revision", "document_hash", "created_at"],
+  "additionalProperties": false,
+  "properties": {
+    "revision": {"type": "integer", "minimum": 0},
+    "parent_revision": {
+      "oneOf": [
+        {"type": "integer", "minimum": 0},
+        {"type": "null"}
+      ]
+    },
+    "action": {"enum": ["created", "bootstrap", "host_update", "operations", "restore"]},
+    "operation_id": {
+      "oneOf": [
+        {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+        {"type": "null"}
+      ]
+    },
+    "restored_from_revision": {
+      "oneOf": [
+        {"type": "integer", "minimum": 0},
+        {"type": "null"}
+      ]
+    },
+    "document_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "created_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"const": "created"}}, "required": ["action"]},
+      "then": {"properties": {"revision": {"const": 0}, "parent_revision": {"type": "null"}, "operation_id": {"type": "null"}, "restored_from_revision": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"action": {"const": "bootstrap"}}, "required": ["action"]},
+      "then": {"properties": {"operation_id": {"type": "null"}, "restored_from_revision": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"action": {"const": "host_update"}}, "required": ["action"]},
+      "then": {"properties": {"parent_revision": {"type": "integer", "minimum": 0}, "operation_id": {"type": "null"}, "restored_from_revision": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"action": {"const": "operations"}}, "required": ["action"]},
+      "then": {"properties": {"parent_revision": {"type": "integer", "minimum": 0}, "operation_id": {"type": "string"}, "restored_from_revision": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"action": {"const": "restore"}}, "required": ["action"]},
+      "then": {"properties": {"parent_revision": {"type": "integer", "minimum": 0}, "operation_id": {"type": "string"}, "restored_from_revision": {"type": "integer", "minimum": 0}}}
+    }
+  ]
+}

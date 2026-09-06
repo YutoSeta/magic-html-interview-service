@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/quality-result.json",
+  "title": "Auditable fused design quality scorecard",
+  "description": "Exact output of Magic HTML Design Core DesignQualityScorer algorithm 1.1.0.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile", "algorithm_version", "subject_digest", "objective_digest", "rubric_digest", "evidence_digest", "evidence_coverage", "source_evidence_digests", "evidence_bindings", "assessment", "weights", "weights_bp", "scores", "scores_bp", "gate_outcomes", "gates_passed", "failed_gates", "score_floors", "score_floors_bp", "score_floors_passed", "failed_score_floors", "automation_ready", "scorecard_digest"],
+  "properties": {
+    "profile": {"const": "balanced-order-richness-v1"},
+    "algorithm_version": {"const": "1.1.0"},
+    "subject_digest": {"$ref": "#/$defs/digest"},
+    "objective_digest": {"$ref": "#/$defs/digest"},
+    "rubric_digest": {"$ref": "#/$defs/digest"},
+    "evidence_digest": {"$ref": "#/$defs/digest"},
+    "evidence_coverage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["required_ids", "observed_ids", "missing_ids", "complete"],
+      "properties": {
+        "required_ids": {"$ref": "#/$defs/evidenceIds"},
+        "observed_ids": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/evidenceId"}},
+        "missing_ids": {"type": "array", "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/evidenceId"}},
+        "complete": {"type": "boolean"}
+      }
+    },
+    "source_evidence_digests": {
+      "type": "object", "additionalProperties": false,
+      "required": ["browser", "screenshot_reviewer", "agentic"],
+      "properties": {"browser": {"$ref": "#/$defs/digest"}, "screenshot_reviewer": {"$ref": "#/$defs/digest"}, "agentic": {"$ref": "#/$defs/digest"}}
+    },
+    "evidence_bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["hard_gates", "accessibility", "order", "richness", "purpose_fit"],
+      "properties": {
+        "hard_gates": {"$ref": "#/$defs/hardGateBindings"},
+        "accessibility": {"$ref": "#/$defs/evidenceIds"},
+        "order": {"$ref": "#/$defs/orderEvidence"},
+        "richness": {"$ref": "#/$defs/richnessEvidence"},
+        "purpose_fit": {"$ref": "#/$defs/evidenceIds"}
+      }
+    },
+    "assessment": {
+      "type": "object", "additionalProperties": false,
+      "required": ["order", "richness", "purpose_fit", "accessibility", "gates"],
+      "properties": {
+        "order": {"$ref": "#/$defs/orderScores"}, "richness": {"$ref": "#/$defs/richnessScores"},
+        "purpose_fit": {"$ref": "#/$defs/score"}, "accessibility": {"$ref": "#/$defs/score"}, "gates": {"$ref": "#/$defs/gateBooleans"}
+      }
+    },
+    "weights": {"$ref": "#/$defs/weights"},
+    "weights_bp": {"$ref": "#/$defs/weightsBp"},
+    "scores": {"$ref": "#/$defs/aggregateScores"},
+    "scores_bp": {"$ref": "#/$defs/aggregateScoresBp"},
+    "gate_outcomes": {"$ref": "#/$defs/gateOutcomes"},
+    "gates_passed": {"type": "boolean"},
+    "failed_gates": {"type": "array", "maxItems": 7, "uniqueItems": true, "items": {"$ref": "#/$defs/gateName"}},
+    "score_floors": {"$ref": "#/$defs/floors"},
+    "score_floors_bp": {"$ref": "#/$defs/floorsBp"},
+    "score_floors_passed": {"type": "boolean"},
+    "failed_score_floors": {"type": "array", "maxItems": 5, "uniqueItems": true, "items": {"enum": ["order", "richness", "purpose_fit", "accessibility", "final"]}},
+    "automation_ready": {"type": "boolean"},
+    "scorecard_digest": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "score": {"type": "number", "minimum": 0, "maximum": 100},
+    "scoreBp": {"type": "integer", "minimum": 0, "maximum": 10000},
+    "weight": {"type": "number", "minimum": 0, "maximum": 1},
+    "weightBp": {"type": "integer", "minimum": 0, "maximum": 10000},
+    "evidenceId": {"type": "string", "pattern": "^[a-z][a-z0-9._:-]{0,199}$"},
+    "evidenceIds": {"type": "array", "minItems": 1, "maxItems": 100, "uniqueItems": true, "items": {"$ref": "#/$defs/evidenceId"}},
+    "gateName": {"enum": ["readability", "accessibility", "responsive_integrity", "operability", "visual_hierarchy", "information_priority", "primary_action_clarity"]},
+    "gateOutcome": {"enum": ["passed", "failed", "not_applicable", "insufficient_evidence"]},
+    "gateOutcomes": {
+      "type": "object", "additionalProperties": false,
+      "required": ["readability", "accessibility", "responsive_integrity", "operability", "visual_hierarchy", "information_priority", "primary_action_clarity"],
+      "properties": {
+        "readability": {"$ref": "#/$defs/gateOutcome"}, "accessibility": {"$ref": "#/$defs/gateOutcome"},
+        "responsive_integrity": {"$ref": "#/$defs/gateOutcome"}, "operability": {"$ref": "#/$defs/gateOutcome"},
+        "visual_hierarchy": {"$ref": "#/$defs/gateOutcome"}, "information_priority": {"$ref": "#/$defs/gateOutcome"},
+        "primary_action_clarity": {"$ref": "#/$defs/gateOutcome"}
+      }
+    },
+    "gateBooleans": {
+      "type": "object", "additionalProperties": false,
+      "required": ["readability", "accessibility", "responsive_integrity", "operability", "visual_hierarchy", "information_priority", "primary_action_clarity"],
+      "properties": {
+        "readability": {"type": "boolean"}, "accessibility": {"type": "boolean"}, "responsive_integrity": {"type": "boolean"},
+        "operability": {"type": "boolean"}, "visual_hierarchy": {"type": "boolean"}, "information_priority": {"type": "boolean"},
+        "primary_action_clarity": {"type": "boolean"}
+      }
+    },
+    "gateBinding": {
+      "type": "object", "additionalProperties": false, "required": ["source", "outcome", "evidence_ids"],
+      "properties": {
+        "source": {"enum": ["browser", "screenshot_reviewer", "agentic"]},
+        "outcome": {"$ref": "#/$defs/gateOutcome"}, "evidence_ids": {"$ref": "#/$defs/evidenceIds"}
+      }
+    },
+    "gateBindingList": {"type": "array", "minItems": 1, "maxItems": 2, "items": {"$ref": "#/$defs/gateBinding"}},
+    "hardGateBindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["readability", "accessibility", "responsive_integrity", "operability", "visual_hierarchy", "information_priority", "primary_action_clarity"],
+      "properties": {
+        "readability": {"$ref": "#/$defs/gateBindingList"}, "accessibility": {"$ref": "#/$defs/gateBindingList"},
+        "responsive_integrity": {"$ref": "#/$defs/gateBindingList"}, "operability": {"$ref": "#/$defs/gateBindingList"},
+        "visual_hierarchy": {"$ref": "#/$defs/gateBindingList"}, "information_priority": {"$ref": "#/$defs/gateBindingList"},
+        "primary_action_clarity": {"$ref": "#/$defs/gateBindingList"}
+      }
+    },
+    "orderScores": {
+      "type": "object", "additionalProperties": false,
+      "required": ["hierarchy", "alignment", "spacing_rhythm", "component_consistency", "visual_system_consistency"],
+      "properties": {"hierarchy": {"$ref": "#/$defs/score"}, "alignment": {"$ref": "#/$defs/score"}, "spacing_rhythm": {"$ref": "#/$defs/score"}, "component_consistency": {"$ref": "#/$defs/score"}, "visual_system_consistency": {"$ref": "#/$defs/score"}}
+    },
+    "richnessScores": {
+      "type": "object", "additionalProperties": false,
+      "required": ["useful_information_density", "focal_variety", "content_specificity", "brand_distinctiveness"],
+      "properties": {"useful_information_density": {"$ref": "#/$defs/score"}, "focal_variety": {"$ref": "#/$defs/score"}, "content_specificity": {"$ref": "#/$defs/score"}, "brand_distinctiveness": {"$ref": "#/$defs/score"}}
+    },
+    "orderEvidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["hierarchy", "alignment", "spacing_rhythm", "component_consistency", "visual_system_consistency"],
+      "properties": {"hierarchy": {"$ref": "#/$defs/evidenceIds"}, "alignment": {"$ref": "#/$defs/evidenceIds"}, "spacing_rhythm": {"$ref": "#/$defs/evidenceIds"}, "component_consistency": {"$ref": "#/$defs/evidenceIds"}, "visual_system_consistency": {"$ref": "#/$defs/evidenceIds"}}
+    },
+    "richnessEvidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["useful_information_density", "focal_variety", "content_specificity", "brand_distinctiveness"],
+      "properties": {"useful_information_density": {"$ref": "#/$defs/evidenceIds"}, "focal_variety": {"$ref": "#/$defs/evidenceIds"}, "content_specificity": {"$ref": "#/$defs/evidenceIds"}, "brand_distinctiveness": {"$ref": "#/$defs/evidenceIds"}}
+    },
+    "weights": {"type": "object", "additionalProperties": false, "required": ["order", "richness"], "properties": {"order": {"type": "object", "additionalProperties": {"$ref": "#/$defs/weight"}}, "richness": {"type": "object", "additionalProperties": {"$ref": "#/$defs/weight"}}}},
+    "weightsBp": {"type": "object", "additionalProperties": false, "required": ["order", "richness"], "properties": {"order": {"type": "object", "additionalProperties": {"$ref": "#/$defs/weightBp"}}, "richness": {"type": "object", "additionalProperties": {"$ref": "#/$defs/weightBp"}}}},
+    "aggregateScores": {"type": "object", "additionalProperties": false, "required": ["order", "richness", "core", "purpose_fit", "accessibility", "final"], "properties": {"order": {"$ref": "#/$defs/score"}, "richness": {"$ref": "#/$defs/score"}, "core": {"$ref": "#/$defs/score"}, "purpose_fit": {"$ref": "#/$defs/score"}, "accessibility": {"$ref": "#/$defs/score"}, "final": {"$ref": "#/$defs/score"}}},
+    "aggregateScoresBp": {"type": "object", "additionalProperties": false, "required": ["order", "richness", "core", "purpose_fit", "accessibility", "final"], "properties": {"order": {"$ref": "#/$defs/scoreBp"}, "richness": {"$ref": "#/$defs/scoreBp"}, "core": {"$ref": "#/$defs/scoreBp"}, "purpose_fit": {"$ref": "#/$defs/scoreBp"}, "accessibility": {"$ref": "#/$defs/scoreBp"}, "final": {"$ref": "#/$defs/scoreBp"}}},
+    "floors": {"type": "object", "additionalProperties": false, "required": ["order", "richness", "purpose_fit", "accessibility", "final"], "properties": {"order": {"$ref": "#/$defs/score"}, "richness": {"$ref": "#/$defs/score"}, "purpose_fit": {"$ref": "#/$defs/score"}, "accessibility": {"$ref": "#/$defs/score"}, "final": {"$ref": "#/$defs/score"}}},
+    "floorsBp": {"type": "object", "additionalProperties": false, "required": ["order", "richness", "purpose_fit", "accessibility", "final"], "properties": {"order": {"$ref": "#/$defs/scoreBp"}, "richness": {"$ref": "#/$defs/scoreBp"}, "purpose_fit": {"$ref": "#/$defs/scoreBp"}, "accessibility": {"$ref": "#/$defs/scoreBp"}, "final": {"$ref": "#/$defs/scoreBp"}}}
+  }
+}

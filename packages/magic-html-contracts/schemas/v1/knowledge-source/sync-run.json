@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge-source/sync-run.json",
+  "title": "Knowledge source sync run",
+  "type": "object",
+  "required": ["contract_version", "id", "source_connection_id", "tenant_id", "knowledge_base_id", "status", "stats", "error", "started_at", "completed_at", "created_at", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "id": {"type": "string", "format": "uuid"},
+    "source_connection_id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "minLength": 1, "maxLength": 100},
+    "knowledge_base_id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "stats": {
+      "type": "object", "required": ["discovered", "submitted", "unchanged", "removed", "failed"], "additionalProperties": false,
+      "properties": {
+        "discovered": {"type": "integer", "minimum": 0, "maximum": 500},
+        "submitted": {"type": "integer", "minimum": 0, "maximum": 500},
+        "unchanged": {"type": "integer", "minimum": 0, "maximum": 500},
+        "removed": {"type": "integer", "minimum": 0, "maximum": 500},
+        "failed": {"type": "integer", "minimum": 0, "maximum": 500}
+      }
+    },
+    "error": {"anyOf": [{"type": "null"}, {"type": "object", "required": ["code", "message"], "additionalProperties": false, "properties": {"code": {"type": "string", "maxLength": 100}, "message": {"type": "string", "maxLength": 1000}}}]},
+    "started_at": {"type": ["string", "null"], "format": "date-time"},
+    "completed_at": {"type": ["string", "null"], "format": "date-time"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

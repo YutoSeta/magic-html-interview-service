@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Magic HTML Tier 0 APIs",
-    "version": "1.1.0",
-    "description": "Atomic image, video, slide, isolated document rendering, and deterministic static compilation capabilities."
+    "version": "1.3.0",
+    "description": "Atomic image, video, slide, deterministic presentation materialization and licensed font policy checks, isolated document rendering, and deterministic static compilation capabilities."
   },
   "servers": [{"url": "/api"}],
   "paths": {
@@ -67,6 +67,53 @@
               }
             }
           }
+        }
+      }
+    },
+    "/v1/presentations/materialize": {
+      "post": {
+        "tags": ["Presentation"],
+        "operationId": "materializePresentation",
+        "description": "Synchronously map a finite provider-neutral Component AST to canonical HTML and compiled CSS through a version-pinned adapter registry. This operation is deterministic and side-effect free, so it does not use an Idempotency-Key.",
+        "security": [{"presentationServiceBearer": []}],
+        "x-magic-html-presentation-boundary": {
+          "remote_asset_fetch": false,
+          "remote_catalog_fetch": false,
+          "executable_input": false,
+          "arbitrary_css_class_input": false,
+          "provider_credentials": false,
+          "adapter_selection": "server_registry_only",
+          "tailwind_plus_catalog": "private_byo_only",
+          "output_javascript": false
+        },
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/presentation/materialize-request.json"}}}},
+        "responses": {
+          "200": {"description": "Deterministic presentation artifact", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/presentation/materialize-result.json"}}}},
+          "401": {"$ref": "#/components/responses/PresentationProblem"},
+          "422": {"$ref": "#/components/responses/PresentationProblem"},
+          "503": {"$ref": "#/components/responses/PresentationProblem"}
+        }
+      }
+    },
+    "/v1/presentations/font-assets/check": {
+      "post": {
+        "tags": ["Presentation"],
+        "operationId": "checkPresentationFontAssets",
+        "description": "Deterministically check a self-hosted Google Fonts asset set against the installed commercial-use policy without fetching fonts, repositories, catalogs, or license documents.",
+        "security": [{"presentationServiceBearer": []}],
+        "x-magic-html-font-policy-boundary": {
+          "remote_asset_fetch": false,
+          "remote_catalog_fetch": false,
+          "provider_credentials": false,
+          "accepted_provider": "google-fonts",
+          "accepted_licenses": ["OFL-1.1", "Apache-2.0", "Ubuntu-font-1.0"],
+          "legal_advice": false
+        },
+        "requestBody": {"required": true, "content": {"application/json": {"schema": {"$ref": "../schemas/v1/presentation/font-policy-check-request.json"}}}},
+        "responses": {
+          "200": {"description": "Deterministic licensed-font policy decision", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/presentation/font-policy-check-result.json"}}}},
+          "401": {"$ref": "#/components/responses/PresentationProblem"},
+          "422": {"$ref": "#/components/responses/PresentationProblem"}
         }
       }
     },
@@ -170,14 +217,16 @@
   },
   "components": {
     "securitySchemes": {
-      "documentServiceBearer": {"type": "http", "scheme": "bearer", "description": "Service-to-service credential required for preview, job status, and private artifact access."}
+      "documentServiceBearer": {"type": "http", "scheme": "bearer", "description": "Service-to-service credential required for preview, job status, and private artifact access."},
+      "presentationServiceBearer": {"type": "http", "scheme": "bearer", "description": "Service-to-service credential required for deterministic presentation materialization."}
     },
     "parameters": {
       "DocumentIdempotencyKey": {"name": "Idempotency-Key", "in": "header", "required": true, "description": "Opaque key scoped to the Document Service. While its job is retained, exact input replays that job and changed input returns 409.", "schema": {"type": "string", "minLength": 8, "maxLength": 200}},
       "DocumentJob": {"name": "job", "in": "path", "required": true, "schema": {"type": "string", "format": "uuid"}}
     },
     "responses": {
-      "DocumentProblem": {"description": "Document API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/document/problem.json"}}}}
+      "DocumentProblem": {"description": "Document API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/document/problem.json"}}}},
+      "PresentationProblem": {"description": "Presentation API problem", "content": {"application/json": {"schema": {"$ref": "../schemas/v1/presentation/problem.json"}}}}
     }
   }
 }

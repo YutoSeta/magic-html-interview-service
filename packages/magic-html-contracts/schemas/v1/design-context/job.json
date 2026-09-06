@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/design-context/job.json",
+  "title": "Design Context Job",
+  "allOf": [
+    { "$ref": "./common.json#/$defs/jobEnvelope" },
+    {
+      "properties": {
+        "result": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifacts", "telemetry"],
+          "properties": {
+            "design_dna": { "type": "object" },
+            "direction": { "$ref": "./common.json#/$defs/prose" },
+            "canvas_brief": { "$ref": "./common.json#/$defs/prose" },
+            "canvas": { "$ref": "./common.json#/$defs/canvasReference" },
+            "viewport": { "$ref": "./common.json#/$defs/canvasViewport" },
+            "framing": { "$ref": "./common.json#/$defs/canvasFraming" },
+            "asset_plan": { "type": "array", "maxItems": 8, "items": { "$ref": "./common.json#/$defs/assetSpec" } },
+            "asset": { "$ref": "./common.json#/$defs/artifact" },
+            "artifacts": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "$ref": "./common.json#/$defs/artifact" } },
+            "telemetry": { "$ref": "./common.json#/$defs/telemetry" }
+          }
+        }
+      }
+    }
+  ]
+}

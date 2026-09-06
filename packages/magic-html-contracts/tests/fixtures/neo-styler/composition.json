@@ -1,0 +1,61 @@
+{
+  "hero": {
+    "eyebrow": "介護保険の申請業務を、クラウドで。",
+    "title": "申請の書類仕事を、現場から減らす。",
+    "lead": "紙とファックスの往復をなくし、ケアマネジャーが利用者と向き合う時間を取り戻します。",
+    "cta_label": "資料を請求する",
+    "sub_cta_label": "できることを見る",
+    "sub_cta_section": "features",
+    "image": { "aspect": "3:2", "mime": "image/png", "transparent": false, "prompt": "フラットデザインのイラスト。テーブルを囲んで、ケアマネジャーの女性がノートPCを見せながら、高齢の夫婦とその娘に説明している。文字は描かない。" }
+  },
+  "sections": [
+    {
+      "key": "problem",
+      "title": "こんなお悩み、ありませんか",
+      "items": [
+        { "text": "申請書の転記に、ケアマネジャーの時間が毎月何時間も取られている" },
+        { "text": "更新申請の期限を紙の台帳で追っていて、出し忘れが怖い" }
+      ]
+    },
+    {
+      "key": "features",
+      "title": "ケアシンでできること",
+      "lead": "申請に関わる書類仕事を、作る・集める・追うの三つに分けて支えます。",
+      "items": [
+        { "name": "申請書類の作成", "text": "利用者の情報を一度入れれば、新規・更新・区分変更の申請書に自動で反映。", "image": { "aspect": "1:1", "mime": "image/png", "transparent": false, "prompt": "フラットデザインのイラスト。1 枚の申請書と、そこへ流れ込む利用者情報のカード。文字は描かない。" } },
+        { "name": "提出状況の追跡", "text": "自治体ごとの提出状況と更新の期限を一覧で確認。期限の 30 日前にお知らせします。", "image": { "aspect": "1:1", "mime": "image/png", "transparent": false, "prompt": "フラットデザインのイラスト。カレンダーとチェックマーク。文字は描かない。" } }
+      ]
+    },
+    {
+      "key": "cta",
+      "title": "まずは資料をご覧ください",
+      "lead": "機能と料金、導入の流れをまとめた資料を、営業日 2 日以内にお送りします。",
+      "link": { "label": "資料を請求する", "target": "form" }
+    },
+    {
+      "key": "access",
+      "title": "アクセス",
+      "text": "名古屋市中区栄4丁目。地下鉄栄駅から徒歩 5 分。",
+      "link": { "label": "地図を見る", "target": "external", "to": "https://maps.app.goo.gl/example" }
+    },
+    {
+      "key": "closing",
+      "title": "書類仕事を減らす一歩を、今日から",
+      "text": "1 か月の無料試用つき。まずは資料でご確認ください。",
+      "link": { "label": "資料を請求する", "target": "form" }
+    }
+  ],
+  "form": {
+    "notice": "電話番号以外は必須です。",
+    "submit_label": "この内容で資料を請求する",
+    "success_message": "送信を受け付けました。営業日 2 日以内に資料をメールでお送りします。",
+    "error_message": "送信できませんでした。時間をおいて、もう一度お試しください。",
+    "fields": [
+      { "name": "name", "label": "お名前", "type": "text", "required": true, "autocomplete": "name" },
+      { "name": "email", "label": "メールアドレス", "type": "email", "required": true, "autocomplete": "email" },
+      { "name": "tel", "label": "電話番号", "type": "tel", "required": false, "autocomplete": "tel" },
+      { "name": "agree", "label": "個人情報の取り扱いに同意する", "type": "checkbox", "required": true }
+    ]
+  },
+  "notes": "課題 → 機能 → 中間 CTA → アクセス → 締め CTA → フォーム。実績と声はヒアリングに無いので置かない。"
+}

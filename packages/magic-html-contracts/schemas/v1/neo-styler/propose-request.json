@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/neo-styler/propose-request.json",
+  "title": "Propose Landing Composition Request",
+  "description": "Asks a model for a landing page composition from a brief. External, tel and mail links are kept only when their destination appears in the brief; anything else is dropped and noted. This is the one operation whose output people are expected to edit.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "brief"],
+  "properties": {
+    "contract_version": { "const": "1.0" },
+    "brief": { "$ref": "./common.json#/$defs/brief" },
+    "execution_profile": { "$ref": "./common.json#/$defs/executionProfile" }
+  }
+}

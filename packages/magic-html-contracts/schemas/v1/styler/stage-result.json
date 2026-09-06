@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/styler/stage-result.json",
+  "title": "Succeeded Styler stage result",
+  "description": "The immutable result of a succeeded Skin, Decor, or Motion job. stage_subject_ref is the only authority accepted by the non-Layout Visual Feedback request; stage_bundle remains the complete downstream generation and rendering handoff.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["annotated_html", "stage_ast", "stage_css", "css", "stage_bundle", "stage_subject_ref", "diagnostics", "refinement"],
+  "properties": {
+    "annotated_html": {"type": "string", "minLength": 1, "maxLength": 2000000},
+    "stage_ast": {"type": "object", "minProperties": 1, "maxProperties": 1000},
+    "stage_css": {"type": "string", "minLength": 1, "maxLength": 2000000},
+    "css": {"type": "string", "minLength": 1, "maxLength": 8000000},
+    "stage_bundle": {"$ref": "stage-bundle.json"},
+    "stage_subject_ref": {"$ref": "stage-subject-reference.json"},
+    "diagnostics": {"type": "object", "maxProperties": 50},
+    "refinement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["used", "limit"],
+      "properties": {
+        "used": {"type": "integer", "minimum": 0, "maximum": 5},
+        "limit": {"type": "integer", "minimum": 0, "maximum": 5}
+      }
+    }
+  }
+}

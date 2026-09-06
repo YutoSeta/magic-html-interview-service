@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/neo-styler/job.json",
+  "title": "Neo Styler Job",
+  "allOf": [
+    { "$ref": "./common.json#/$defs/jobEnvelope" },
+    {
+      "properties": {
+        "result": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["telemetry"],
+          "properties": {
+            "composition": { "$ref": "./composition.json" },
+            "site_ast": { "$ref": "./site-ast.json" },
+            "content": { "$ref": "./content.json" },
+            "snapshot": { "$ref": "./snapshot.json" },
+            "telemetry": { "$ref": "./common.json#/$defs/telemetry" }
+          }
+        }
+      }
+    }
+  ]
+}

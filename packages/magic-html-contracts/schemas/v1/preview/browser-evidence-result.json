@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/preview/browser-evidence-result.json",
+  "title": "Same-run Preview browser evidence result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "screenshots", "browser_evidence"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "screenshots": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 10,
+      "items": {
+        "allOf": [
+          {"$ref": "../visual-feedback/review-request.json#/$defs/screenshot"},
+          {"properties": {"full_page": {"const": false}}}
+        ]
+      }
+    },
+    "browser_evidence": {"$ref": "../visual-feedback/browser-evidence.json"}
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/styler/pipeline-job.json",
+  "title": "Styler pipeline job",
+  "description": "The asynchronous Layout Snapshot-backed Layout, Skin, Decor, and Motion pipeline job. Contract 1.3 resolves Layout from a frozen snapshot and does not regenerate it with an LLM.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "id", "status", "created_at", "updated_at"],
+  "properties": {
+    "contract_version": {"enum": ["1.1", "1.2", "1.3"]},
+    "id": {"type": "string", "format": "uuid"},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "progress": {"type": "number", "minimum": 0, "maximum": 1},
+    "current_stage": {"type": ["string", "null"], "enum": ["layout", "skin", "decor", "motion", null]},
+    "current_stage_attempt": {"type": ["integer", "null"], "minimum": 0, "maximum": 5},
+    "current_stage_job_id": {
+      "oneOf": [
+        {"type": "string", "format": "uuid"},
+        {"type": "null"}
+      ]
+    },
+    "stage_started_at": {
+      "oneOf": [
+        {"type": "string", "format": "date-time"},
+        {"type": "null"}
+      ]
+    },
+    "result": {"$ref": "pipeline-result.json"},
+    "error": {"type": ["object", "null"], "maxProperties": 30},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "succeeded"}}, "required": ["status"]},
+      "then": {
+        "required": ["progress", "result", "error"],
+        "properties": {"progress": {"const": 1}, "error": {"const": null}}
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "failed"}}, "required": ["status"]},
+      "then": {"required": ["progress", "error"], "properties": {"progress": {"const": 1}}}
+    }
+  ]
+}

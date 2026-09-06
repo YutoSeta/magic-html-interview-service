@@ -1,0 +1,89 @@
+{
+  "contract_version": "1.0",
+  "contract_kind": "magic_html_resource",
+  "status": "proposal",
+  "sources": [
+    {
+      "source_id": "html:inline",
+      "kind": "html",
+      "locator": "inline",
+      "sha256": "9999999999999999999999999999999999999999999999999999999999999999",
+      "digest_scope": "canonical_dom"
+    }
+  ],
+  "resources": [
+    {
+      "resource_key": "content:",
+      "kind": "content",
+      "name": "",
+      "provenance": [
+        {"source_id": "html:inline", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]", "attribute": "m-content"}
+      ],
+      "fields": [
+        {
+          "path": "",
+          "value_type": "unknown",
+          "input": null,
+          "bindings": [
+            {
+              "kind": "text",
+              "attribute": null,
+              "provenance": [
+                {"source_id": "html:inline", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]/p[1]", "attribute": "m-field"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:inline", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]/p[1]", "attribute": "m-field"}
+          ]
+        }
+      ],
+      "item": null,
+      "capabilities": [
+        {
+          "name": "display",
+          "provenance": [
+            {"source_id": "html:inline", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]", "attribute": "m-content"}
+          ]
+        }
+      ],
+      "bindings": [],
+      "policies": {
+        "authentication": {"status": "unresolved", "reference": null, "provenance": []},
+        "authorization": {"status": "unresolved", "reference": null, "provenance": []},
+        "tenant_scope": {"status": "unresolved", "reference": null, "provenance": []},
+        "storage": {"status": "unresolved", "reference": null, "provenance": []},
+        "validation": {"status": "unresolved", "reference": null, "provenance": []},
+        "audit": {"status": "unresolved", "reference": null, "provenance": []},
+        "write_semantics": {"status": "unresolved", "reference": null, "provenance": []},
+        "concurrency": {"status": "unresolved", "reference": null, "provenance": []}
+      }
+    }
+  ],
+  "diagnostics": [
+    {
+      "diagnostic_id": "content.empty.marker.invalid",
+      "severity": "error",
+      "code": "declaration.resource-name.invalid",
+      "message": "m-content must declare a non-empty canonical resource name.",
+      "resource_key": "content:",
+      "field_path": null,
+      "blocks": ["admin_write", "api", "display"],
+      "provenance": [
+        {"source_id": "html:inline", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]", "attribute": "m-content"}
+      ]
+    },
+    {
+      "diagnostic_id": "content.empty.path.invalid",
+      "severity": "error",
+      "code": "field.path.invalid",
+      "message": "m-field must declare a non-empty canonical field path.",
+      "resource_key": "content:",
+      "field_path": "",
+      "blocks": ["admin_write", "api", "display"],
+      "provenance": [
+        {"source_id": "html:inline", "pointer_kind": "xpath", "pointer": "/html[1]/body[1]/main[1]/p[1]", "attribute": "m-field"}
+      ]
+    }
+  ]
+}

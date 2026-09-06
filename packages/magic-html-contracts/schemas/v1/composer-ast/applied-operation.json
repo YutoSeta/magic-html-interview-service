@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/applied-operation.json",
+  "title": "Applied Composer AST operation",
+  "type": "object",
+  "required": ["operation_index", "op", "pointer"],
+  "additionalProperties": false,
+  "properties": {
+    "operation_index": {"type": "integer", "minimum": 0, "maximum": 24},
+    "op": {"enum": ["insert", "move", "update", "remove", "duplicate"]},
+    "pointer": {
+      "oneOf": [
+        {"$ref": "pointer.json"},
+        {"type": "null"}
+      ]
+    }
+  }
+}

@@ -7,7 +7,7 @@
   "required": ["type", "id", "version", "digest"],
   "additionalProperties": false,
   "properties": {
-    "type": {"enum": ["site_snapshot", "cms_snapshot", "static_build", "composer_artifact", "publication_candidate"]},
+    "type": {"enum": ["site_snapshot", "cms_snapshot", "static_build", "composer_artifact", "publication_candidate", "site_change", "layout_snapshot"]},
     "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,254}$"},
     "version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$"},
     "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},

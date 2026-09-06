@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/messaging/pagination-links.json",
+  "title": "Messaging pagination links",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["first", "last", "prev", "next"],
+  "properties": {
+    "first": {"type": "string", "format": "uri"},
+    "last": {"type": "string", "format": "uri"},
+    "prev": {"type": ["string", "null"], "format": "uri"},
+    "next": {"type": ["string", "null"], "format": "uri"}
+  }
+}

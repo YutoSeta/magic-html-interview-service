@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/knowledge-source/connection-list.json",
+  "title": "Knowledge source connection list",
+  "type": "object",
+  "required": ["contract_version", "tenant_id", "knowledge_base_id", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "tenant_id": {"type": "string", "minLength": 1, "maxLength": 100},
+    "knowledge_base_id": {"type": "string", "format": "uuid"},
+    "data": {"type": "array", "maxItems": 500, "items": {"$ref": "connection.json"}}
+  }
+}

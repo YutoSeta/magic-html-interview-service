@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/visual-feedback/patch-plan.json",
+  "title": "Finite visual-feedback patch plan",
+  "description": "A digest-bound list of at most 20 stage-owned AST corrections. An empty list records a passed review with no patch. Problems and operations use finite vocabularies; arbitrary prose patches, selectors, CSS blocks, and executable instructions are not accepted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "stage", "base_ast_digest", "issues"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "stage": {"enum": ["layout", "skin", "decor", "motion"]},
+    "base_ast_digest": {"$ref": "#/$defs/digest"},
+    "issues": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/issue"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"stage": {"const": "layout"}}, "required": ["stage"]},
+      "then": {"properties": {"issues": {"items": {"properties": {"problem": {"$ref": "#/$defs/layoutProblem"}, "operation": {"$ref": "#/$defs/layoutOperation"}}}}}}
+    },
+    {
+      "if": {"properties": {"stage": {"const": "skin"}}, "required": ["stage"]},
+      "then": {"properties": {"issues": {"items": {"properties": {"problem": {"$ref": "#/$defs/skinProblem"}, "operation": {"$ref": "#/$defs/skinOperation"}}}}}}
+    },
+    {
+      "if": {"properties": {"stage": {"const": "decor"}}, "required": ["stage"]},
+      "then": {"properties": {"issues": {"items": {"properties": {"problem": {"$ref": "#/$defs/decorProblem"}, "operation": {"$ref": "#/$defs/decorOperation"}}}}}}
+    },
+    {
+      "if": {"properties": {"stage": {"const": "motion"}}, "required": ["stage"]},
+      "then": {"properties": {"issues": {"items": {"properties": {"problem": {"$ref": "#/$defs/motionProblem"}, "operation": {"$ref": "#/$defs/motionOperation"}}}}}}
+    }
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "tokenName": {"type": "string", "pattern": "^(?:[a-z]|[0-9]+[a-z])[a-z0-9-]{0,99}$"},
+    "safeValue": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^(?!.*(?:[{};]|!important)).+$"
+    },
+    "viewport": {
+      "type": "object",
+      "description": "At least one bound is required. For Layout, min_width=320 with no max_width is the canonical all-device/base scope; consumers map non-base ranges to an explicit responsive scope and reject ranges crossing breakpoints. When both bounds are supplied, min_width must not exceed max_width.",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 2,
+      "properties": {
+        "min_width": {"type": "integer", "minimum": 320, "maximum": 7680},
+        "max_width": {"type": "integer", "minimum": 320, "maximum": 7680}
+      }
+    },
+    "problem": {
+      "enum": [
+        "unintended_wrap", "horizontal_overflow", "overlap", "clipped_content", "zero_dimension",
+        "container_too_wide", "container_too_narrow", "content_too_wide", "content_too_narrow",
+        "spacing_too_tight", "spacing_too_loose", "misalignment",
+        "weak_hierarchy", "column_imbalance", "incorrect_reflow", "incorrect_mobile_order", "image_aspect_mismatch",
+        "object_fit_mismatch", "form_control_too_small", "action_too_small", "insufficient_contrast",
+        "inconsistent_surface", "inconsistent_type_voice", "excessive_decoration", "missing_decoration",
+        "inconsistent_radius", "heavy_shadow", "motion_too_fast", "motion_too_slow", "motion_distracting",
+        "motion_missing", "reduced_motion_risk"
+      ]
+    },
+    "layoutProblem": {
+      "enum": [
+        "unintended_wrap", "horizontal_overflow", "overlap", "clipped_content", "zero_dimension",
+        "container_too_wide", "container_too_narrow", "content_too_wide", "content_too_narrow",
+        "spacing_too_tight", "spacing_too_loose", "misalignment",
+        "weak_hierarchy", "column_imbalance", "incorrect_reflow", "incorrect_mobile_order", "image_aspect_mismatch",
+        "object_fit_mismatch", "form_control_too_small", "action_too_small"
+      ]
+    },
+    "skinProblem": {
+      "enum": ["insufficient_contrast", "inconsistent_surface", "inconsistent_type_voice", "weak_hierarchy"]
+    },
+    "decorProblem": {
+      "enum": ["excessive_decoration", "missing_decoration", "inconsistent_radius", "heavy_shadow", "weak_hierarchy"]
+    },
+    "motionProblem": {
+      "enum": ["motion_too_fast", "motion_too_slow", "motion_distracting", "motion_missing", "reduced_motion_risk"]
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "enum": [
+            "set_cluster_wrap", "set_flow", "set_columns", "set_column_ratio", "set_gap", "set_section_spacing",
+            "set_alignment", "set_image_aspect", "set_object_fit", "set_container_max_width",
+            "set_content_max_width", "set_minimum_action_height",
+            "set_surface_background", "set_surface_foreground", "set_tone", "set_font_family", "set_color_token",
+            "set_radius", "set_shadow", "set_border", "set_outline", "set_opacity", "set_accent",
+            "set_duration", "set_easing", "set_delay", "set_transition_property", "set_tween_transform",
+            "set_tween_opacity", "disable_motion"
+          ]
+        },
+        "value": true
+      }
+    },
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_id", "viewport", "problem", "operation"],
+      "properties": {
+        "target_id": {"type": "string", "pattern": "^(?:\\$constraints|[a-z][a-z0-9._-]{0,199})$"},
+        "viewport": {"$ref": "#/$defs/viewport"},
+        "problem": {"$ref": "#/$defs/problem"},
+        "operation": {"$ref": "#/$defs/operation"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "set_container_max_width", "set_content_max_width", "set_minimum_action_height",
+                      "set_color_token", "set_accent",
+                      "set_duration", "set_easing", "set_delay", "set_transition_property",
+                      "set_tween_transform", "set_tween_opacity", "disable_motion"
+                    ]
+                  }
+                },
+                "required": ["type"]
+              }
+            },
+            "required": ["operation"]
+          },
+          "then": {
+            "properties": {
+              "viewport": {
+                "required": ["min_width"],
+                "properties": {"min_width": {"const": 320}},
+                "not": {"required": ["max_width"]}
+              }
+            }
+          },
+          "else": {"properties": {"target_id": {"not": {"const": "$constraints"}}}}
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "properties": {
+                  "type": {
+                    "enum": ["set_container_max_width", "set_content_max_width", "set_minimum_action_height"]
+                  }
+                },
+                "required": ["type"]
+              }
+            },
+            "required": ["operation"]
+          },
+          "then": {"properties": {"target_id": {"const": "$constraints"}}},
+          "else": {"properties": {"target_id": {"not": {"const": "$constraints"}}}}
+        }
+      ]
+    },
+    "layoutOperation": {
+      "oneOf": [
+        {"properties": {"type": {"const": "set_cluster_wrap"}, "value": {"enum": ["wrap", "nowrap"]}}},
+        {"properties": {"type": {"const": "set_flow"}, "value": {"enum": ["stack", "cluster", "row", "grid", "split", "overlay"]}}},
+        {"properties": {"type": {"const": "set_columns"}, "value": {"enum": ["one", "two", "three", "auto-fit"]}}},
+        {"properties": {"type": {"const": "set_column_ratio"}, "value": {"type": "string", "pattern": "^(?:[0-9]*\\.?[0-9]+fr)(?:\\s+[0-9]*\\.?[0-9]+fr){1,5}$"}}},
+        {"properties": {"type": {"enum": ["set_gap", "set_section_spacing", "set_image_aspect"]}, "value": {"$ref": "#/$defs/tokenName"}}},
+        {"properties": {"type": {"const": "set_alignment"}, "value": {"enum": ["start", "center", "end", "stretch", "baseline"]}}},
+        {"properties": {"type": {"const": "set_object_fit"}, "value": {"enum": ["cover", "contain", "fill", "none", "scale-down"]}}},
+        {"properties": {"type": {"const": "set_container_max_width"}, "value": {"type": "integer", "minimum": 320, "maximum": 3840}}},
+        {"properties": {"type": {"const": "set_content_max_width"}, "value": {"type": "integer", "minimum": 240, "maximum": 3840}}},
+        {"properties": {"type": {"const": "set_minimum_action_height"}, "value": {"type": "integer", "minimum": 44, "maximum": 256}}}
+      ]
+    },
+    "skinOperation": {
+      "oneOf": [
+        {"properties": {"type": {"enum": ["set_surface_background", "set_surface_foreground"]}, "value": {"$ref": "#/$defs/tokenName"}}},
+        {"properties": {"type": {"const": "set_color_token"}, "value": {"$ref": "#/$defs/safeValue"}}},
+        {"properties": {"type": {"const": "set_tone"}, "value": {"enum": ["canvas", "surface", "raised", "inverse"]}}},
+        {"properties": {"type": {"const": "set_font_family"}, "value": {"$ref": "#/$defs/tokenName"}}}
+      ]
+    },
+    "decorOperation": {
+      "oneOf": [
+        {"properties": {"type": {"enum": ["set_radius", "set_shadow", "set_border"]}, "value": {"$ref": "#/$defs/tokenName"}}},
+        {"properties": {"type": {"enum": ["set_outline", "set_opacity"]}, "value": {"$ref": "#/$defs/safeValue"}}},
+        {
+          "properties": {
+            "type": {"const": "set_accent"},
+            "value": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind"],
+              "properties": {
+                "kind": {"enum": ["underline", "side-bar", "top-bar", "dot"]},
+                "tone": {"$ref": "#/$defs/tokenName"},
+                "thickness": {"type": "string", "pattern": "^(?:[0-9]*\\.?[0-9]+)(?:px|rem|em)$"},
+                "length": {"type": "string", "pattern": "^(?:full|(?:[0-9]*\\.?[0-9]+)(?:px|rem|em|%|ch))$"}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "motionOperation": {
+      "oneOf": [
+        {"properties": {"type": {"enum": ["set_duration", "set_easing", "set_delay"]}, "value": {"$ref": "#/$defs/tokenName"}}},
+        {
+          "properties": {
+            "type": {"const": "set_transition_property"},
+            "value": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "uniqueItems": true,
+              "items": {"enum": ["transform", "opacity", "background", "color", "box-shadow", "border-color", "translate", "scale"]}
+            }
+          }
+        },
+        {"properties": {"type": {"enum": ["set_tween_transform", "set_tween_opacity"]}, "value": {"$ref": "#/$defs/safeValue"}}},
+        {"properties": {"type": {"const": "disable_motion"}, "value": {"const": true}}}
+      ]
+    }
+  }
+}

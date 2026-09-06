@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/crm/problem.json",
+  "title": "CRM API problem",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "type", "title", "status", "detail", "request_id"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "type": {"enum": ["unauthenticated", "validation_failed", "crm_record_not_found", "crm_version_conflict", "idempotency_conflict", "idempotency_in_progress"]},
+    "title": {"type": "string", "minLength": 1, "maxLength": 255},
+    "status": {"enum": [401, 404, 409, 422]},
+    "detail": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "request_id": {"type": "string", "minLength": 1, "maxLength": 255},
+    "current_version": {"type": "integer", "minimum": 1},
+    "errors": {"type": "object", "maxProperties": 50, "additionalProperties": {"type": "array", "maxItems": 20, "items": {"type": "string", "minLength": 1, "maxLength": 1000}}}
+  },
+  "allOf": [
+    {"if": {"properties": {"type": {"const": "crm_version_conflict"}}, "required": ["type"]}, "then": {"required": ["current_version"]}, "else": {"not": {"required": ["current_version"]}}},
+    {"if": {"properties": {"type": {"const": "validation_failed"}}, "required": ["type"]}, "then": {"required": ["errors"]}, "else": {"not": {"required": ["errors"]}}}
+  ]
+}

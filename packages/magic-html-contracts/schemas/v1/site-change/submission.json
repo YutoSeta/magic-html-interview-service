@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/site-change/submission.json",
+  "title": "Submitted Site Change",
+  "description": "Provider identifiers for an immutable pushed branch or pull request. URLs are generated only from the service-owned GitHub endpoint and never contain credentials.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "change_id", "mode", "base_sha", "head_sha", "diff_digest", "branch", "pull_request_number", "pull_request_url", "submitted_at"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "change_id": {"type": "string", "format": "uuid"},
+    "mode": {"enum": ["branch", "pull_request"]},
+    "base_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "head_sha": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+    "diff_digest": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "branch": {"type": "string", "pattern": "^magic-html/change/[0-9a-f-]{36}$"},
+    "pull_request_number": {"type": ["integer", "null"], "minimum": 1},
+    "pull_request_url": {"type": ["string", "null"], "format": "uri", "pattern": "^https://github\\.com/", "maxLength": 2048},
+    "submitted_at": {"type": "string", "format": "date-time"}
+  },
+  "oneOf": [
+    {"properties": {"mode": {"const": "branch"}, "pull_request_number": {"type": "null"}, "pull_request_url": {"type": "null"}}},
+    {"properties": {"mode": {"const": "pull_request"}, "pull_request_number": {"type": "integer", "minimum": 1}, "pull_request_url": {"type": "string"}}}
+  ]
+}

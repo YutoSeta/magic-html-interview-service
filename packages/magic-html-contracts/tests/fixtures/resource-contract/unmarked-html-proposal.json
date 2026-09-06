@@ -1,0 +1,29 @@
+{
+  "contract_version": "1.0",
+  "contract_kind": "magic_html_resource",
+  "status": "proposal",
+  "sources": [
+    {
+      "source_id": "html:inline",
+      "kind": "html",
+      "locator": "inline",
+      "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "digest_scope": "exact_input"
+    }
+  ],
+  "resources": [],
+  "diagnostics": [
+    {
+      "diagnostic_id": "document.resource-marker.missing",
+      "severity": "error",
+      "code": "resource.marker.missing",
+      "message": "No explicit m-content, m-post, or m-form resource marker was found.",
+      "resource_key": null,
+      "field_path": null,
+      "blocks": ["admin_write", "api", "display", "form_submission"],
+      "provenance": [
+        {"source_id": "html:inline", "pointer_kind": "xpath", "pointer": "/html[1]", "attribute": null}
+      ]
+    }
+  ]
+}

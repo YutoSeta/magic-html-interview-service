@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/template/upsert-request.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "title", "html"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "title": {"type": "string", "minLength": 1, "maxLength": 200},
+    "description": {"type": "string", "maxLength": 2000},
+    "html": {"type": "string", "minLength": 1, "maxLength": 1048576}
+  }
+}

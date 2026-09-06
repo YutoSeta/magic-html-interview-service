@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/composer-ast/ast-item.json",
+  "title": "Composer authoring AST item",
+  "description": "A candidate Vocabulary AST node or text run. The owning Composer host validates the finite vocabulary before committing the atomic batch.",
+  "type": "object",
+  "minProperties": 1
+}

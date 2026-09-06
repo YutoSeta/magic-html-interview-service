@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/crm/person-list.json",
+  "title": "CRM person list",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "data", "meta"],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "data": {"type": "array", "maxItems": 100, "items": {"$ref": "person.json"}},
+    "meta": {"$ref": "pagination-meta.json"}
+  }
+}

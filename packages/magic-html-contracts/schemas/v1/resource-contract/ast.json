@@ -1,0 +1,702 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/resource-contract/ast.json",
+  "title": "Magic HTML Resource Contract AST v1",
+  "description": "Closed, deterministic intermediate representation produced from explicit Magic HTML markers and completed by trusted host metadata. A scanner MUST emit proposal status. Only an operational document is eligible for API or write-capable administration projection.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "contract_kind",
+    "status",
+    "sources",
+    "resources",
+    "diagnostics"
+  ],
+  "properties": {
+    "contract_version": {"const": "1.0"},
+    "contract_kind": {"const": "magic_html_resource"},
+    "status": {
+      "enum": ["proposal", "operational"],
+      "description": "HTML scanning produces proposal. A trusted host may produce operational only after resolving every policy and blocking diagnostic without embedding credentials."
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "description": "Canonical order is source_id in bytewise ascending order.",
+      "items": {"$ref": "#/$defs/source"}
+    },
+    "resources": {
+      "type": "array",
+      "maxItems": 1000,
+      "description": "Resource declaration order is semantic presentation order and must be preserved. Content, collection, and form are mutually exclusive resource kinds.",
+      "items": {"$ref": "#/$defs/resource"}
+    },
+    "diagnostics": {
+      "type": "array",
+      "maxItems": 5000,
+      "description": "Canonical order is resource_key, field_path, code, then diagnostic_id in bytewise ascending order, treating null as the empty string.",
+      "items": {"$ref": "#/$defs/diagnostic"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"status": {"const": "operational"}},
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "resources": {
+            "minItems": 1,
+            "items": {"$ref": "#/$defs/operationalResource"}
+          },
+          "diagnostics": {
+            "items": {
+              "allOf": [
+                {
+                  "not": {
+                    "properties": {"severity": {"const": "error"}},
+                    "required": ["severity"]
+                  }
+                },
+                {"properties": {"blocks": {"maxItems": 0}}}
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "maxLength": 128,
+      "description": "The exact explicit marker value, including an invalid value, is preserved in a proposal so its diagnostic remains attributable; operational resources require resolvedIdentifier."
+    },
+    "fieldPath": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "The exact explicit field declaration, including an invalid value, is preserved in a proposal; operational fields require resolvedFieldPath."
+    },
+    "resolvedIdentifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*(?:[.-][A-Za-z0-9_-]+)*$",
+      "maxLength": 128
+    },
+    "resolvedFieldPath": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]*(?:\\.(?:[A-Za-z][A-Za-z0-9_-]*|0|[1-9][0-9]*))*$",
+      "maxLength": 256
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "kind", "locator", "sha256", "digest_scope"],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._:-]*$",
+          "maxLength": 200
+        },
+        "kind": {"enum": ["html", "metadata"]},
+        "locator": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "digest_scope": {
+          "enum": ["exact_input", "canonical_dom", "canonical_json"],
+          "description": "States exactly which bytes were hashed; canonical DOM output must never be described as the original HTML bytes."
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_id", "pointer_kind", "pointer", "attribute"],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._:-]*$",
+          "maxLength": 200
+        },
+        "pointer_kind": {"enum": ["xpath", "semantic", "json_pointer"]},
+        "pointer": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "attribute": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z_:][A-Za-z0-9_.:-]*$",
+          "maxLength": 128
+        }
+      }
+    },
+    "provenanceList": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "uniqueItems": true,
+      "description": "Evidence order follows source occurrence order and must be preserved.",
+      "items": {"$ref": "#/$defs/provenance"}
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_key",
+        "kind",
+        "name",
+        "provenance",
+        "fields",
+        "item",
+        "capabilities",
+        "bindings",
+        "policies"
+      ],
+      "properties": {
+        "resource_key": {
+          "type": "string",
+          "maxLength": 140,
+          "description": "Canonical key kind:name. Producers must ensure that the prefix equals kind and the suffix equals name."
+        },
+        "kind": {"enum": ["content", "collection", "form"]},
+        "name": {"$ref": "#/$defs/identifier"},
+        "provenance": {"$ref": "#/$defs/provenanceList"},
+        "fields": {
+          "type": "array",
+          "maxItems": 1000,
+          "description": "Field order is semantic form and administration presentation order and must be preserved. Paths must be unique within a resource.",
+          "items": {"$ref": "#/$defs/field"}
+        },
+        "item": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/collectionItem"}
+          ]
+        },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "description": "Canonical order is name in bytewise ascending order and names must be unique within a resource.",
+          "items": {"$ref": "#/$defs/capability"}
+        },
+        "bindings": {
+          "type": "array",
+          "maxItems": 16,
+          "description": "Contains only explicit m-source/action or trusted-host operation targets in source occurrence order. A scanner must not synthesize a default endpoint or data write operation and must preserve binding order.",
+          "items": {"$ref": "#/$defs/resourceBinding"}
+        },
+        "policies": {"$ref": "#/$defs/policies"}
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "kind": {"const": "content"},
+            "resource_key": {"type": "string", "pattern": "^content:[\\s\\S]{0,128}$"},
+            "item": {"type": "null"},
+            "fields": {"items": {"$ref": "#/$defs/dataField"}},
+            "capabilities": {"items": {"$ref": "#/$defs/contentCapability"}},
+            "bindings": {"items": {"$ref": "#/$defs/contentBinding"}}
+          }
+        },
+        {
+          "properties": {
+            "kind": {"const": "collection"},
+            "resource_key": {"type": "string", "pattern": "^collection:[\\s\\S]{0,128}$"},
+            "item": {"$ref": "#/$defs/collectionItem"},
+            "fields": {"items": {"$ref": "#/$defs/dataField"}},
+            "capabilities": {"items": {"$ref": "#/$defs/collectionCapability"}},
+            "bindings": {"items": {"$ref": "#/$defs/collectionBinding"}}
+          }
+        },
+        {
+          "properties": {
+            "kind": {"const": "form"},
+            "resource_key": {"type": "string", "pattern": "^form:[\\s\\S]{0,128}$"},
+            "item": {"type": "null"},
+            "fields": {"items": {"$ref": "#/$defs/formField"}},
+            "capabilities": {"items": {"$ref": "#/$defs/formCapability"}},
+            "bindings": {"items": {"$ref": "#/$defs/formBinding"}}
+          }
+        }
+      ]
+    },
+    "operationalResource": {
+      "$ref": "#/$defs/resource",
+      "properties": {
+        "resource_key": {
+          "type": "string",
+          "pattern": "^(?:content|collection|form):[A-Za-z0-9][A-Za-z0-9_-]*(?:[.-][A-Za-z0-9_-]+)*$",
+          "maxLength": 140
+        },
+        "name": {"$ref": "#/$defs/resolvedIdentifier"},
+        "fields": {
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/resolvedField"}
+        },
+        "bindings": {
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/operationalResourceBinding"}
+        },
+        "policies": {"$ref": "#/$defs/explicitPolicies"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "content"}}, "required": ["kind"]},
+          "then": {
+            "properties": {
+              "bindings": {
+                "contains": {"properties": {"purpose": {"const": "read"}}, "required": ["purpose"]}
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "collection"}}, "required": ["kind"]},
+          "then": {
+            "properties": {
+              "item": {"$ref": "#/$defs/resolvedCollectionItem"},
+              "bindings": {
+                "contains": {
+                  "properties": {"purpose": {"enum": ["list", "detail"]}},
+                  "required": ["purpose"]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "form"}}, "required": ["kind"]},
+          "then": {
+            "properties": {
+              "bindings": {
+                "contains": {"properties": {"purpose": {"const": "submit"}}, "required": ["purpose"]}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "collectionItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_path", "provenance"],
+      "properties": {
+        "key_path": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/fieldPath"}
+          ],
+          "description": "Null is permitted only in a proposal carrying a blocking item-key diagnostic. Operational collections require a resolved field path."
+        },
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      }
+    },
+    "resolvedCollectionItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_path", "provenance"],
+      "properties": {
+        "key_path": {"$ref": "#/$defs/resolvedFieldPath"},
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      }
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "value_type", "input", "bindings", "provenance"],
+      "properties": {
+        "path": {"$ref": "#/$defs/fieldPath"},
+        "value_type": {
+          "enum": ["string", "integer", "number", "boolean", "array", "object", "unknown"],
+          "description": "HTML-evidenced value shape only. Use unknown rather than inferring a persistence or API type that HTML does not establish."
+        },
+        "input": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/input"}
+          ]
+        },
+        "bindings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "description": "DOM binding occurrence order is semantic and must be preserved.",
+          "items": {"$ref": "#/$defs/fieldBinding"}
+        },
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      }
+    },
+    "dataField": {
+      "$ref": "#/$defs/field",
+      "properties": {
+        "bindings": {
+          "items": {
+            "oneOf": [
+              {"$ref": "#/$defs/textFieldBinding"},
+              {"$ref": "#/$defs/attributeFieldBinding"}
+            ]
+          }
+        }
+      }
+    },
+    "formField": {
+      "$ref": "#/$defs/field",
+      "properties": {
+        "input": {"$ref": "#/$defs/input"},
+        "bindings": {"items": {"$ref": "#/$defs/controlFieldBinding"}}
+      }
+    },
+    "resolvedField": {
+      "$ref": "#/$defs/field",
+      "properties": {
+        "path": {"$ref": "#/$defs/resolvedFieldPath"},
+        "input": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/resolvedInput"}
+          ]
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control",
+        "input_type",
+        "name",
+        "required",
+        "readonly",
+        "disabled",
+        "multiple",
+        "min",
+        "max",
+        "step",
+        "min_length",
+        "max_length",
+        "pattern",
+        "accept",
+        "options",
+        "provenance"
+      ],
+      "properties": {
+        "control": {"enum": ["input", "textarea", "select"]},
+        "input_type": {
+          "enum": [null, "text", "email", "url", "tel", "password", "number", "range", "date", "time", "datetime-local", "month", "week", "checkbox", "radio", "file", "hidden", "search", "color"]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 256,
+          "description": "An empty successful-control name is retained only in a proposal with a blocking diagnostic; operational inputs require resolvedInput."
+        },
+        "required": {"type": "boolean"},
+        "readonly": {"type": "boolean"},
+        "disabled": {"type": "boolean"},
+        "multiple": {"type": "boolean"},
+        "min": {"type": ["string", "null"], "maxLength": 100},
+        "max": {"type": ["string", "null"], "maxLength": 100},
+        "step": {"type": ["string", "null"], "maxLength": 100},
+        "min_length": {"type": ["integer", "null"], "minimum": 0, "maximum": 1000000},
+        "max_length": {"type": ["integer", "null"], "minimum": 0, "maximum": 1000000},
+        "pattern": {"type": ["string", "null"], "maxLength": 2000},
+        "accept": {"type": ["string", "null"], "maxLength": 1000},
+        "options": {
+          "type": "array",
+          "maxItems": 200,
+          "description": "Option order is semantic control presentation order and must be preserved.",
+          "items": {"$ref": "#/$defs/inputOption"}
+        },
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"control": {"const": "input"}}, "required": ["control"]},
+          "then": {"properties": {"input_type": {"not": {"type": "null"}}}}
+        },
+        {
+          "if": {"properties": {"control": {"enum": ["textarea", "select"]}}, "required": ["control"]},
+          "then": {"properties": {"input_type": {"type": "null"}}}
+        }
+      ]
+    },
+    "resolvedInput": {
+      "$ref": "#/$defs/input",
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 256}
+      }
+    },
+    "inputOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "label", "disabled", "provenance"],
+      "properties": {
+        "value": {"type": "string", "maxLength": 1000},
+        "label": {"type": "string", "maxLength": 1000},
+        "disabled": {"type": "boolean"},
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      }
+    },
+    "fieldBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "attribute", "provenance"],
+      "properties": {
+        "kind": {"enum": ["text", "attribute", "control"]},
+        "attribute": {"type": ["string", "null"], "maxLength": 128},
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      },
+      "oneOf": [
+        {"$ref": "#/$defs/textFieldBinding"},
+        {"$ref": "#/$defs/attributeFieldBinding"},
+        {"$ref": "#/$defs/controlFieldBinding"}
+      ]
+    },
+    "textFieldBinding": {
+      "properties": {
+        "kind": {"const": "text"},
+        "attribute": {"type": "null"}
+      },
+      "required": ["kind", "attribute"]
+    },
+    "attributeFieldBinding": {
+      "properties": {
+        "kind": {"const": "attribute"},
+        "attribute": {
+          "type": "string",
+          "pattern": "^[A-Za-z_:][A-Za-z0-9_.:-]*$",
+          "maxLength": 128
+        }
+      },
+      "required": ["kind", "attribute"]
+    },
+    "controlFieldBinding": {
+      "properties": {
+        "kind": {"const": "control"},
+        "attribute": {"const": "name"}
+      },
+      "required": ["kind", "attribute"]
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "provenance"],
+      "properties": {
+        "name": {
+          "enum": ["display", "runtime_load", "list", "detail", "search", "pagination", "route_expansion", "create", "update", "delete", "upsert", "submit", "validate"]
+        },
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      }
+    },
+    "contentCapability": {
+      "$ref": "#/$defs/capability",
+      "properties": {"name": {"enum": ["display", "runtime_load", "create", "update", "delete", "upsert"]}}
+    },
+    "collectionCapability": {
+      "$ref": "#/$defs/capability",
+      "properties": {"name": {"enum": ["list", "detail", "runtime_load", "search", "pagination", "route_expansion", "create", "update", "delete", "upsert"]}}
+    },
+    "formCapability": {
+      "$ref": "#/$defs/capability",
+      "properties": {"name": {"enum": ["submit", "validate"]}}
+    },
+    "resourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding_id", "purpose", "target", "http_method", "confirmation", "provenance"],
+      "properties": {
+        "binding_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._:-]*$",
+          "maxLength": 200
+        },
+        "purpose": {"enum": ["read", "list", "detail", "create", "update", "delete", "upsert", "submit", "validate"]},
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "An explicit source or action identifier. It is inert data and must not be fetched by a contract parser."
+        },
+        "http_method": {"enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]},
+        "confirmation": {
+          "enum": ["unresolved", "required", "not_required"],
+          "description": "HTML cannot decide write confirmation. Scanner-emitted write bindings use unresolved; a trusted host must select required or not_required before operational projection. Read and validation bindings use not_required."
+        },
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"purpose": {"enum": ["read", "list", "detail", "validate"]}},
+            "required": ["purpose"]
+          },
+          "then": {"properties": {"confirmation": {"const": "not_required"}}}
+        }
+      ]
+    },
+    "operationalResourceBinding": {
+      "$ref": "#/$defs/resourceBinding",
+      "allOf": [
+        {
+          "if": {
+            "properties": {"purpose": {"enum": ["create", "update", "delete", "upsert", "submit"]}},
+            "required": ["purpose"]
+          },
+          "then": {"properties": {"confirmation": {"enum": ["required", "not_required"]}}}
+        }
+      ]
+    },
+    "contentBinding": {
+      "$ref": "#/$defs/resourceBinding",
+      "properties": {
+        "purpose": {"enum": ["read", "create", "update", "delete", "upsert"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"purpose": {"const": "read"}}, "required": ["purpose"]},
+          "then": {"properties": {"http_method": {"const": "GET"}}}
+        }
+      ]
+    },
+    "collectionBinding": {
+      "$ref": "#/$defs/resourceBinding",
+      "properties": {
+        "purpose": {"enum": ["list", "detail", "create", "update", "delete", "upsert"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"purpose": {"enum": ["list", "detail"]}}, "required": ["purpose"]},
+          "then": {"properties": {"http_method": {"const": "GET"}}}
+        }
+      ]
+    },
+    "formBinding": {
+      "$ref": "#/$defs/resourceBinding",
+      "properties": {
+        "purpose": {"enum": ["submit", "validate"]}
+      }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authentication",
+        "authorization",
+        "tenant_scope",
+        "storage",
+        "validation",
+        "audit",
+        "write_semantics",
+        "concurrency"
+      ],
+      "properties": {
+        "authentication": {"$ref": "#/$defs/policy"},
+        "authorization": {"$ref": "#/$defs/policy"},
+        "tenant_scope": {"$ref": "#/$defs/policy"},
+        "storage": {"$ref": "#/$defs/policy"},
+        "validation": {"$ref": "#/$defs/policy"},
+        "audit": {"$ref": "#/$defs/policy"},
+        "write_semantics": {"$ref": "#/$defs/policy"},
+        "concurrency": {"$ref": "#/$defs/policy"}
+      }
+    },
+    "explicitPolicies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authentication",
+        "authorization",
+        "tenant_scope",
+        "storage",
+        "validation",
+        "audit",
+        "write_semantics",
+        "concurrency"
+      ],
+      "properties": {
+        "authentication": {"$ref": "#/$defs/explicitPolicy"},
+        "authorization": {"$ref": "#/$defs/explicitPolicy"},
+        "tenant_scope": {"$ref": "#/$defs/explicitPolicy"},
+        "storage": {"$ref": "#/$defs/explicitPolicy"},
+        "validation": {"$ref": "#/$defs/explicitPolicy"},
+        "audit": {"$ref": "#/$defs/explicitPolicy"},
+        "write_semantics": {"$ref": "#/$defs/explicitPolicy"},
+        "concurrency": {"$ref": "#/$defs/explicitPolicy"}
+      }
+    },
+    "policy": {
+      "oneOf": [
+        {"$ref": "#/$defs/unresolvedPolicy"},
+        {"$ref": "#/$defs/explicitPolicy"}
+      ]
+    },
+    "unresolvedPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reference", "provenance"],
+      "properties": {
+        "status": {"const": "unresolved"},
+        "reference": {"type": "null"},
+        "provenance": {"type": "array", "maxItems": 0}
+      }
+    },
+    "explicitPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reference", "provenance"],
+      "properties": {
+        "status": {"const": "explicit"},
+        "reference": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9+.-]*:[A-Za-z0-9][A-Za-z0-9._~:/-]{0,254}$",
+          "maxLength": 256,
+          "description": "Opaque identifier of a host-owned policy definition. This is a reference only; credentials, tokens, secret values, connection strings, and provider configuration are forbidden."
+        },
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "diagnostic_id",
+        "severity",
+        "code",
+        "message",
+        "resource_key",
+        "field_path",
+        "blocks",
+        "provenance"
+      ],
+      "properties": {
+        "diagnostic_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._:-]*$",
+          "maxLength": 200
+        },
+        "severity": {"enum": ["error", "warning", "info"]},
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
+          "maxLength": 128
+        },
+        "message": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "resource_key": {
+          "type": ["string", "null"],
+          "maxLength": 140
+        },
+        "field_path": {
+          "type": ["string", "null"],
+          "maxLength": 256
+        },
+        "blocks": {
+          "type": "array",
+          "maxItems": 4,
+          "uniqueItems": true,
+          "description": "Canonical order is bytewise ascending.",
+          "items": {"enum": ["display", "admin_write", "form_submission", "api"]}
+        },
+        "provenance": {"$ref": "#/$defs/provenanceList"}
+      }
+    }
+  }
+}

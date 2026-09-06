@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.magic-html.dev/v1/preview/layout-validation-request.json",
+  "title": "Preview page Layout validation request",
+  "description": "Requests real-browser geometry validation for one candidate Layout Snapshot page at the three mandatory viewport sizes. Contracts 1.0 and 1.1 preserve legacy local execution. Contract 1.2 requires an explicit local or Cloudflare CDP provider and returns signed evidence suitable for Styler review.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "layout_snapshot_ref", "layout_ast", "constraints", "page", "viewports"],
+  "properties": {
+    "contract_version": {"enum": ["1.0", "1.1", "1.2"]},
+    "provider": {"enum": ["local_puppeteer", "cloudflare_browser_run_cdp"]},
+    "layout_snapshot_ref": {"$ref": "../layout/reference.json"},
+    "layout_ast": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 3,
+      "required": ["version", "constraints", "rules"],
+      "properties": {
+        "version": {"const": 2},
+        "constraints": {"$ref": "../layout/snapshot.json#/$defs/constraints"},
+        "tokens": {"type": "object"},
+        "rules": {"type": "array", "minItems": 1, "maxItems": 400}
+      },
+      "description": "The exact geometry-only AST embedded in the referenced page. Runtime canonicalizes the full object with the Layout package algorithm, requires its SHA-256 to equal layout_snapshot_ref.layout_ast_digest, requires layout_ast.constraints to equal the request/root snapshot constraints, and delegates full AST validation to yutoseta/magic-html-layout-ast."
+    },
+    "constraints": {"$ref": "../layout/snapshot.json#/$defs/constraints"},
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route", "path"],
+      "properties": {
+        "route": {"type": "string", "pattern": "^/(?:[a-z0-9][a-z0-9-]*(?:/[a-z0-9][a-z0-9-]*)*)?$", "maxLength": 200},
+        "path": {"type": "string", "pattern": "^(?:[a-z0-9][a-z0-9-]*/)*[a-z0-9][a-z0-9-]*\\.html$", "maxLength": 200}
+      }
+    },
+    "viewports": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": false,
+      "prefixItems": [
+        {"$ref": "#/$defs/viewport390"},
+        {"$ref": "#/$defs/viewport768"},
+        {"$ref": "#/$defs/viewport1440"}
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"contract_version": {"const": "1.2"}}, "required": ["contract_version"]},
+      "then": {"required": ["provider"]},
+      "else": {"not": {"required": ["provider"]}}
+    }
+  ],
+  "$defs": {
+    "viewport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width_px", "height_px"],
+      "properties": {
+        "width_px": {"type": "integer"},
+        "height_px": {"type": "integer", "minimum": 320, "maximum": 4320}
+      }
+    },
+    "viewport390": {"allOf": [{"$ref": "#/$defs/viewport"}, {"properties": {"width_px": {"const": 390}}}]},
+    "viewport768": {"allOf": [{"$ref": "#/$defs/viewport"}, {"properties": {"width_px": {"const": 768}}}]},
+    "viewport1440": {"allOf": [{"$ref": "#/$defs/viewport"}, {"properties": {"width_px": {"const": 1440}}}]}
+  }
+}

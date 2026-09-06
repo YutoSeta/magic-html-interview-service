@@ -1,0 +1,239 @@
+{
+  "contract_version": "1.0",
+  "contract_kind": "magic_html_resource",
+  "status": "proposal",
+  "sources": [
+    {
+      "source_id": "html:site",
+      "kind": "html",
+      "locator": "pages",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "digest_scope": "canonical_dom"
+    }
+  ],
+  "resources": [
+    {
+      "resource_key": "collection:news",
+      "kind": "collection",
+      "name": "news",
+      "provenance": [
+        {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[collection:news]", "attribute": "m-post"}
+      ],
+      "fields": [
+        {
+          "path": "title",
+          "value_type": "string",
+          "input": null,
+          "bindings": [
+            {
+              "kind": "text",
+              "attribute": null,
+              "provenance": [
+                {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[collection:news]/field[title]/binding[text]", "attribute": "m-field"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[collection:news]/field[title]", "attribute": "m-field"}
+          ]
+        },
+        {
+          "path": "id",
+          "value_type": "string",
+          "input": null,
+          "bindings": [
+            {
+              "kind": "text",
+              "attribute": null,
+              "provenance": [
+                {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[collection:news]/field[id]/binding[text]", "attribute": "m-field"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[collection:news]/field[id]", "attribute": "m-field"}
+          ]
+        }
+      ],
+      "item": {
+        "key_path": "id",
+        "provenance": [
+          {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[collection:news]/item", "attribute": "m-key"}
+        ]
+      },
+      "capabilities": [
+        {
+          "name": "list",
+          "provenance": [
+            {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[collection:news]", "attribute": "m-post"}
+          ]
+        }
+      ],
+      "bindings": [],
+      "policies": {
+        "authentication": {"status": "unresolved", "reference": null, "provenance": []},
+        "authorization": {"status": "unresolved", "reference": null, "provenance": []},
+        "tenant_scope": {"status": "unresolved", "reference": null, "provenance": []},
+        "storage": {"status": "unresolved", "reference": null, "provenance": []},
+        "validation": {"status": "unresolved", "reference": null, "provenance": []},
+        "audit": {"status": "unresolved", "reference": null, "provenance": []},
+        "write_semantics": {"status": "unresolved", "reference": null, "provenance": []},
+        "concurrency": {"status": "unresolved", "reference": null, "provenance": []}
+      }
+    },
+    {
+      "resource_key": "content:home",
+      "kind": "content",
+      "name": "home",
+      "provenance": [
+        {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[content:home]", "attribute": "m-content"}
+      ],
+      "fields": [
+        {
+          "path": "hero.title",
+          "value_type": "string",
+          "input": null,
+          "bindings": [
+            {
+              "kind": "text",
+              "attribute": null,
+              "provenance": [
+                {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[content:home]/field[hero.title]/binding[text]", "attribute": "m-field"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[content:home]/field[hero.title]", "attribute": "m-field"}
+          ]
+        }
+      ],
+      "item": null,
+      "capabilities": [
+        {
+          "name": "display",
+          "provenance": [
+            {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[content:home]", "attribute": "m-content"}
+          ]
+        }
+      ],
+      "bindings": [],
+      "policies": {
+        "authentication": {"status": "unresolved", "reference": null, "provenance": []},
+        "authorization": {"status": "unresolved", "reference": null, "provenance": []},
+        "tenant_scope": {"status": "unresolved", "reference": null, "provenance": []},
+        "storage": {"status": "unresolved", "reference": null, "provenance": []},
+        "validation": {"status": "unresolved", "reference": null, "provenance": []},
+        "audit": {"status": "unresolved", "reference": null, "provenance": []},
+        "write_semantics": {"status": "unresolved", "reference": null, "provenance": []},
+        "concurrency": {"status": "unresolved", "reference": null, "provenance": []}
+      }
+    },
+    {
+      "resource_key": "form:contact",
+      "kind": "form",
+      "name": "contact",
+      "provenance": [
+        {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]", "attribute": "m-form"}
+      ],
+      "fields": [
+        {
+          "path": "email",
+          "value_type": "string",
+          "input": {
+            "control": "input",
+            "input_type": "email",
+            "name": "email",
+            "required": true,
+            "readonly": false,
+            "disabled": false,
+            "multiple": false,
+            "min": null,
+            "max": null,
+            "step": null,
+            "min_length": null,
+            "max_length": 254,
+            "pattern": null,
+            "accept": null,
+            "options": [],
+            "provenance": [
+              {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]/field[email]", "attribute": "maxlength"},
+              {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]/field[email]", "attribute": "name"},
+              {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]/field[email]", "attribute": "required"},
+              {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]/field[email]", "attribute": "type"}
+            ]
+          },
+          "bindings": [
+            {
+              "kind": "control",
+              "attribute": "name",
+              "provenance": [
+                {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]/field[email]/binding[control]", "attribute": "name"}
+              ]
+            }
+          ],
+          "provenance": [
+            {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]/field[email]", "attribute": "name"}
+          ]
+        }
+      ],
+      "item": null,
+      "capabilities": [
+        {
+          "name": "submit",
+          "provenance": [
+            {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]", "attribute": "m-form"}
+          ]
+        }
+      ],
+      "bindings": [],
+      "policies": {
+        "authentication": {"status": "unresolved", "reference": null, "provenance": []},
+        "authorization": {"status": "unresolved", "reference": null, "provenance": []},
+        "tenant_scope": {"status": "unresolved", "reference": null, "provenance": []},
+        "storage": {"status": "unresolved", "reference": null, "provenance": []},
+        "validation": {"status": "unresolved", "reference": null, "provenance": []},
+        "audit": {"status": "unresolved", "reference": null, "provenance": []},
+        "write_semantics": {"status": "unresolved", "reference": null, "provenance": []},
+        "concurrency": {"status": "unresolved", "reference": null, "provenance": []}
+      }
+    }
+  ],
+  "diagnostics": [
+    {
+      "diagnostic_id": "collection.news.policy.unresolved",
+      "severity": "error",
+      "code": "policy.operational.unresolved",
+      "message": "Trusted host policy metadata is required before API or write-capable administration projection.",
+      "resource_key": "collection:news",
+      "field_path": null,
+      "blocks": ["admin_write", "api"],
+      "provenance": [
+        {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[collection:news]", "attribute": "m-post"}
+      ]
+    },
+    {
+      "diagnostic_id": "content.home.policy.unresolved",
+      "severity": "error",
+      "code": "policy.operational.unresolved",
+      "message": "Trusted host policy metadata is required before API or write-capable administration projection.",
+      "resource_key": "content:home",
+      "field_path": null,
+      "blocks": ["admin_write", "api"],
+      "provenance": [
+        {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[content:home]", "attribute": "m-content"}
+      ]
+    },
+    {
+      "diagnostic_id": "form.contact.policy.unresolved",
+      "severity": "error",
+      "code": "policy.operational.unresolved",
+      "message": "Trusted host policy metadata and an explicit action are required before form submission, API, or write-capable administration projection.",
+      "resource_key": "form:contact",
+      "field_path": null,
+      "blocks": ["admin_write", "api", "form_submission"],
+      "provenance": [
+        {"source_id": "html:site", "pointer_kind": "semantic", "pointer": "resource[form:contact]", "attribute": "m-form"}
+      ]
+    }
+  ]
+}
